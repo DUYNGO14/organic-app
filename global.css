@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-canvas: 255 255 255;
+  --color-surface: 255 255 255;
+  --color-surface-soft: 249 250 247;
+  --color-surface-container-lowest: 255 255 255;
+  --color-surface-container-low: 249 250 247;
+  --color-surface-container: 235 246 233;
+  --color-surface-container-high: 229 231 235;
+  --color-surface-container-highest: 229 231 235;
+  --color-surface-variant: 235 246 233;
+  --color-border: 229 231 235;
+  --color-border-strong: 209 213 219;
+  --color-ink: 0 0 0;
+  --color-muted: 107 114 128;
+  --color-primary: 0 107 53;
+  --color-on-primary: 255 255 255;
+  --color-primary-container: 235 246 233;
+  --color-on-primary-container: 0 107 53;
+  --color-secondary: 88 165 0;
+  --color-on-secondary: 255 255 255;
+  --color-secondary-container: 235 246 233;
+  --color-on-secondary-container: 0 107 53;
+  --color-tertiary: 235 246 233;
+  --color-on-tertiary: 0 107 53;
+  --color-error: 186 26 26;
+  --color-on-error: 255 255 255;
+  --color-error-container: 255 218 214;
+  --color-on-error-container: 147 0 10;
+}
+
+.dark:root {
+  --color-canvas: 18 22 20;
+  --color-surface: 26 32 28;
+  --color-surface-soft: 36 44 38;
+  --color-surface-container-lowest: 26 32 28;
+  --color-surface-container-low: 26 32 28;
+  --color-surface-container: 36 44 38;
+  --color-surface-container-high: 45 55 48;
+  --color-surface-container-highest: 45 55 48;
+  --color-surface-variant: 45 55 48;
+  --color-border: 45 55 48;
+  --color-border-strong: 45 55 48;
+  --color-ink: 240 253 244;
+  --color-muted: 148 163 184;
+  --color-primary: 56 193 114;
+  --color-on-primary: 18 22 20;
+  --color-primary-container: 56 193 114;
+  --color-on-primary-container: 18 22 20;
+  --color-secondary: 88 165 0;
+  --color-on-secondary: 18 22 20;
+  --color-secondary-container: 0 107 53;
+  --color-on-secondary-container: 240 253 244;
+  --color-tertiary: 45 55 48;
+  --color-on-tertiary: 240 253 244;
+  --color-error: 255 180 171;
+  --color-on-error: 105 0 5;
+  --color-error-container: 147 0 10;
+  --color-on-error-container: 255 218 214;
+}
