@@ -23,7 +23,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <View className="flex-1 bg-surface">
+    <View className="flex-1 bg-canvas">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 28 }}

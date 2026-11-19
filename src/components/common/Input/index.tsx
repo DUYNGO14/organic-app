@@ -2,6 +2,7 @@ import { Eye, EyeOff, Search, X } from "lucide-react-native";
 import { useAppColors } from "@/hooks/use-app-colors";
 import type { ReactNode } from "react";
 import { useState } from "react";
+import { twMerge } from "tailwind-merge";
 import {
   Pressable,
   Text,
@@ -65,7 +66,7 @@ export function PhoneInput({ countryCode = "+84", ...props }: PhoneInputProps) {
       helperText={helperText}
       className={containerClassName}
     >
-      <View className={`h-12 flex-row items-center rounded-lg border bg-surface dark:bg-surface-container-low ${error ? "border-danger" : "border-border-strong"}`}>
+      <View className={`h-12 flex-row items-center rounded-lg border bg-surface ${error ? "border-danger" : "border-border-strong"}`}>
         <Text className="pl-4 font-vietnam text-body-md text-muted">{countryCode}</Text>
         <TextInput
           accessibilityLabel={accessibilityLabel ?? label ?? "Số điện thoại"}
@@ -75,7 +76,7 @@ export function PhoneInput({ countryCode = "+84", ...props }: PhoneInputProps) {
           placeholderTextColor={colors.muted}
           textContentType="telephoneNumber"
           {...inputProps}
-          className={`h-full min-w-0 flex-1 px-3 font-vietnam text-body-md text-ink dark:text-on-surface ${inputClassName ?? ""}`}
+          className={`h-full min-w-0 flex-1 px-3 font-vietnam text-body-md text-ink ${inputClassName ?? ""}`}
         />
       </View>
     </FieldFrame>
@@ -103,7 +104,7 @@ export function PasswordInput({
 
   return (
     <FieldFrame label={label} error={error} helperText={helperText} className={containerClassName}>
-      <View className={`h-12 flex-row items-center rounded-lg border bg-surface focus-within:border-primary dark:bg-surface-container-low ${error ? "border-danger" : "border-border-strong"}`}>
+      <View className={`h-12 flex-row items-center rounded-lg border bg-surface focus-within:border-primary ${error ? "border-danger" : "border-border-strong"}`}>
         <TextInput
           accessibilityLabel={accessibilityLabel ?? label ?? "Mật khẩu"}
           autoCapitalize="none"
@@ -111,7 +112,7 @@ export function PasswordInput({
           placeholder="Nhập mật khẩu"
           placeholderTextColor={colors.muted}
           {...inputProps}
-          className={`h-full min-w-0 flex-1 px-4 font-vietnam text-body-md text-ink dark:text-on-surface ${inputClassName}`}
+          className={`h-full min-w-0 flex-1 px-4 font-vietnam text-body-md text-ink ${inputClassName}`}
           secureTextEntry={!visible}
         />
         <Pressable
@@ -130,15 +131,21 @@ export function PasswordInput({
 
 export type SearchInputProps = BaseInputProps & {
   onClear?: () => void;
+  leadingIcon?: ReactNode;
+  trailingAccessory?: ReactNode;
+  inputWrapperClassName?: string;
 };
 
 export function SearchInput({
   onClear,
+  leadingIcon,
+  trailingAccessory,
   value,
   label,
   error,
   helperText,
   containerClassName,
+  inputWrapperClassName = "",
   accessibilityLabel,
   inputClassName = "",
   ...inputProps
@@ -146,8 +153,13 @@ export function SearchInput({
   const colors = useAppColors();
   return (
     <FieldFrame label={label} error={error} helperText={helperText} className={containerClassName}>
-      <View className="h-12 flex-row items-center rounded-full border border-border-strong bg-surface px-4 focus-within:border-primary dark:bg-surface-container-low">
-        <Search color={colors.muted} size={19} />
+      <View
+        className={twMerge(
+          "h-12 flex-row items-center rounded-full border border-border-strong bg-surface px-4 focus-within:border-primary",
+          inputWrapperClassName,
+        )}
+      >
+        {leadingIcon ?? <Search color={colors.muted} size={19} />}
         <TextInput
           accessibilityLabel={accessibilityLabel ?? label ?? "Tìm kiếm"}
           autoCapitalize="none"
@@ -157,7 +169,7 @@ export function SearchInput({
           placeholderTextColor={colors.muted}
           returnKeyType="search"
           {...inputProps}
-          className={`h-full min-w-0 flex-1 px-3 font-vietnam text-body-md text-ink dark:text-on-surface ${inputClassName}`}
+          className={`h-full min-w-0 flex-1 px-3 font-vietnam text-body-md text-ink ${inputClassName}`}
           value={value}
         />
         {Boolean(value) && onClear ? (
@@ -171,6 +183,7 @@ export function SearchInput({
             <X color={colors.muted} size={18} />
           </Pressable>
         ) : null}
+        {trailingAccessory}
       </View>
     </FieldFrame>
   );
@@ -208,9 +221,9 @@ export function OTPInput({
           return (
             <View
               key={index}
-              className={`h-14 min-w-0 flex-1 items-center justify-center rounded-lg border bg-surface ${error ? "border-danger" : isActive ? "border-primary" : "border-border-strong"} dark:bg-surface-container-low`}
+              className={`h-14 min-w-0 flex-1 items-center justify-center rounded-lg border bg-surface ${error ? "border-danger" : isActive ? "border-primary" : "border-border-strong"}`}
             >
-              <Text className="font-vietnam text-headline-sm text-ink dark:text-on-surface">
+              <Text className="font-vietnam text-headline-sm text-ink">
                 {digit}
               </Text>
             </View>

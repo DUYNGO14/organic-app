@@ -13,7 +13,7 @@ export function TraceabilityCard({ onJournalPress }: TraceabilityCardProps) {
   const colors = useAppColors();
 
   return (
-    <View className="mx-4 mt-8 rounded-[26px] border border-[#F0F4EC] bg-surface-container-lowest p-4 shadow-sm dark:border-[#00E676]/[0.12]">
+    <View className="mx-4 mt-8 rounded-xl border border-[#F0F4EC] bg-surface-container-lowest p-4 shadow-sm dark:border-[#00E676]/[0.12]">
       <View className="mb-4 flex-row items-center justify-between gap-3">
         <View className="flex-1 flex-row items-center gap-3">
           <View className="h-11 w-11 items-center justify-center rounded-full bg-secondary-container/50">
