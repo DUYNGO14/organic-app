@@ -27,8 +27,8 @@ export default function WelcomeScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-surface">
-      <View className="flex-1 overflow-hidden px-4 pb-3 pt-4">
+    <View className="flex-1 overflow-hidden bg-surface">
+      <View pointerEvents="none" className="absolute inset-0">
         <LinearGradient
           colors={
             isDark
@@ -59,8 +59,10 @@ export default function WelcomeScreen() {
               : "rgba(129,217,151,0.12)",
           }}
         />
+      </View>
 
-        <View className="z-10 flex-1 justify-between">
+      <SafeAreaView className="flex-1">
+        <View className="flex-1 justify-between px-4 pb-3 pt-4">
           <View className="items-center pt-2">
             <View className="flex-row items-center gap-2 rounded-full bg-surface-container px-4 py-2 shadow-sm">
               <Leaf
@@ -147,7 +149,7 @@ export default function WelcomeScreen() {
             </View>
           </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
