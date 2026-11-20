@@ -1,6 +1,6 @@
+import { addToCart } from "@/features/cart/add-to-cart";
 import { CategorySection } from "@/features/home/components/CategorySection";
 import { DealSection } from "@/features/home/components/DealProductCard";
-import { HomeSearchBar } from "@/features/home/components/HomeSearchBar";
 import { NewsCarousel } from "@/features/home/components/NewsCarousel";
 import { QualityPromise } from "@/features/home/components/QualityPromise";
 import { RecommendationSection } from "@/features/home/components/RecommendedProductCard";
@@ -11,25 +11,46 @@ import {
   homeCategories,
   recommendedProducts,
 } from "@/features/home/home.data";
+import { ProductSearchBar } from "@/features/products/components/ProductSearchBar";
 import { router } from "expo-router";
-import { ScrollView, View } from "react-native";
+import { useState } from "react";
+import { Keyboard, ScrollView, View } from "react-native";
 
 export default function HomeScreen() {
+  const [search, setSearch] = useState("");
+
   const openProduct = (product: (typeof dealProducts)[number]) => {
     router.push({
       pathname: "/(product)/product/[productId]",
       params: { productId: product.id },
     });
   };
+  const openScanner = () => {
+    Keyboard.dismiss();
+    router.push("/scan-qr");
+  };
+
+  function submitSearch(text: string) {
+    const query = text.trim();
+    if (!query) return;
+    Keyboard.dismiss();
+    router.push({ pathname: "/(tabs)/categories", params: { query } });
+  }
 
   return (
     <View className="flex-1 bg-canvas">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 28 }}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <HomeSearchBar />
+        <ProductSearchBar
+          value={search}
+          onChangeText={setSearch}
+          onScanPress={openScanner}
+          onSubmitSearch={submitSearch}
+        />
         <View className="mt-2">
           <NewsCarousel
             banners={homeBanners}
@@ -47,9 +68,10 @@ export default function HomeScreen() {
           onCategoryPress={() => router.push("/(tabs)/categories")}
           onSeeAll={() => router.push("/(tabs)/categories")}
         />
-        <DealSection onProductPress={openProduct} products={dealProducts} />
-        <TraceabilityCard onJournalPress={() => router.push("/(tabs)/farm")} />
+        <DealSection onAddProduct={addToCart} onProductPress={openProduct} products={dealProducts} />
+        <TraceabilityCard onScanPress={openScanner} onJournalPress={() => router.push("/(tabs)/farm")} />
         <RecommendationSection
+          onAddProduct={addToCart}
           onProductPress={openProduct}
           onSeeMore={() => router.push("/(tabs)/categories")}
           products={recommendedProducts}

@@ -1,5 +1,6 @@
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { StackHeader } from "@/components/layout";
+import { selectCartQuantity, useCartStore } from "@/features/cart/cart.store";
 import { catalogProducts } from "@/features/products/catalog.data";
 import { getProductDetailSpec } from "@/features/products/product-detail.data";
 import {
@@ -18,13 +19,14 @@ import { useAppColors } from "@/hooks/use-app-colors";
 import { router, useLocalSearchParams } from "expo-router";
 import { Share2, ShoppingBag } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Alert, ScrollView, Share, Text, View } from "react-native";
+import { ScrollView, Share, Text, View } from "react-native";
 
 const products = catalogProducts;
 
 export default function ProductDetailScreen() {
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const colors = useAppColors();
+  const cartItemsCount = useCartStore(selectCartQuantity);
   const product = products.find((item) => item.id === productId);
   const spec = useMemo(
     () => (product ? getProductDetailSpec(product) : null),
@@ -75,23 +77,18 @@ export default function ProductDetailScreen() {
             <View className="relative">
               <IconButton
                 icon={<ShoppingBag color={colors.ink} size={20} />}
-                label="Giỏ hàng"
+                label={cartItemsCount ? `Giỏ hàng, ${cartItemsCount} sản phẩm` : "Giỏ hàng"}
                 size="sm"
-                onPress={() =>
-                  Alert.alert(
-                    "Giỏ hàng",
-                    "Giỏ hàng sẽ được kết nối trong bước tích hợp API.",
-                  )
-                }
+                onPress={() => router.push("/cart")}
               />
-              <View
+              {cartItemsCount > 0 ? <View
                 pointerEvents="none"
                 className="absolute -right-0.5 -top-0.5 h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1"
               >
                 <Text className="font-vietnam text-label-sm font-bold text-on-primary">
-                  3
+                  {cartItemsCount > 99 ? "99+" : cartItemsCount}
                 </Text>
-              </View>
+              </View> : null}
             </View>
           </View>
         }

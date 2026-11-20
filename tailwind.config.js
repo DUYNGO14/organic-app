@@ -21,6 +21,8 @@ module.exports = {
         border: "rgb(var(--color-border) / <alpha-value>)",
         "border-strong": "rgb(var(--color-border-strong) / <alpha-value>)",
         "card-border": "rgb(var(--color-card-border) / <alpha-value>)",
+        "photo-scrim": "rgb(var(--color-photo-scrim) / <alpha-value>)",
+        "on-photo": "rgb(var(--color-on-photo) / <alpha-value>)",
         luminous: "rgb(var(--color-luminous) / <alpha-value>)",
         warning: "rgb(var(--color-warning) / <alpha-value>)",
         "warning-container": "rgb(var(--color-warning-container) / <alpha-value>)",

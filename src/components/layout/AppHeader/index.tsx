@@ -24,7 +24,7 @@ function CountBadge({ count }: { count: number }) {
   if (count < 1) return null;
 
   return (
-    <View className="absolute -right-0.5 -top-0.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-surface bg-primary px-1">
+    <View pointerEvents="none" className="absolute -right-0.5 -top-0.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-surface bg-primary px-1">
       <Text className="font-vietnam text-label-sm font-bold text-on-primary">
         {count > 99 ? "99+" : count}
       </Text>

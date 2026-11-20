@@ -1,3 +1,4 @@
+import { useCartStore } from "@/features/cart/cart.store";
 import { secureStorage, storage } from "@/lib/storage";
 import { create } from "zustand";
 
@@ -61,6 +62,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signOut: async () => {
     await secureStorage.removeItem(SESSION_KEY);
+    useCartStore.getState().reset();
     set({ session: null });
   },
 }));

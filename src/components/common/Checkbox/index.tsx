@@ -1,3 +1,5 @@
+import { useAppColors } from "@/hooks/use-app-colors";
+import { cn } from "@/lib/cn";
 import { Check, Minus } from "lucide-react-native";
 import { Pressable, Text, View, type PressableProps } from "react-native";
 
@@ -20,6 +22,8 @@ export function Checkbox({
   className = "",
   ...props
 }: CheckboxProps) {
+  const colors = useAppColors();
+  const markColor = colors.isDark ? colors.onPrimary : colors.surface;
   const selected = checked || indeterminate;
 
   return (
@@ -27,7 +31,7 @@ export function Checkbox({
       accessibilityLabel={label ?? "Ô chọn"}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: indeterminate ? "mixed" : checked, disabled }}
-      className={`min-h-11 flex-row items-center gap-3 ${disabled ? "opacity-50" : ""} ${className}`}
+      className={cn("min-h-12 flex-row items-center gap-3", disabled && "opacity-50", className)}
       disabled={disabled}
       onPress={() => onCheckedChange(!checked)}
       {...props}
@@ -36,9 +40,9 @@ export function Checkbox({
         className={`h-5 w-5 items-center justify-center rounded border ${selected ? "border-secondary bg-secondary dark:border-primary dark:bg-primary" : "border-border-strong bg-surface"}`}
       >
         {indeterminate ? (
-          <Minus color="#ffffff" size={15} strokeWidth={3} />
+          <Minus color={markColor} size={15} strokeWidth={3} />
         ) : checked ? (
-          <Check color="#ffffff" size={15} strokeWidth={3} />
+          <Check color={markColor} size={15} strokeWidth={3} />
         ) : null}
       </View>
       {label || description ? (

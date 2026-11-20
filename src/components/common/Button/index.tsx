@@ -141,13 +141,13 @@ export function StepperBtn({
   return (
     <View
       accessibilityLabel={label}
-      className={`h-11 flex-row items-center rounded-full border border-border bg-surface px-1 dark:border-border-strong dark:bg-surface-container-low ${className}`}
+      className={`min-h-12 flex-row items-center rounded-full border border-border bg-surface dark:border-border-strong dark:bg-surface-container-low ${className}`}
     >
       <Pressable
         accessibilityLabel="Giảm số lượng"
         accessibilityRole="button"
         accessibilityState={{ disabled: !canDecrement }}
-        className={`h-9 w-9 items-center justify-center rounded-full ${canDecrement ? "active:bg-surface-soft dark:active:bg-surface-container-high" : "opacity-40"}`}
+        className={`h-12 w-12 items-center justify-center rounded-full ${canDecrement ? "active:bg-surface-soft dark:active:bg-surface-container-high" : "opacity-40"}`}
         disabled={!canDecrement}
         onPress={() => onValueChange(Math.max(min, value - step))}
       >
@@ -160,7 +160,7 @@ export function StepperBtn({
         accessibilityLabel="Tăng số lượng"
         accessibilityRole="button"
         accessibilityState={{ disabled: !canIncrement }}
-        className={`h-9 w-9 items-center justify-center rounded-full ${canIncrement ? "active:bg-surface-soft dark:active:bg-surface-container-high" : "opacity-40"}`}
+        className={`h-12 w-12 items-center justify-center rounded-full ${canIncrement ? "active:bg-surface-soft dark:active:bg-surface-container-high" : "opacity-40"}`}
         disabled={!canIncrement}
         onPress={() => onValueChange(Math.min(max, value + step))}
       >

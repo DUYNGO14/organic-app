@@ -15,6 +15,8 @@
   --color-border: 229 231 235;
   --color-border-strong: 209 213 219;
   --color-card-border: 240 244 236;
+  --color-photo-scrim: 18 22 20;
+  --color-on-photo: 255 255 255;
   --color-luminous: 0 230 118;
   --color-warning: 146 64 14;
   --color-warning-container: 254 243 199;
@@ -54,6 +56,8 @@
   --color-border: 45 55 48;
   --color-border-strong: 45 55 48;
   --color-card-border: 23 56 39;
+  --color-photo-scrim: 18 22 20;
+  --color-on-photo: 255 255 255;
   --color-luminous: 0 230 118;
   --color-warning: 252 211 77;
   --color-warning-container: 59 47 11;
