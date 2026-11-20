@@ -7,9 +7,10 @@ import { Text, View } from "react-native";
 
 type TraceabilityCardProps = {
   onJournalPress?: () => void;
+  onScanPress: () => void;
 };
 
-export function TraceabilityCard({ onJournalPress }: TraceabilityCardProps) {
+export function TraceabilityCard({ onJournalPress, onScanPress }: TraceabilityCardProps) {
   const colors = useAppColors();
 
   return (
@@ -57,7 +58,7 @@ export function TraceabilityCard({ onJournalPress }: TraceabilityCardProps) {
           label="Quét mã truy xuất nông trại"
           size="lg"
           className="absolute bottom-3 right-3 rounded-xl bg-white"
-          onPress={onJournalPress}
+          onPress={onScanPress}
           icon={<QrCode color={colors.primary} size={25} />}
         />
       </View>

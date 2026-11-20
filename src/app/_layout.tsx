@@ -1,16 +1,25 @@
+import { StartupSplash } from "@/components/layout/StartupSplash";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { AppProviders } from "@/providers/app-providers";
+import { useAppStore } from "@/stores/app-store";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, usePathname } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
-import { StatusBar } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { StatusBar, View } from "react-native";
 import "../../global.css";
 
 void SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({ fade: false, duration: 0 });
 
 export default function RootLayout() {
+  const pathname = usePathname();
   const hydrateAuth = useAuthStore((state) => state.hydrate);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const isThemeHydrated = useAppStore((state) => state.isThemeHydrated);
+  const nativeSplashHidden = useRef(false);
+  const [splashComplete, setSplashComplete] = useState(false);
+  const [startupComplete, setStartupComplete] = useState(false);
   const [fontsLoaded, fontError] = useFonts([
     {
       fontFamily: "BeVietnamPro",
@@ -39,29 +48,58 @@ export default function RootLayout() {
     void hydrateAuth();
   }, [hydrateAuth]);
 
-  if (!fontsLoaded && !fontError) {
-    return null;
+  const fontsReady = fontsLoaded || Boolean(fontError);
+
+  useEffect(() => {
+    if (
+      startupComplete ||
+      !splashComplete ||
+      !fontsReady ||
+      isLoading ||
+      !isThemeHydrated ||
+      pathname === "/"
+    )
+      return;
+    const frame = requestAnimationFrame(() => setStartupComplete(true));
+    return () => cancelAnimationFrame(frame);
+  }, [
+    startupComplete,
+    splashComplete,
+    fontsReady,
+    isLoading,
+    isThemeHydrated,
+    pathname,
+  ]);
+
+  function handOffSplash() {
+    if (nativeSplashHidden.current) return;
+    SplashScreen.hide();
+    nativeSplashHidden.current = true;
   }
 
+  const completeSplash = useCallback(() => setSplashComplete(true), []);
+
   return (
-    <AppProviders>
-      <AuthNavigator fontsReady={fontsLoaded || !!fontError} />
-    </AppProviders>
+    <View className="flex-1 bg-canvas" collapsable={false}>
+      <AppProviders>
+        {fontsReady && !isLoading ? <AuthNavigator /> : null}
+      </AppProviders>
+      {!startupComplete ? (
+        <StartupSplash
+          fontsReady={fontsReady}
+          onReady={handOffSplash}
+          onComplete={completeSplash}
+        />
+      ) : null}
+    </View>
   );
 }
 
-function AuthNavigator({ fontsReady }: { fontsReady: boolean }) {
+function AuthNavigator() {
   const session = useAuthStore((state) => state.session);
-  const isLoading = useAuthStore((state) => state.isLoading);
   const hasCompletedOnboarding = useAuthStore(
     (state) => state.hasCompletedOnboarding,
   );
-
-  useEffect(() => {
-    if (fontsReady && !isLoading) void SplashScreen.hideAsync();
-  }, [fontsReady, isLoading]);
-
-  if (isLoading) return null;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
@@ -75,6 +113,8 @@ function AuthNavigator({ fontsReady }: { fontsReady: boolean }) {
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(product)" />
+        <Stack.Screen name="cart" />
+        <Stack.Screen name="scan-qr" />
       </Stack.Protected>
       <Stack.Screen name="index" />
       <Stack.Screen name="+not-found" />

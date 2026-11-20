@@ -1,5 +1,5 @@
-import { RoutePlaceholder } from "@/components/route-placeholder";
+import FarmScreen from "@/features/farm/FarmScreen";
 
-export default function FarmScreen() {
-  return <RoutePlaceholder title="Trang trại" />;
+export default function FarmRoute() {
+  return <FarmScreen />;
 }

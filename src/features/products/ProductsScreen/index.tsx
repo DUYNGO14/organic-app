@@ -1,4 +1,4 @@
-import { IconButton, SearchInput } from "@/components/common";
+import { IconButton } from "@/components/common";
 import { QualityPromise } from "@/features/home/components/QualityPromise";
 import {
   catalogProducts,
@@ -6,9 +6,10 @@ import {
   type CatalogProduct,
   type ProductCategoryId,
 } from "@/features/products/catalog.data";
+import { ProductSearchBar } from "@/features/products/components/ProductSearchBar";
 import { CatalogProductCard } from "@/features/products/ProductsScreen/components/CatalogProductCard";
-import { ProductCategoryChips } from "@/features/products/ProductsScreen/components/ProductCategoryChips";
 import {
+  emptyProductFilters,
   ProductFilterSheet,
   type ProductFilters,
 } from "@/features/products/ProductsScreen/components/ProductFilterSheet";
@@ -16,24 +17,17 @@ import {
   ProductSortSheet,
   type ProductSortId,
 } from "@/features/products/ProductsScreen/components/ProductSortSheet";
-import {
-  SeasonFilterChips,
-  type SeasonFilterValue,
-} from "@/features/products/ProductsScreen/components/SeasonFilterChips";
 import { useAppColors } from "@/hooks/use-app-colors";
-import { FlashList, type ListRenderItem } from "@shopify/flash-list";
+import { FlashList, type FlashListRef, type ListRenderItem } from "@shopify/flash-list";
 import { router } from "expo-router";
 import {
   ArrowDownUp,
   ChevronDown,
-  Mic,
-  QrCode,
-  Search,
   SlidersHorizontal,
   Sprout,
 } from "lucide-react-native";
-import { useCallback, useMemo, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Keyboard, Pressable, Text, View } from "react-native";
 
 function ProductRowSeparator() {
   return <View className="h-3" />;
@@ -57,27 +51,24 @@ function priceMatches(price: number, band: ProductFilters["priceBand"]) {
 function SelectedCategoryLabel({
   selectedIds,
 }: {
-  selectedIds: ReadonlySet<ProductCategoryId>;
+  selectedIds: readonly ProductCategoryId[];
 }) {
-  if (selectedIds.size === 0) return "Tất cả sản phẩm";
-  const selected = productCategories.filter(({ id }) => selectedIds.has(id));
+  if (selectedIds.length === 0) return "Tất cả sản phẩm";
+  const selected = productCategories.filter(({ id }) => selectedIds.includes(id));
   if (selected.length === 1) return selected[0].label;
   if (selected.length === 2)
     return selected.map(({ label }) => label).join(" & ");
   return `${selected.length} danh mục đã chọn`;
 }
 
-export default function ProductsScreen() {
+export default function ProductsScreen({ initialSearch }: { initialSearch: string }) {
   const colors = useAppColors();
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState<
-    Set<ProductCategoryId>
-  >(() => new Set(["greens"]));
-  const [seasonFilter, setSeasonFilter] = useState<SeasonFilterValue>("all");
-  const [search, setSearch] = useState("");
+  const listRef = useRef<FlashListRef<CatalogProduct>>(null);
+  const [search, setSearch] = useState(initialSearch);
   const [sort, setSort] = useState<ProductSortId>("harvest");
   const [filters, setFilters] = useState<ProductFilters>({
-    certifications: [],
-    priceBand: null,
+    ...emptyProductFilters,
+    categoryIds: initialSearch ? [] : ["greens"],
   });
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
@@ -98,10 +89,10 @@ export default function ProductsScreen() {
     const query = search.trim().toLocaleLowerCase("vi-VN");
     const selected = catalogProducts.filter((product) => {
       const categoryMatches =
-        selectedCategoryIds.size === 0 ||
-        product.categoryIds.some((id) => selectedCategoryIds.has(id));
+        filters.categoryIds.length === 0 ||
+        product.categoryIds.some((id) => filters.categoryIds.includes(id));
       const seasonMatches =
-        seasonFilter === "all" || product.seasonTags.includes(seasonFilter);
+        filters.season === "all" || product.seasonTags.includes(filters.season);
       const queryMatches =
         !query ||
         `${product.name} ${product.subtitle} ${product.origin} ${product.certification ?? ""}`
@@ -126,16 +117,7 @@ export default function ProductsScreen() {
       if (sort === "price-desc") return b.price - a.price;
       return b.harvestOrder - a.harvestOrder;
     });
-  }, [filters, search, seasonFilter, selectedCategoryIds, sort]);
-
-  const toggleCategory = useCallback((id: ProductCategoryId) => {
-    setSelectedCategoryIds((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }, []);
+  }, [filters, search, sort]);
 
   const openProduct = useCallback((product: CatalogProduct) => {
     router.push({
@@ -149,20 +131,12 @@ export default function ProductsScreen() {
     [openProduct],
   );
 
-  const activeProductCount =
-    search.trim() ||
-    seasonFilter !== "all" ||
-    filters.certifications.length > 0 ||
-    filters.priceBand !== null
-      ? visibleProducts.length
-      : selectedCategoryIds.size === 0
-        ? productCategories.reduce(
-            (total, category) => total + category.count,
-            0,
-          )
-        : productCategories
-            .filter(({ id }) => selectedCategoryIds.has(id))
-            .reduce((total, category) => total + category.count, 0);
+  function applyFilters(nextFilters: ProductFilters) {
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+    setFilters(nextFilters);
+  }
+
+  const activeProductCount = visibleProducts.length;
 
   const header = useMemo(
     () => (
@@ -192,7 +166,7 @@ export default function ProductsScreen() {
               className="font-vietnam text-title-md text-ink"
               numberOfLines={1}
             >
-              <SelectedCategoryLabel selectedIds={selectedCategoryIds} />
+              <SelectedCategoryLabel selectedIds={filters.categoryIds} />
             </Text>
             <Text className="mt-0.5 font-vietnam text-body-sm text-muted">
               {activeProductCount} sản phẩm
@@ -231,58 +205,28 @@ export default function ProductsScreen() {
       colors.muted,
       colors.onPrimary,
       colors.primary,
-      selectedCategoryIds,
+      filters.categoryIds,
       sort,
     ],
   );
 
   return (
     <View className="flex-1 bg-canvas">
-      <View className="bg-canvas px-4 pb-2 pt-3">
-        <SearchInput
-          accessibilityLabel="Tìm kiếm nông sản"
-          autoCapitalize="none"
-          autoCorrect={false}
-          containerClassName="min-w-0"
-          inputClassName="text-body-md"
-          inputWrapperClassName="rounded-xl border-border bg-surface-container-lowest px-3"
-          leadingIcon={<Search color={colors.primary} size={21} />}
-          onChangeText={setSearch}
-          onClear={() => setSearch("")}
-          placeholder="Tìm kiếm rau củ, trái cây hữu cơ..."
-          placeholderTextColor={colors.muted}
-          returnKeyType="search"
-          trailingAccessory={
-            <View className="flex-row items-center">
-              <IconButton
-                disabled
-                label="Tìm bằng giọng nói"
-                size="lg"
-                icon={<Mic color={colors.muted} size={20} />}
-              />
-              <IconButton
-                disabled
-                label="Quét mã QR hoặc mã vạch"
-                size="lg"
-                icon={<QrCode color={colors.muted} size={20} />}
-              />
-            </View>
-          }
-          value={search}
-        />
-      </View>
-
-      <ProductCategoryChips
-        categories={productCategories}
-        onToggle={toggleCategory}
-        selectedIds={selectedCategoryIds}
+      <ProductSearchBar
+        value={search}
+        onChangeText={setSearch}
+        onScanPress={() => {
+          Keyboard.dismiss();
+          router.push("/scan-qr");
+        }}
       />
-      <SeasonFilterChips onSelect={setSeasonFilter} selected={seasonFilter} />
 
       <FlashList
+        ref={listRef}
         className="flex-1 bg-canvas"
         contentContainerStyle={{ paddingBottom: 28, paddingHorizontal: 10 }}
         data={visibleProducts}
+        maintainVisibleContentPosition={{ disabled: true }}
         keyExtractor={(product) => product.id}
         ListEmptyComponent={
           <View className="items-center px-6 py-12">
@@ -297,9 +241,7 @@ export default function ProductsScreen() {
               className="mt-3 min-h-11 justify-center px-3"
               onPress={() => {
                 setSearch("");
-                setSelectedCategoryIds(new Set());
-                setSeasonFilter("all");
-                setFilters({ certifications: [], priceBand: null });
+                applyFilters(emptyProductFilters);
               }}
             >
               <Text className="font-vietnam text-label-md text-primary">
@@ -328,10 +270,7 @@ export default function ProductsScreen() {
         <ProductFilterSheet
           certifications={certifications}
           filters={filters}
-          onApply={(nextFilters) => {
-            setFilters(nextFilters);
-            setFilterSheetVisible(false);
-          }}
+          onApply={applyFilters}
           onClose={() => setFilterSheetVisible(false)}
         />
       ) : null}

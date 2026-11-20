@@ -94,6 +94,7 @@ export default function OtpScreen() {
             name="code"
             render={({ field, fieldState }) => (
               <OTPInput
+                required
                 autoFocus
                 error={fieldState.error?.message}
                 label="Mã OTP 6 chữ số"

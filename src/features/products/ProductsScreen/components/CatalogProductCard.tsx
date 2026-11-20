@@ -1,9 +1,10 @@
 import { CertBadge, IconButton, StatusChip } from "@/components/common";
+import { addToCart } from "@/features/cart/add-to-cart";
 import type { CatalogProduct } from "@/features/products/catalog.data";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { Image } from "expo-image";
-import { Plus } from "lucide-react-native";
-import { Alert, Pressable, Text, View } from "react-native";
+import { ShoppingCartPlus } from "lucide-react-native";
+import { Pressable, Text, View } from "react-native";
 
 type CatalogProductCardProps = {
   product: CatalogProduct;
@@ -14,7 +15,10 @@ function formatPrice(price: number) {
   return `${price.toLocaleString("vi-VN")}đ`;
 }
 
-export function CatalogProductCard({ product, onPress }: CatalogProductCardProps) {
+export function CatalogProductCard({
+  product,
+  onPress,
+}: CatalogProductCardProps) {
   const colors = useAppColors();
 
   return (
@@ -99,14 +103,12 @@ export function CatalogProductCard({ product, onPress }: CatalogProductCardProps
           </Text>
         </View>
         <IconButton
-          className="h-12 w-12 bg-primary"
-          icon={<Plus color={colors.onPrimary} size={21} />}
+          className="h-10 w-10 bg-primary"
+          icon={<ShoppingCartPlus color={colors.onPrimary} size={16} />}
           label={`Thêm ${product.name} vào giỏ`}
           size="md"
           variant="filled"
-          onPress={() =>
-            Alert.alert("Đã thêm vào giỏ", `1 × ${product.name}`)
-          }
+          onPress={() => addToCart(product)}
         />
       </View>
     </View>

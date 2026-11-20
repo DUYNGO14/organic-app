@@ -1,4 +1,5 @@
 import { PrimaryBtn } from "@/components/common";
+import { addToCart } from "@/features/cart/add-to-cart";
 import type { HomeProduct } from "@/features/home/home.data";
 import type { PackageOption } from "@/features/products/product-detail.data";
 import type { AppColors } from "@/hooks/use-app-colors";
@@ -14,7 +15,7 @@ type ProductPurchaseBarProps = {
 
 export function ProductPurchaseBar({ product, selectedPackage, quantity, colors }: ProductPurchaseBarProps) {
   function handleAddToCart() {
-    Alert.alert("Đã thêm vào giỏ", `${quantity} × ${product.name} (${selectedPackage.label})`);
+    addToCart(product, selectedPackage, quantity);
   }
 
   return (

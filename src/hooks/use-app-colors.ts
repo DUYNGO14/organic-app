@@ -6,9 +6,14 @@ export type AppColors = {
   secondary: string;
   ink: string;
   muted: string;
+  danger: string;
   border: string;
+  canvas: string;
   surface: string;
+  surfaceContainer: string;
   surfaceRaised: string;
+  photoScrim: string;
+  onPhoto: string;
   isDark: boolean;
 };
 
@@ -23,9 +28,14 @@ export function useAppColors(): AppColors {
     secondary: "#58A500",
     ink: isDark ? "#F0FDF4" : "#000000",
     muted: isDark ? "#94A3B8" : "#6B7280",
+    danger: isDark ? "#FFB4AB" : "#BA1A1A",
     border: isDark ? "#2D3730" : "#E5E7EB",
+    canvas: isDark ? "#121614" : "#FFFFFF",
     surface: isDark ? "#1A201C" : "#FFFFFF",
+    surfaceContainer: isDark ? "#242C26" : "#EBF6E9",
     surfaceRaised: isDark ? "#242C26" : "#F9FAF7",
+    photoScrim: "#121614",
+    onPhoto: "#FFFFFF",
     isDark,
   };
 }

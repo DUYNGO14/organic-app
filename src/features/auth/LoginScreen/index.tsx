@@ -134,6 +134,7 @@ export default function LoginScreen() {
                   name="phone"
                   render={({ field, fieldState }) => (
                     <PhoneInput
+                      required
                       accessibilityLabel="Số điện thoại"
                       error={fieldState.error?.message}
                       label="Số điện thoại"
