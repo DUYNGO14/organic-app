@@ -52,6 +52,15 @@ colors:
   background: "#f9f9f9"
   on-background: "#1b1b1b"
   surface-variant: "#e2e2e2"
+  card-border: "#F0F4EC"
+  luminous: "#00E676"
+  warning: "#92400E"
+  warning-container: "#FEF3C7"
+  cold: "#075985"
+  cold-container: "#E0F2FE"
+  warm: "#9A3412"
+  warm-container: "#FFEDD5"
+  rating: "#F59E0B"
 colors-dark:
   # ---- DARK MODE ----
   surface: "#101412"
@@ -101,6 +110,15 @@ colors-dark:
   background: "#101412"
   on-background: "#e0e3df"
   surface-variant: "#323633"
+  card-border: "#173827"
+  luminous: "#00E676"
+  warning: "#FCD34D"
+  warning-container: "#3B2F0B"
+  cold: "#7DD3FC"
+  cold-container: "#0C2A3D"
+  warm: "#FDBA74"
+  warm-container: "#3B1A0C"
+  rating: "#FBBF24"
 typography:
   display-xl:
     fontFamily: Be Vietnam Pro
@@ -219,6 +237,15 @@ The brand personality embodies freshness, authentic botanical vitality, uncompro
 
 ## Colors
 
+### App-specific semantic tokens
+
+- **Card border**: light `#F0F4EC`; dark `#173827`.
+- **Luminous**: `#00E676` in both themes, reserved for accents and glow treatments.
+- **Warning**: foreground `#92400E` / `#FCD34D`; container `#FEF3C7` / `#3B2F0B` (light / dark).
+- **Cold badge**: foreground `#075985` / `#7DD3FC`; container `#E0F2FE` / `#0C2A3D` (light / dark).
+- **Warm badge**: foreground `#9A3412` / `#FDBA74`; container `#FFEDD5` / `#3B1A0C` (light / dark).
+- **Rating star**: `#F59E0B` / `#FBBF24` (light / dark); empty stars use the `border-strong` token.
+
 ### Brand palette (shared identity)
 
 | Role                         | Light     | Dark                                                                        |
@@ -301,7 +328,7 @@ No heavy, artificial drop shadows in either theme. Depth comes from tonal layeri
 ### Dark
 
 - **Tonal stacking:** `#121614` base, `#1A201C` card, `#242C26` floating sheet or action.
-- **Emerald border glow:** `border: 1px solid rgba(0, 230, 118, 0.15)` with `box-shadow: 0 4px 24px -2px rgba(0, 107, 53, 0.25)`.
+- **Emerald border glow:** card border `#173827`, with `box-shadow: 0 4px 24px -2px rgba(0, 107, 53, 0.25)`.
 - **Active and focus glow:** border intensifies to `rgba(56, 193, 114, 0.45)` with bloom `0 0 16px rgba(0, 230, 118, 0.3)`.
 
 ## Shapes
@@ -336,7 +363,7 @@ A soft, curvilinear shape language echoing leaves and seed pods.
 ### Product & Story Cards
 
 - Light: `#FFFFFF` background, `1px solid #F0F4EC`, `16px` inner padding. Photography at the top edge with an 8px inner radius, clear origin labels and fresh green price badges.
-- Dark: `#1A201C` background, `rounded-2xl`, signature `1px solid rgba(0, 230, 118, 0.12)` border. Image containers use 1:1 or 4:3 ratios with inset vignette masks so produce photography dissolves into the surface.
+- Dark: `#1A201C` background, `rounded-2xl`, signature `1px solid #173827` border. Image containers use 1:1 or 4:3 ratios with inset vignette masks so produce photography dissolves into the surface.
 
 ### Input Fields
 

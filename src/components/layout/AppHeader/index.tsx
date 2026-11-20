@@ -24,8 +24,8 @@ function CountBadge({ count }: { count: number }) {
   if (count < 1) return null;
 
   return (
-    <View className="absolute -right-0.5 -top-0.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-surface bg-primary px-1 dark:border-surface-container-lowest">
-      <Text className="font-vietnam text-[9px] font-bold text-on-primary">
+    <View className="absolute -right-0.5 -top-0.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-surface bg-primary px-1">
+      <Text className="font-vietnam text-label-sm font-bold text-on-primary">
         {count > 99 ? "99+" : count}
       </Text>
     </View>
@@ -47,7 +47,7 @@ export function MainHeader({
   const iconColor = colors.isDark ? colors.ink : "#4B5563";
 
   return (
-    <View className="min-h-[76px] flex-row items-center justify-between gap-2 rounded-b-lg border-b border-border bg-surface px-3 py-2 dark:border-border-strong dark:bg-surface-container-lowest">
+    <View className="min-h-[76px] flex-row items-center justify-between gap-2 rounded-b-lg border-b border-border bg-surface px-3 py-2">
       <View className="min-w-0 flex-1 flex-row items-center gap-2.5">
         <View
           accessibilityLabel="Organic Việt Nam"
@@ -81,7 +81,7 @@ export function MainHeader({
             />
             <Text
               numberOfLines={1}
-              className="shrink font-vietnam text-label-md text-ink dark:text-on-surface"
+              className="shrink font-vietnam text-label-md text-ink"
             >
               Giao tới: {currentAddress}
             </Text>
@@ -103,7 +103,7 @@ export function MainHeader({
             size="sm"
           />
           {unreadNotificationsCount > 0 ? (
-            <View className="absolute right-2 top-2 h-2 w-2 rounded-full border border-surface bg-danger dark:border-surface-container-lowest" />
+            <View className="absolute right-2 top-2 h-2 w-2 rounded-full border border-surface bg-danger" />
           ) : null}
         </View>
 

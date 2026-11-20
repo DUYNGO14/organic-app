@@ -7,6 +7,7 @@ import {
   Sprout,
   UserRound,
 } from "lucide-react-native";
+import { useAppColors } from "@/hooks/use-app-colors";
 import { useColorScheme } from "nativewind";
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
@@ -104,13 +105,13 @@ function RouteBadge({ badge }: { badge?: number | boolean }) {
 
   if (typeof badge === "boolean") {
     return (
-      <View className="absolute right-1 top-1 h-2 w-2 rounded-full border border-surface bg-secondary dark:border-surface-container-lowest dark:bg-primary" />
+      <View className="absolute right-1 top-1 h-2 w-2 rounded-full border border-surface bg-secondary dark:bg-primary" />
     );
   }
 
   return (
-    <View className="absolute -right-1 -top-1 min-h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 dark:bg-primary">
-      <Text className="font-vietnam text-[9px] font-bold text-on-primary">
+    <View className="absolute -right-1 -top-1 min-h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1">
+      <Text className="font-vietnam text-label-sm font-bold text-on-primary">
         {badge > 99 ? "99+" : badge}
       </Text>
     </View>
@@ -124,6 +125,7 @@ export function BottomTabBar({
 }: BottomTabBarProps) {
   const pathname = usePathname();
   const { colorScheme } = useColorScheme();
+  const colors = useAppColors();
   const activeKey =
     currentTab ??
     tabDefinitions.find((tab) => pathname.endsWith(`/${tab.key}`))?.key ??
@@ -132,8 +134,8 @@ export function BottomTabBar({
     0,
     tabDefinitions.findIndex((tab) => tab.key === activeKey),
   );
-  const activeColor = colorScheme === "dark" ? "#38c172" : "#006b35";
-  const inactiveColor = colorScheme === "dark" ? "#94a3b8" : "#6b7280";
+  const activeColor = colors.primary;
+  const inactiveColor = colors.muted;
   const containerWidth = useSharedValue(0);
 
   const indicatorStyle = useAnimatedStyle(() => {
@@ -149,7 +151,7 @@ export function BottomTabBar({
 
   return (
     <View
-      className="z-10 mx-3 mb-3 flex-row items-center justify-around rounded-3xl border border-border bg-surface px-1 pb-1 pt-2 dark:border-primary/35 dark:bg-[#2d3730]"
+      className="z-10 mx-3 mb-3 flex-row items-center justify-around rounded-3xl border border-border bg-surface px-1 pb-1 pt-2 dark:border-primary/35 dark:bg-surface-container-high"
       onLayout={({ nativeEvent }) => {
         containerWidth.value = nativeEvent.layout.width;
       }}

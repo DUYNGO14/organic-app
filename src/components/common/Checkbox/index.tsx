@@ -33,7 +33,7 @@ export function Checkbox({
       {...props}
     >
       <View
-        className={`h-5 w-5 items-center justify-center rounded border ${selected ? "border-secondary bg-secondary dark:border-primary dark:bg-primary" : "border-border-strong bg-surface dark:border-border-strong dark:bg-surface-container-low"}`}
+        className={`h-5 w-5 items-center justify-center rounded border ${selected ? "border-secondary bg-secondary dark:border-primary dark:bg-primary" : "border-border-strong bg-surface"}`}
       >
         {indeterminate ? (
           <Minus color="#ffffff" size={15} strokeWidth={3} />
@@ -43,7 +43,7 @@ export function Checkbox({
       </View>
       {label || description ? (
         <View className="flex-1">
-          {label ? <Text className="font-vietnam text-body-md text-ink dark:text-on-surface">{label}</Text> : null}
+          {label ? <Text className="font-vietnam text-body-md text-ink">{label}</Text> : null}
           {description ? (
             <Text className="mt-0.5 font-vietnam text-body-sm text-muted">{description}</Text>
           ) : null}

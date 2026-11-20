@@ -34,7 +34,7 @@ export function DealProductCard({ product, onPress, onAdd }: DealProductCardProp
           transition={200}
         />
         <View className="absolute left-2 top-2 rounded-full bg-primary px-2.5 py-1">
-          <Text className="font-vietnam text-[10px] text-on-primary">
+          <Text className="font-vietnam text-label-sm text-on-primary">
             {product.badge}
           </Text>
         </View>
@@ -99,7 +99,7 @@ export function DealProductCard({ product, onPress, onAdd }: DealProductCardProp
               style={{ width: `${product.soldPercent}%` }}
             />
           </View>
-          <Text className="mt-1 text-right font-vietnam text-[10px] text-muted">
+          <Text className="mt-1 text-right font-vietnam text-label-sm text-muted">
             Đã bán {product.soldPercent}%
           </Text>
         </>

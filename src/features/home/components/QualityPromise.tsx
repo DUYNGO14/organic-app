@@ -28,7 +28,7 @@ export function QualityPromise() {
   const colors = useAppColors();
 
   return (
-    <View className="mx-4 mt-8 rounded-[26px] bg-surface-container-low p-4">
+    <View className="mx-4 mt-8 rounded-xl bg-surface-container-low p-4">
       <View className="mb-5 flex-row items-center gap-2">
         <Award color={colors.secondary} size={23} />
         <Text className="flex-1 font-vietnam text-title-sm text-primary">

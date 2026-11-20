@@ -27,7 +27,6 @@ const kaleGallery = [
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDn7n9GDMqCxi1OsZqk-wQihIvB1DfvHpoWFESQLEqxPkmQxba-uYaWI9bxsbbeMS4z5toQ1k7Jr4xbF4aAg8B3HlS1QVRffXlVOZlCmjCnZDyk1dmfq3IYmzDBdItU0ovSSKGTfkixmxIia9mKIOvO4WMpsXZ0G4XZyOBOySZr7q9bXHFgzHG8zc2lh3U0ZxTcg1XWS-2z8sMJjTDZ6f20K1qzavA-2FRbVqeF0WI",
   "https://lh3.googleusercontent.com/aida-public/AB6AXuBHnM8bQ-KyrORn9mbNm9L0APxcSdtoR3Hc9qSu_9UnEe2epV1e_HDa4jyZ0TGcKE5AJeb8dfF52QwhwT-di8IyM_-a2FQ-AOwa6Bpa0z1OgUGDxSePANrUtq_w2_-OyYUb_SM-SS_4BojidjbFSYJftwIyOJ3J9M0X40MiuJhxqDopEpemPqIb84TmQPtgTbbOphPcEMruuhkCT4yHp1QUkdPpXJk0GzllFW8ZBCY",
   "https://lh3.googleusercontent.com/aida-public/AB6AXuDiron7MCZfBXaf926UA4YTr69Sxi9qsEMZCo0_f0dwnHJSegwDC1IQ0y5hU54aGV-8vGjadk2Re59EOW4FN82C44D7wEi5t08Q9n6e_q27Cw3zCkWSviT4CB7xSNXpOR3AJ0hQ8XtCCrQvuEc2jjbd7p0Lh2wF90PRBz5ZIQ5eiBGaQiKpsKunwc1N_KvKNUrVLEPMKR2-Lr9z3JZyIs67uqwn5qf1PUMtJZQpZRM",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAE5riMOjGiER-KQYggkQdx_NJuqkhpHnJQaIP3HULHQZRgD1V2ZuAyW7EB5jmHuCY3H-brDaP6CYv2_jp7-5SgvVXMFSO4_0GA8jViuG43tAmoxTUHaOexkg_p-m8tlo34cJ5pZFLzIL598Y05mamDkjl278qvRb3yOAnuzcM7i6kTcij0k1J4yU1bQLoJtF_UZ61db_NCs5af6sznxZmNmsLc7eagAtgz_mRlES8",
 ];
 
 const specs: Record<string, Omit<ProductDetailSpec, "gallery"> & { gallery?: string[] }> = {

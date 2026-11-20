@@ -89,7 +89,7 @@ export default function WelcomeScreen() {
             <Text className="text-center font-vietnam text-headline-lg-mobile text-primary">
               ORGANIC VIỆT NAM
             </Text>
-            <Text className="mt-2 max-w-[310px] text-center font-vietnam text-body-lg text-on-primary">
+            <Text className="mt-2 max-w-[310px] text-center font-vietnam text-body-lg text-ink">
               Từ nông trại hữu cơ thuần khiết đến bàn ăn lành mạnh của gia đình
               Việt
             </Text>

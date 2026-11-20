@@ -22,7 +22,7 @@ export function StackHeader({
   const iconColor = colorScheme === "dark" ? "#e0e3df" : "#3f4940";
 
   return (
-    <View className="h-14 flex-row items-center justify-between border-b border-border bg-surface px-4 dark:border-border-strong dark:bg-surface-container-lowest">
+    <View className="h-14 flex-row items-center justify-between border-b border-border bg-surface px-4">
       <View className="w-11 items-start">
         {showBack ? (
           <IconButton
@@ -36,7 +36,7 @@ export function StackHeader({
       </View>
 
       <Text
-        className="mx-2 flex-1 text-center font-vietnam text-title-md text-ink dark:text-on-surface"
+        className="mx-2 flex-1 text-center font-vietnam text-title-md text-ink"
         numberOfLines={1}
       >
         {title}

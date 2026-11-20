@@ -65,7 +65,7 @@ export function NewsCarousel({
   const renderBanner = useCallback(
     ({ item }: { item: HomeBanner }) => (
       <View style={{ width }} className="px-4">
-        <View className="h-[244px] overflow-hidden rounded-[26px] bg-primary shadow-md">
+        <View className="h-[244px] overflow-hidden rounded-xl bg-primary shadow-md">
           <Image
             accessibilityLabel={item.title}
             cachePolicy="disk"

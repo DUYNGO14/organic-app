@@ -1,7 +1,19 @@
 import { useColorScheme } from "nativewind";
 
+export type AppColors = {
+  primary: string;
+  onPrimary: string;
+  secondary: string;
+  ink: string;
+  muted: string;
+  border: string;
+  surface: string;
+  surfaceRaised: string;
+  isDark: boolean;
+};
+
 /** Lucide icons and native props need concrete colors rather than NativeWind classes. */
-export function useAppColors() {
+export function useAppColors(): AppColors {
   const { colorScheme } = useColorScheme();
   const isDark = colorScheme === "dark";
 

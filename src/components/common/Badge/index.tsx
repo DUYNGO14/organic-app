@@ -14,7 +14,7 @@ export function CertBadge({ label, className = "", showIcon = true }: CertBadgeP
       className={`min-h-7 flex-row items-center gap-1.5 self-start rounded-full border border-primary/15 bg-secondary-container px-2.5 py-1 dark:border-primary/30 dark:bg-primary/25 ${className}`}
     >
       {showIcon ? <BadgeCheck color="#006b35" size={14} /> : null}
-      <Text className="font-vietnam text-label-sm text-on-secondary-container dark:text-on-surface">
+      <Text className="font-vietnam text-label-sm text-on-secondary-container">
         {label}
       </Text>
     </View>
@@ -38,11 +38,11 @@ const statusStyles: Record<StatusTone, string> = {
 };
 
 const statusTextStyles: Record<StatusTone, string> = {
-  success: "text-on-secondary-container dark:text-on-surface",
-  info: "text-primary dark:text-primary",
+  success: "text-on-secondary-container",
+  info: "text-primary",
   warning: "text-[#765000] dark:text-[#ffdc8a]",
-  danger: "text-danger dark:text-danger",
-  neutral: "text-muted dark:text-on-surface-variant",
+  danger: "text-danger",
+  neutral: "text-muted",
 };
 
 export function StatusChip({ label, tone = "neutral", className = "" }: StatusChipProps) {
@@ -71,7 +71,7 @@ const tempBackgroundStyles = {
 
 const tempTextStyles = {
   cold: "text-[#175788] dark:text-[#a9dcff]",
-  fresh: "text-on-secondary-container dark:text-on-surface",
+  fresh: "text-on-secondary-container",
   warm: "text-[#8a4300] dark:text-[#ffc58c]",
 } as const;
 
