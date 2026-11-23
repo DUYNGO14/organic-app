@@ -97,11 +97,14 @@ export function Input({
 
 export const TextField = Input;
 
+type InputVariant = "default" | "inset";
+
 export type PhoneInputProps = SwappableInputProps & {
   countryCode?: string;
+  variant?: InputVariant;
 };
 
-export function PhoneInput({ countryCode = "+84", ...props }: PhoneInputProps) {
+export function PhoneInput({ countryCode = "+84", variant = "default", ...props }: PhoneInputProps) {
   const {
     label,
     required,
@@ -111,8 +114,12 @@ export function PhoneInput({ countryCode = "+84", ...props }: PhoneInputProps) {
     inputClassName,
     accessibilityLabel,
     inputComponent,
+    onBlur,
+    onFocus,
     ...inputProps
   } = props;
+  const [focused, setFocused] = useState(false);
+  const inset = variant === "inset";
 
   return (
     <FieldFrame
@@ -122,8 +129,16 @@ export function PhoneInput({ countryCode = "+84", ...props }: PhoneInputProps) {
       helperText={helperText}
       className={containerClassName}
     >
-      <View className={`h-12 flex-row items-center rounded-lg border bg-surface ${error ? "border-danger" : "border-border-strong"}`}>
-        <Text className="pl-4 font-vietnam text-body-md text-muted">{countryCode}</Text>
+      <View className={twMerge(
+        "flex-row items-center rounded-lg border",
+        inset ? "min-h-14 bg-surface-container-low/90" : "h-12 bg-surface",
+        error ? "border-danger" : focused && inset ? "border-primary" : "border-border-strong",
+      )}>
+        <Text className={inset
+          ? "border-r border-border-strong px-4 font-vietnam text-label-lg text-primary"
+          : "pl-4 font-vietnam text-body-md text-muted"}>
+          {countryCode}
+        </Text>
         <InputControl
           inputComponent={inputComponent}
           accessibilityLabel={accessibilityLabel ?? label ?? "Số điện thoại"}
@@ -132,7 +147,15 @@ export function PhoneInput({ countryCode = "+84", ...props }: PhoneInputProps) {
           placeholder="912 345 678"
           textContentType="telephoneNumber"
           {...inputProps}
-          className={`h-full min-w-0 flex-1 px-3 ${inputClassName ?? ""}`}
+          className={twMerge("min-w-0 flex-1 px-3", inset ? "min-h-14 py-3" : "h-full", inputClassName)}
+          onBlur={(event) => {
+            if (inset) setFocused(false);
+            onBlur?.(event);
+          }}
+          onFocus={(event) => {
+            if (inset) setFocused(true);
+            onFocus?.(event);
+          }}
         />
       </View>
     </FieldFrame>
@@ -255,6 +278,7 @@ export type OTPInputProps = {
   error?: string;
   autoFocus?: boolean;
   disabled?: boolean;
+  variant?: InputVariant;
   className?: string;
 };
 
@@ -267,9 +291,11 @@ export function OTPInput({
   error,
   autoFocus = false,
   disabled = false,
+  variant = "default",
   className = "",
 }: OTPInputProps) {
   const digits = value.replace(/\D/g, "").slice(0, length);
+  const inset = variant === "inset";
 
   return (
     <FieldFrame label={label} required={required} error={error} className={className}>
@@ -280,11 +306,22 @@ export function OTPInput({
           return (
             <View
               key={index}
-              className={`h-14 min-w-0 flex-1 items-center justify-center rounded-lg border bg-surface ${error ? "border-danger" : isActive ? "border-primary" : "border-border-strong"}`}
+              className={twMerge(
+                "min-w-0 flex-1 items-center justify-center rounded-lg border",
+                inset ? "min-h-14 bg-surface-container-low/90" : "h-14 bg-surface",
+                error ? "border-danger" : isActive ? "border-primary" : "border-border-strong",
+                !error && inset && isActive && "bg-primary/10",
+              )}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
             >
-              <Text className="font-vietnam text-headline-sm text-ink">
-                {digit}
-              </Text>
+              {inset && !digit ? (
+                <View className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-primary" : "bg-muted/40"}`} />
+              ) : (
+                <Text className="font-vietnam text-headline-sm text-ink">
+                  {digit}
+                </Text>
+              )}
             </View>
           );
         })}
@@ -299,7 +336,9 @@ export function OTPInput({
           maxLength={length}
           onChangeText={(text) => onChangeText(text.replace(/\D/g, "").slice(0, length))}
           selectTextOnFocus
+          selectionColor="transparent"
           style={{ position: "absolute", inset: 0, opacity: 0 }}
+          underlineColorAndroid="transparent"
           value={digits}
         />
       </View>

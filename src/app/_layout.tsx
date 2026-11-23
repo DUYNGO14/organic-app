@@ -104,6 +104,7 @@ function AuthNavigator() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <StatusBar barStyle="auto" />
+      <Stack.Screen name="legal" />
       <Stack.Protected guard={!session && hasCompletedOnboarding}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>

@@ -6,7 +6,7 @@ import { DetailCard } from "./DetailCard";
 const commitments = [
   { Icon: AlarmClock, title: "Thu hoạch tươi mỗi sáng", note: "Đóng gói nhanh để giữ độ giòn và hương vị tự nhiên." },
   { Icon: Leaf, title: "Canh tác theo tiêu chuẩn hữu cơ", note: "Ưu tiên phương pháp canh tác an toàn và bền vững." },
-  { Icon: RefreshCw, title: "Đổi trả miễn phí trong 4 giờ", note: "Liên hệ hỗ trợ nếu sản phẩm không đạt chất lượng cam kết." },
+  { Icon: RefreshCw, title: "Hỗ trợ sau mua hàng", note: "Xem chính sách đổi trả và hoàn tiền trước khi đặt đơn." },
 ];
 
 export function ProductCommitmentsCard({ colors }: { colors: AppColors }) {

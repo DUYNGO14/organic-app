@@ -1,5 +1,5 @@
-import { RoutePlaceholder } from "@/components/route-placeholder";
+import OrdersScreen from "@/features/orders/OrdersScreen";
 
-export default function OrdersScreen() {
-  return <RoutePlaceholder title="Đơn hàng" />;
+export default function OrdersRoute() {
+  return <OrdersScreen />;
 }

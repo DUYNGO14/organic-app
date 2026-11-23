@@ -7,7 +7,7 @@ import {
   Maximize, ShieldCheck, Sprout, Sun, Thermometer, Trees, Wind,
 } from "lucide-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { certificates, commitments, featuredStory, forecast, greenhouse, regions, stories, type FarmDetail } from "./farm.data";
+import { certificates, commitments, featuredStory, forecast, greenhouse, regions, stories, type FarmDetail, type FarmStory } from "./farm.data";
 
 type FarmSectionProps = { onOpen: (detail: FarmDetail) => void };
 
@@ -74,7 +74,7 @@ export function FarmOverview({ onOpen }: FarmSectionProps) {
   );
 }
 
-export function FarmJournal({ onOpen }: FarmSectionProps) {
+export function FarmJournal({ onOpen }: { onOpen: (story: FarmStory) => void }) {
   const colors = useAppColors();
   return (
     <View className="gap-3">
@@ -95,7 +95,7 @@ export function FarmJournal({ onOpen }: FarmSectionProps) {
           </Text>
         </View>
         <View className="gap-2 p-4">
-          <Text className="font-vietnam text-label-md text-muted">Bởi {featuredStory.author} · Mộc Châu</Text>
+          <Text className="font-vietnam text-label-md text-muted">Bởi {featuredStory.author} · {featuredStory.location}</Text>
           <Text className="font-vietnam text-headline-sm text-ink">{featuredStory.title}</Text>
           <Text numberOfLines={2} className="font-vietnam text-body-md text-muted">{featuredStory.description}</Text>
           <View className="flex-row flex-wrap items-center justify-between gap-x-2 border-t border-border pt-1">
@@ -119,7 +119,9 @@ export function FarmJournal({ onOpen }: FarmSectionProps) {
             <Image source={story.image} contentFit="cover" style={StyleSheet.absoluteFill} />
           </View>
           <View className="min-w-0 flex-1 gap-1">
-            <Text className="font-vietnam text-label-md text-primary">{story.tags.join("  ")}</Text>
+            {story.tags?.length ? (
+              <Text className="font-vietnam text-label-md text-primary">{story.tags.join("  ")}</Text>
+            ) : null}
             <Text className="font-vietnam text-body-emphasis text-ink">{story.title}</Text>
             <Text className="font-vietnam text-label-sm text-muted">{story.author}</Text>
           </View>

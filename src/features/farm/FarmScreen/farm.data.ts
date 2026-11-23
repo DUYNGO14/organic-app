@@ -6,6 +6,15 @@ export type FarmDetail = {
   productIds?: readonly string[];
 };
 
+export type FarmStory = Omit<FarmDetail, "image" | "mapQuery"> & {
+  image: number;
+  author: string;
+  label?: string;
+  location?: string;
+  tags?: readonly string[];
+  sections: readonly { title: string; text: string }[];
+};
+
 export const greenhouse: FarmDetail = {
   title: "Nhà màng A3 · Lạc Dương",
   description: "Ảnh minh họa khu thu hoạch xà lách thủy canh tại cao nguyên Lạc Dương, Lâm Đồng.",
@@ -20,9 +29,20 @@ export const featuredStory = {
   productIds: ["strawberries"],
   author: "Kỹ sư Trần Bình",
   label: "Đợt hái đầu mùa",
-};
+  location: "Mộc Châu",
+  sections: [
+    {
+      title: "Chọn quả tại luống",
+      text: "Người hái quan sát màu quả ngay trên cây. Quả chín đều được đưa vào khay, còn những quả chưa tới độ chín được giữ lại cho lượt hái sau. Khi hái, người trồng cầm nhẹ ở cuống để hạn chế làm dập phần thịt quả.",
+    },
+    {
+      title: "Từ luống dâu đến khay",
+      text: "Quả được xếp nhẹ vào khay ngay sau khi hái để hạn chế va chạm khi di chuyển. Độ ngọt 12,8°Bx được ghi nhận ở lô đầu mùa trong ký sự này. Chỉ số có thể thay đổi theo độ chín và từng đợt hái.",
+    },
+  ],
+} satisfies FarmStory;
 
-export const stories = [
+export const stories: readonly FarmStory[] = [
   {
     title: "Bí quyết chăm cải Kale bằng đạm cá ủ men tự nhiên",
     description: "Ký sự của HTX An Nhiên giới thiệu cách dùng đạm cá ủ men để chăm cải Kale, cùng thời điểm thu hái giúp lá giữ độ giòn.",
@@ -30,6 +50,16 @@ export const stories = [
     productIds: ["kale"],
     author: "HTX An Nhiên",
     tags: ["#HữuCơ", "#ĐàLạt"],
+    sections: [
+      {
+        title: "Theo dõi lá giữa các lần chăm bón",
+        text: "Đạm cá ủ men là một nguồn dinh dưỡng mà hợp tác xã sử dụng khi chăm cải Kale. Giữa các lần chăm bón, người trồng quan sát màu lá, đọt non và độ ẩm đất để biết luống cải đang phát triển ra sao.",
+      },
+      {
+        title: "Hái lá ngoài, giữ lại đọt non",
+        text: "Khi thu hái, người trồng chọn các lá ngoài đã đủ lớn và giữ lại phần đọt giữa để cây tiếp tục ra lá. Hái lúc trời còn mát giúp lá hạn chế mất nước trước khi được đưa đi sơ chế.",
+      },
+    ],
   },
   {
     title: "Nuôi gà thả đồi với giun quế và bắp hạt",
@@ -37,6 +67,16 @@ export const stories = [
     image: require("@/assets/images/farm/free-range-chickens.jpg"),
     author: "Trại Gà Đồi Eakao",
     tags: ["#ThảoMộc", "#ChănNuôi"],
+    sections: [
+      {
+        title: "Bóng mát trên bãi thả",
+        text: "Bãi thả có khoảng trống để đàn gà đi lại và những chỗ râm để nghỉ khi trời nắng. Máng nước được đặt ở nơi đàn dễ tìm, gần khu vực có bóng mát.",
+      },
+      {
+        title: "Giun quế và bắp trong khẩu phần",
+        text: "Trại dùng giun quế và bắp hạt để bổ sung vào khẩu phần hằng ngày. Người chăm đàn quan sát lượng thức ăn còn lại và mức độ hoạt động của gà để điều chỉnh cách cho ăn theo từng giai đoạn.",
+      },
+    ],
   },
 ];
 

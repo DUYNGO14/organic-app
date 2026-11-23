@@ -4,9 +4,13 @@ export type AppColors = {
   primary: string;
   onPrimary: string;
   secondary: string;
+  onSecondary: string;
   ink: string;
   muted: string;
   danger: string;
+  warning: string;
+  cold: string;
+  rating: string;
   border: string;
   canvas: string;
   surface: string;
@@ -26,9 +30,13 @@ export function useAppColors(): AppColors {
     primary: isDark ? "#38C172" : "#006B35",
     onPrimary: isDark ? "#121614" : "#FFFFFF",
     secondary: "#58A500",
+    onSecondary: isDark ? "#121614" : "#FFFFFF",
     ink: isDark ? "#F0FDF4" : "#000000",
     muted: isDark ? "#94A3B8" : "#6B7280",
     danger: isDark ? "#FFB4AB" : "#BA1A1A",
+    warning: isDark ? "#FCD34D" : "#92400E",
+    cold: isDark ? "#7DD3FC" : "#075985",
+    rating: isDark ? "#FBBF24" : "#F59E0B",
     border: isDark ? "#2D3730" : "#E5E7EB",
     canvas: isDark ? "#121614" : "#FFFFFF",
     surface: isDark ? "#1A201C" : "#FFFFFF",
