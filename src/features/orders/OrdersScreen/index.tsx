@@ -15,19 +15,19 @@ export default function OrdersScreen() {
   const [filter, setFilter] = useState<OrderFilter>("all");
   const [detailOrder, setDetailOrder] = useState<CustomerOrder | null>(null);
   const [reviewOrder, setReviewOrder] = useState<CustomerOrder | null>(null);
-  const [reviewedOrderIds, setReviewedOrderIds] = useState<ReadonlySet<string>>(new Set());
+  const [reviews, setReviews] = useState<Partial<Record<string, OrderReview>>>({});
 
   const visibleOrders = useMemo(
     () => demoOrders.filter((order) => {
       if (filter !== "all" && order.status !== filter) return false;
-      return order.status !== "review" || !reviewedOrderIds.has(order.id) || filter === "all";
+      return order.status !== "review" || !reviews[order.id] || filter === "all";
     }),
-    [filter, reviewedOrderIds],
+    [filter, reviews],
   );
 
   function countForFilter(nextFilter: OrderFilter) {
     if (nextFilter === "all") return demoOrders.length;
-    return demoOrders.filter((order) => order.status === nextFilter && !reviewedOrderIds.has(order.id)).length;
+    return demoOrders.filter((order) => order.status === nextFilter && !reviews[order.id]).length;
   }
 
   function handleOrderAction(order: CustomerOrder) {
@@ -49,7 +49,7 @@ export default function OrdersScreen() {
   }
 
   function submitReview(review: OrderReview) {
-    setReviewedOrderIds((current) => new Set(current).add(review.orderId));
+    setReviews((current) => ({ ...current, [review.orderId]: review }));
     setReviewOrder(null);
     Toast.show({
       type: "success",
@@ -108,7 +108,7 @@ export default function OrdersScreen() {
         renderItem={({ item }) => (
           <OrderCard
             order={item}
-            reviewed={reviewedOrderIds.has(item.id)}
+            review={reviews[item.id]}
             onAction={handleOrderAction}
           />
         )}

@@ -3,6 +3,7 @@ import { useColorScheme } from "nativewind";
 export type AppColors = {
   primary: string;
   onPrimary: string;
+  onPrimaryContainer: string;
   secondary: string;
   onSecondary: string;
   ink: string;
@@ -16,6 +17,8 @@ export type AppColors = {
   surface: string;
   surfaceContainer: string;
   surfaceRaised: string;
+  logoStart: string;
+  logoEnd: string;
   photoScrim: string;
   onPhoto: string;
   isDark: boolean;
@@ -29,6 +32,7 @@ export function useAppColors(): AppColors {
   return {
     primary: isDark ? "#38C172" : "#006B35",
     onPrimary: isDark ? "#121614" : "#FFFFFF",
+    onPrimaryContainer: isDark ? "#121614" : "#006B35",
     secondary: "#58A500",
     onSecondary: isDark ? "#121614" : "#FFFFFF",
     ink: isDark ? "#F0FDF4" : "#000000",
@@ -42,6 +46,8 @@ export function useAppColors(): AppColors {
     surface: isDark ? "#1A201C" : "#FFFFFF",
     surfaceContainer: isDark ? "#242C26" : "#EBF6E9",
     surfaceRaised: isDark ? "#242C26" : "#F9FAF7",
+    logoStart: "#055597",
+    logoEnd: "#75C614",
     photoScrim: "#121614",
     onPhoto: "#FFFFFF",
     isDark,

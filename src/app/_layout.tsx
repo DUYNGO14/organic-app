@@ -12,6 +12,8 @@ import "../../global.css";
 void SplashScreen.preventAutoHideAsync();
 SplashScreen.setOptions({ fade: false, duration: 0 });
 
+const shouldShowStartupSplash = __DEV__;
+
 export default function RootLayout() {
   const pathname = usePathname();
   const hydrateAuth = useAuthStore((state) => state.hydrate);
@@ -53,13 +55,20 @@ export default function RootLayout() {
   useEffect(() => {
     if (
       startupComplete ||
-      !splashComplete ||
       !fontsReady ||
       isLoading ||
       !isThemeHydrated ||
       pathname === "/"
     )
       return;
+
+    if (!shouldShowStartupSplash) {
+      handOffSplash();
+      setStartupComplete(true);
+      return;
+    }
+
+    if (!splashComplete) return;
     const frame = requestAnimationFrame(() => setStartupComplete(true));
     return () => cancelAnimationFrame(frame);
   }, [
@@ -84,7 +93,7 @@ export default function RootLayout() {
       <AppProviders>
         {fontsReady && !isLoading ? <AuthNavigator /> : null}
       </AppProviders>
-      {!startupComplete ? (
+      {shouldShowStartupSplash && !startupComplete ? (
         <StartupSplash
           fontsReady={fontsReady}
           onReady={handOffSplash}

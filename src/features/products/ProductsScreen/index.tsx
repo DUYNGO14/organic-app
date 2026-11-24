@@ -176,7 +176,10 @@ export default function ProductsScreen({ initialSearch }: { initialSearch: strin
             <Pressable
               accessibilityRole="button"
               className="h-12 flex-row items-center gap-1.5 rounded-xl border border-border bg-surface-container-lowest px-2.5"
-              onPress={() => setSortSheetVisible(true)}
+              onPress={() => {
+                Keyboard.dismiss();
+                setSortSheetVisible(true);
+              }}
             >
               <ArrowDownUp color={colors.muted} size={17} />
               <Text className="font-vietnam text-label-md text-ink">
@@ -193,7 +196,10 @@ export default function ProductsScreen({ initialSearch }: { initialSearch: strin
               size="lg"
               variant="outlined"
               className="rounded-xl border-border bg-surface-container-lowest"
-              onPress={() => setFilterSheetVisible(true)}
+              onPress={() => {
+                Keyboard.dismiss();
+                setFilterSheetVisible(true);
+              }}
               icon={<SlidersHorizontal color={colors.primary} size={20} />}
             />
           </View>
@@ -259,10 +265,7 @@ export default function ProductsScreen({ initialSearch }: { initialSearch: strin
 
       <ProductSortSheet
         onClose={() => setSortSheetVisible(false)}
-        onSelect={(nextSort) => {
-          setSort(nextSort);
-          setSortSheetVisible(false);
-        }}
+        onSelect={setSort}
         selected={sort}
         visible={sortSheetVisible}
       />

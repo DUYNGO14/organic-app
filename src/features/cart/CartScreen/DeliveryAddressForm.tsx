@@ -36,7 +36,7 @@ import {
 } from "react-native";
 import { NativeViewGestureHandler } from "react-native-gesture-handler";
 import { z } from "zod";
-import { CartSheetFooter } from "./CartBottomSheet";
+import { SheetFooter } from "@/components/common/BottomSheet";
 import { AddressDivisionPicker, divisionLabels } from "./AddressDivisionPicker";
 
 const addressSchema = z.object({
@@ -508,7 +508,7 @@ export function DeliveryAddressForm({
           </AddressFormSection>
         </View>
       </BottomSheetScrollView>
-      <CartSheetFooter>
+      <SheetFooter guardGesture>
         {firstError ? (
           <Text
             accessibilityRole="alert"
@@ -526,7 +526,7 @@ export function DeliveryAddressForm({
             if (!locationRequest.current) void submit();
           }}
         />
-      </CartSheetFooter>
+      </SheetFooter>
       {pickerLevel ? (
         <AddressDivisionPicker
           level={pickerLevel}

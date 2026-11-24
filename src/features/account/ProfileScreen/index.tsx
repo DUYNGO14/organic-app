@@ -362,7 +362,7 @@ function SettingsSection({ onSignOut }: { onSignOut: () => void }) {
       />
 
       <Text className="pb-2 text-center font-vietnam text-label-sm text-muted">
-        Organic Việt Nam v{appVersion} · Vì nông nghiệp tử tế
+        ADIGO v{appVersion} · Vì nông nghiệp tử tế
       </Text>
     </View>
   );

@@ -1,6 +1,11 @@
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { StackHeader } from "@/components/layout";
-import { selectCartQuantity, useCartStore } from "@/features/cart/cart.store";
+import {
+  selectCartQuantity,
+  useCartStore,
+  type CartLine,
+} from "@/features/cart/cart.store";
+import { CheckoutBottomSheet } from "@/features/cart/CartScreen/CheckoutBottomSheet";
 import { catalogProducts } from "@/features/products/catalog.data";
 import { getProductDetailSpec } from "@/features/products/product-detail.data";
 import {
@@ -35,6 +40,7 @@ export default function ProductDetailScreen() {
   const [imageIndex, setImageIndex] = useState(0);
   const [packageIndex, setPackageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [buyNowOpen, setBuyNowOpen] = useState(false);
 
   if (!product || !spec) {
     return (
@@ -52,6 +58,13 @@ export default function ProductDetailScreen() {
   }
 
   const selectedPackage = spec.packages[packageIndex] ?? spec.packages[0];
+  const checkoutLine: CartLine = {
+    id: product.id,
+    product,
+    pack: selectedPackage,
+    quantity,
+    selected: true,
+  };
   const discount = selectedPackage.oldPrice
     ? Math.round((1 - selectedPackage.price / selectedPackage.oldPrice) * 100)
     : product.oldPrice
@@ -59,86 +72,107 @@ export default function ProductDetailScreen() {
       : 0;
 
   return (
-    <View className="flex-1 bg-canvas">
-      <StackHeader
-        title="Chi tiết sản phẩm"
-        rightAction={
-          <View className="flex-row items-center gap-0.5">
-            <IconButton
-              icon={<Share2 color={colors.ink} size={20} />}
-              label="Chia sẻ sản phẩm"
-              size="sm"
-              onPress={() =>
-                void Share.share({
-                  message: `${product.name} – ${formatPrice(selectedPackage.price)}`,
-                })
-              }
-            />
-            <View className="relative">
-              <IconButton
-                icon={<ShoppingBag color={colors.ink} size={20} />}
-                label={cartItemsCount ? `Giỏ hàng, ${cartItemsCount} sản phẩm` : "Giỏ hàng"}
-                size="sm"
-                onPress={() => router.push("/cart")}
-              />
-              {cartItemsCount > 0 ? <View
-                pointerEvents="none"
-                className="absolute -right-0.5 -top-0.5 h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1"
-              >
-                <Text className="font-vietnam text-label-sm font-bold text-on-primary">
-                  {cartItemsCount > 99 ? "99+" : cartItemsCount}
-                </Text>
-              </View> : null}
-            </View>
-          </View>
-        }
-      />
-
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingTop: 12,
-          paddingBottom: 24,
-          gap: 14,
-        }}
-        showsVerticalScrollIndicator={false}
+    <>
+      <View
+        className="flex-1 bg-canvas"
+        accessibilityElementsHidden={buyNowOpen}
+        importantForAccessibility={buyNowOpen ? "no-hide-descendants" : "auto"}
       >
-        <ProductGallery
-          product={product}
-          spec={spec}
-          imageIndex={imageIndex}
-          onImageSelect={setImageIndex}
-          colors={colors}
+        <StackHeader
+          title="Chi tiết sản phẩm"
+          rightAction={
+            <View className="flex-row items-center gap-0.5">
+              <IconButton
+                icon={<Share2 color={colors.ink} size={20} />}
+                label="Chia sẻ sản phẩm"
+                size="sm"
+                onPress={() =>
+                  void Share.share({
+                    message: `${product.name} – ${formatPrice(selectedPackage.price)}`,
+                  })
+                }
+              />
+              <View className="relative">
+                <IconButton
+                  icon={<ShoppingBag color={colors.ink} size={20} />}
+                  label={
+                    cartItemsCount
+                      ? `Giỏ hàng, ${cartItemsCount} sản phẩm`
+                      : "Giỏ hàng"
+                  }
+                  size="sm"
+                  onPress={() => router.push("/cart")}
+                />
+                {cartItemsCount > 0 ? (
+                  <View
+                    pointerEvents="none"
+                    className="absolute -right-0.5 -top-0.5 h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1"
+                  >
+                    <Text className="font-vietnam text-label-sm font-bold text-on-primary">
+                      {cartItemsCount > 99 ? "99+" : cartItemsCount}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          }
         />
-        <ProductInfoCard
+
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingTop: 12,
+            paddingBottom: 24,
+            gap: 14,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          <ProductGallery
+            product={product}
+            spec={spec}
+            imageIndex={imageIndex}
+            onImageSelect={setImageIndex}
+            colors={colors}
+          />
+          <ProductInfoCard
+            product={product}
+            selectedPackage={selectedPackage}
+            packageIndex={packageIndex}
+            discount={discount}
+            colors={colors}
+          />
+          <ProductPackageSelector
+            spec={spec}
+            packageIndex={packageIndex}
+            onPackageChange={setPackageIndex}
+            quantity={quantity}
+            onQuantityChange={setQuantity}
+            colors={colors}
+          />
+          <ProductCommitmentsCard colors={colors} />
+          <ProductTraceabilityCard spec={spec} colors={colors} />
+
+          <ProductNutritionCard spec={spec} colors={colors} />
+          <ProductOriginCard spec={spec} colors={colors} />
+          <ProductReviewsCard product={product} colors={colors} />
+        </ScrollView>
+
+        <ProductPurchaseBar
           product={product}
           selectedPackage={selectedPackage}
-          packageIndex={packageIndex}
-          discount={discount}
-          colors={colors}
-        />
-        <ProductCommitmentsCard colors={colors} />
-        <ProductTraceabilityCard spec={spec} colors={colors} />
-        <ProductPackageSelector
-          spec={spec}
-          packageIndex={packageIndex}
-          onPackageChange={setPackageIndex}
           quantity={quantity}
-          onQuantityChange={setQuantity}
           colors={colors}
+          onBuyNow={() => setBuyNowOpen(true)}
         />
-        <ProductNutritionCard spec={spec} colors={colors} />
-        <ProductOriginCard spec={spec} colors={colors} />
-        <ProductReviewsCard product={product} colors={colors} />
-      </ScrollView>
-
-      <ProductPurchaseBar
-        product={product}
-        selectedPackage={selectedPackage}
-        quantity={quantity}
-        colors={colors}
-      />
-    </View>
+      </View>
+      {buyNowOpen ? (
+        <CheckoutBottomSheet
+          lines={[checkoutLine]}
+          onClose={() => setBuyNowOpen(false)}
+          onQuantityChange={(_, nextQuantity) => setQuantity(nextQuantity)}
+        />
+      ) : null}
+    </>
   );
 }

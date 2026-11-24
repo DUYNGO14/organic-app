@@ -1,16 +1,17 @@
 import { PrimaryBtn } from "@/components/common";
+import { SheetTextInput } from "@/components/common/Input/SheetTextInput";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { useAppColors } from "@/hooks/use-app-colors";
-import { BottomSheetScrollView, BottomSheetTextInput } from "@gorhom/bottom-sheet";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { FilePenLine, Send } from "lucide-react-native";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
-import { CartBottomSheet, CartSheetFooter } from "../cart/CartScreen/CartBottomSheet";
+import { AppSheet, SheetFooter, type AppSheetHandle } from "@/components/common/BottomSheet";
 import { createPrivacyRequest } from "./legal.service";
 import type { PrivacyRequestKind } from "./legal.types";
 
-const requestKinds: ReadonlyArray<{ id: PrivacyRequestKind; label: string }> = [
+const requestKinds: readonly { id: PrivacyRequestKind; label: string }[] = [
   { id: "access", label: "Truy cập dữ liệu" },
   { id: "correct", label: "Chỉnh sửa" },
   { id: "delete", label: "Xoá dữ liệu" },
@@ -18,6 +19,7 @@ const requestKinds: ReadonlyArray<{ id: PrivacyRequestKind; label: string }> = [
 ];
 
 export function PrivacyRequestSheet({ onClose }: { onClose: () => void }) {
+  const sheet = useRef<AppSheetHandle>(null);
   const colors = useAppColors();
   const phone = useAuthStore((state) => state.session?.phone);
   const [kind, setKind] = useState<PrivacyRequestKind>("access");
@@ -33,7 +35,7 @@ export function PrivacyRequestSheet({ onClose }: { onClose: () => void }) {
     try {
       await createPrivacyRequest(phone, kind, note);
       Toast.show({ type: "success", text1: "Đã ghi nhận yêu cầu", text2: "Yêu cầu đang chờ đội ngũ pháp lý xử lý." });
-      onClose();
+      sheet.current?.dismiss();
     } catch {
       Toast.show({ type: "error", text1: "Chưa thể gửi yêu cầu", text2: "Vui lòng thử lại sau." });
     } finally {
@@ -42,11 +44,15 @@ export function PrivacyRequestSheet({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <CartBottomSheet
-      icon={<FilePenLine color={colors.primary} size={20} />}
-      title="Yêu cầu về dữ liệu cá nhân"
-      subtitle="Bản ghi hiện được lưu trên thiết bị cho đến khi hệ thống hỗ trợ được kết nối."
-      onClose={onClose}
+    <AppSheet
+      ref={sheet}
+      mode="inline"
+      header={{
+        icon: <FilePenLine color={colors.primary} size={20} />,
+        title: "Yêu cầu về dữ liệu cá nhân",
+        subtitle: "Bản ghi hiện được lưu trên thiết bị cho đến khi hệ thống hỗ trợ được kết nối.",
+      }}
+      onDismiss={onClose}
     >
       <BottomSheetScrollView contentContainerStyle={{ padding: 16, gap: 16 }} keyboardShouldPersistTaps="handled">
         <View>
@@ -70,7 +76,7 @@ export function PrivacyRequestSheet({ onClose }: { onClose: () => void }) {
         </View>
         <View>
           <Text className="mb-2 font-vietnam text-label-md text-ink">Thông tin bổ sung</Text>
-          <BottomSheetTextInput
+          <SheetTextInput
             accessibilityLabel="Thông tin bổ sung cho yêu cầu dữ liệu"
             className="min-h-28 rounded-lg border border-border bg-surface px-3 py-3 align-top font-vietnam text-body-md text-ink"
             multiline
@@ -84,9 +90,9 @@ export function PrivacyRequestSheet({ onClose }: { onClose: () => void }) {
           <Text className="mt-2 font-vietnam text-body-sm text-muted">Không gửi mật khẩu, mã OTP hoặc thông tin thanh toán trong biểu mẫu này.</Text>
         </View>
       </BottomSheetScrollView>
-      <CartSheetFooter>
+      <SheetFooter guardGesture>
         <PrimaryBtn fullWidth loading={submitting} title="Gửi yêu cầu" trailingIcon={<Send color={colors.onPrimary} size={18} />} onPress={() => void submit()} />
-      </CartSheetFooter>
-    </CartBottomSheet>
+      </SheetFooter>
+    </AppSheet>
   );
 }

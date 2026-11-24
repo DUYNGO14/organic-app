@@ -10,11 +10,11 @@ const documents: Record<LegalDocumentId, LegalDocument> = {
     id: "terms",
     title: "Điều khoản sử dụng",
     shortTitle: "Điều khoản sử dụng",
-    description: "Quy tắc sử dụng ứng dụng Organic Việt Nam.",
+    description: "Quy tắc sử dụng ứng dụng ADIGO.",
     version: "0.1 (dự thảo)",
     effectiveDate: "Chưa công bố",
     sections: [
-      { heading: "1. Phạm vi áp dụng", paragraphs: ["Điều khoản này điều chỉnh việc truy cập và sử dụng ứng dụng Organic Việt Nam do [tên pháp nhân ADIGO] vận hành. Khi sử dụng ứng dụng, người dùng xác nhận đã đọc và đồng ý với phiên bản điều khoản đang được áp dụng."] },
+      { heading: "1. Phạm vi áp dụng", paragraphs: ["Điều khoản này điều chỉnh việc truy cập và sử dụng ứng dụng ADIGO do [tên pháp nhân ADIGO] vận hành. Khi sử dụng ứng dụng, người dùng xác nhận đã đọc và đồng ý với phiên bản điều khoản đang được áp dụng."] },
       { heading: "2. Tài khoản và xác thực", bullets: ["Người dùng cung cấp số điện thoại chính xác và tự bảo vệ mã OTP, thiết bị đăng nhập.", "Không chia sẻ mã OTP, thông tin phiên đăng nhập hoặc sử dụng tài khoản của người khác khi chưa được phép.", "ADIGO có thể tạm ngưng truy cập để bảo vệ an toàn hệ thống hoặc xử lý hành vi vi phạm pháp luật, với thông báo phù hợp khi có thể."] },
       { heading: "3. Sử dụng hợp lệ", bullets: ["Không can thiệp, khai thác trái phép, phát tán mã độc hoặc làm gián đoạn dịch vụ.", "Không đăng tải đánh giá, nội dung hoặc thông tin xâm phạm quyền, danh dự hay quyền riêng tư của người khác.", "Người dùng chịu trách nhiệm về tính chính xác của địa chỉ nhận hàng, thông tin liên hệ và yêu cầu đặt hàng."] },
       { heading: "4. Thay đổi điều khoản", paragraphs: ["Khi có thay đổi quan trọng, ADIGO sẽ công bố phiên bản mới trong Trung tâm pháp lý và yêu cầu xác nhận lại khi cần thiết. Việc tiếp tục sử dụng sau ngày hiệu lực được hiểu theo nội dung thông báo kèm phiên bản đó."] },

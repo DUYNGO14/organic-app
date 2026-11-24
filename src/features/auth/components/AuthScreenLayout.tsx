@@ -93,20 +93,20 @@ export function AuthScreenLayout({
                   />
                 ) : null}
 
-                <View className="h-24 w-24 items-center justify-center rounded-full border border-on-photo/40 bg-surface/75">
-                  <View className="h-[72px] w-[72px] items-center justify-center rounded-full border border-card-border bg-on-photo">
+                <View className="h-28 w-28 items-center justify-center rounded-full border border-on-photo/40 bg-surface/75">
+                  <View className="h-[88px] w-[88px] items-center justify-center rounded-full border border-card-border bg-on-photo">
                     <Image
-                      source={require("@/assets/images/logo.png")}
+                      source={require("@/assets/images/adigo-logo.png")}
                       contentFit="contain"
                       style={styles.logo}
                     />
                   </View>
-                  <View className="absolute bottom-1 right-1 h-6 w-6 items-center justify-center rounded-full border border-on-photo/40 bg-primary">
-                    <Leaf color={colors.onPrimary} size={13} />
+                  <View className="absolute bottom-1 right-1 h-7 w-7 items-center justify-center rounded-full border border-on-photo/40 bg-primary">
+                    <Leaf color={colors.onPrimary} size={14} />
                   </View>
                 </View>
                 <Text className="text-center font-vietnam text-headline-sm text-primary">
-                  ORGANIC VIỆT NAM
+                  ADIGO
                 </Text>
               </View>
 
@@ -180,6 +180,6 @@ export function AuthSubmitButton(props: PrimaryBtnProps) {
 }
 
 const styles = StyleSheet.create({
-  logo: { width: "80%", height: "80%" },
+  logo: { width: "86%", height: "86%" },
   scrollContent: { flexGrow: 1 },
 });

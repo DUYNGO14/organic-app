@@ -1,14 +1,15 @@
 import { Checkbox, PrimaryBtn } from "@/components/common";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { acceptLegalDocuments } from "@/features/legal/legal.service";
-import { getCartTotals, useCartStore, type CartLine, type DeliveryAddress } from "@/features/cart/cart.store";
+import { getCartTotals, selectDeliveryAddress, useCartStore, type CartLine } from "@/features/cart/cart.store";
 import { useBottomSheetScrollableCreator } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { useState } from "react";
 import { Pressable, Text, View, type ScrollViewProps } from "react-native";
 import { router } from "expo-router";
 import Toast from "react-native-toast-message";
-import { CartBottomSheet, CartSheetFooter } from "./CartBottomSheet";
+import { AddressBookBottomSheet } from "./AddressBookBottomSheet";
+import { AppSheet, SheetFooter } from "@/components/common/BottomSheet";
 import { CartItemCard } from "./CartItemCard";
 import { CartSummary } from "./CartSummary";
 import { DeliveryAddressCard } from "./DeliveryAddressCard";
@@ -16,30 +17,22 @@ import { PaymentMethodPicker } from "./PaymentMethodPicker";
 import { VoucherPickerSheet } from "./VoucherPickerSheet";
 import { VoucherSection } from "./VoucherSection";
 
-function renderCheckoutItem({ item }: { item: CartLine }) {
-  return (
-    <View className="pb-3">
-      <CartItemCard line={item} variant="checkout" />
-    </View>
-  );
-}
-
 type CheckoutBottomSheetProps = {
-  address: DeliveryAddress | null;
   lines: CartLine[];
-  onEditAddress: () => void;
   onClose: () => void;
+  onQuantityChange?: (id: string, quantity: number) => void;
 };
 
 export function CheckoutBottomSheet({
-  address,
   lines,
-  onEditAddress,
   onClose,
+  onQuantityChange,
 }: CheckoutBottomSheetProps) {
   const [viewportHeight, setViewportHeight] = useState(0);
+  const [addressBookOpen, setAddressBookOpen] = useState(false);
   const [voucherPickerOpen, setVoucherPickerOpen] = useState(false);
   const renderScrollComponent = useBottomSheetScrollableCreator<ScrollViewProps>();
+  const address = useCartStore(selectDeliveryAddress);
   const appliedVouchers = useCartStore((state) => state.appliedVouchers);
   const phone = useAuthStore((state) => state.session?.phone);
   const totals = getCartTotals(lines, appliedVouchers);
@@ -47,7 +40,7 @@ export function CheckoutBottomSheet({
 
   async function handlePlaceOrder() {
     if (!address) {
-      onEditAddress();
+      setAddressBookOpen(true);
       return;
     }
 
@@ -65,12 +58,17 @@ export function CheckoutBottomSheet({
     });
   }
 
+  if (addressBookOpen) {
+    return <AddressBookBottomSheet onClose={() => setAddressBookOpen(false)} />;
+  }
+
   return (
     <>
-      <CartBottomSheet
-        title="Xem lại thanh toán"
+      <AppSheet
+        mode="inline"
+        header={{ title: "Xem lại thanh toán" }}
         enableContentPanningGesture={false}
-        onClose={onClose}
+        onDismiss={onClose}
       >
         <View
           style={{ flex: 1, minHeight: 0 }}
@@ -82,11 +80,26 @@ export function CheckoutBottomSheet({
               contentContainerStyle={{ padding: 16 }}
               data={lines}
               keyExtractor={(line) => line.id}
-              renderItem={renderCheckoutItem}
+              renderItem={({ item }) => (
+                <View className="pb-3">
+                  <CartItemCard
+                    line={item}
+                    variant="checkout"
+                    onQuantityChange={
+                      onQuantityChange
+                        ? (quantity) => onQuantityChange(item.id, quantity)
+                        : undefined
+                    }
+                  />
+                </View>
+              )}
               renderScrollComponent={renderScrollComponent}
               ListHeaderComponent={
                 <View className="pb-4">
-                  <DeliveryAddressCard address={address} onEdit={onEditAddress} />
+                  <DeliveryAddressCard
+                    address={address}
+                    onEdit={() => setAddressBookOpen(true)}
+                  />
                 </View>
               }
               ListFooterComponent={
@@ -112,15 +125,15 @@ export function CheckoutBottomSheet({
             />
           ) : null}
         </View>
-        <CartSheetFooter>
+        <SheetFooter guardGesture>
           <PrimaryBtn
             title="Đặt hàng"
             fullWidth
             disabled={lines.length === 0 || !hasAcceptedCheckoutTerms}
             onPress={() => void handlePlaceOrder()}
           />
-        </CartSheetFooter>
-      </CartBottomSheet>
+        </SheetFooter>
+      </AppSheet>
       {voucherPickerOpen ? <VoucherPickerSheet onClose={() => setVoucherPickerOpen(false)} /> : null}
     </>
   );

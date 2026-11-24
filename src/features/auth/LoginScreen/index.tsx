@@ -85,7 +85,7 @@ export default function LoginScreen() {
   return (
     <AuthScreenLayout
       title="Đăng nhập"
-      subtitle="Chào mừng bạn đến với Organic Việt Nam. Nhập số điện thoại để tiếp tục."
+      subtitle="Chào mừng bạn đến với ADIGO. Nhập số điện thoại để tiếp tục."
     >
       <Controller
         control={control}

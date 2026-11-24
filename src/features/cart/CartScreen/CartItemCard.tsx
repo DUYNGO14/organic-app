@@ -14,9 +14,10 @@ import { Text, View } from "react-native";
 type CartItemCardProps = {
   line: CartLine;
   variant?: "cart" | "checkout";
+  onQuantityChange?: (quantity: number) => void;
 };
 
-export function CartItemCard({ line, variant = "cart" }: CartItemCardProps) {
+export function CartItemCard({ line, variant = "cart", onQuantityChange }: CartItemCardProps) {
   const { id, pack, product, quantity, selected } = line;
   const colors = useAppColors();
   const setSelected = useCartStore((state) => state.setSelected);
@@ -78,7 +79,7 @@ export function CartItemCard({ line, variant = "cart" }: CartItemCardProps) {
           label={`Số lượng ${productLabel}`}
           value={quantity}
           min={1}
-          onValueChange={(value) => setQuantity(id, value)}
+          onValueChange={onQuantityChange ?? ((value) => setQuantity(id, value))}
         />
       </View>
     </View>

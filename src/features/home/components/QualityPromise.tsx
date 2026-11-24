@@ -32,7 +32,7 @@ export function QualityPromise() {
       <View className="mb-5 flex-row items-center gap-2">
         <Award color={colors.secondary} size={23} />
         <Text className="flex-1 font-vietnam text-title-sm text-primary">
-          Cam kết chất lượng Organic Việt Nam
+          Cam kết chất lượng ADIGO
         </Text>
       </View>
       <View className="flex-row justify-between gap-2">

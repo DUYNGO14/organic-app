@@ -1,6 +1,7 @@
 import type { HomeCategory } from "@/features/home/home.data";
 import { useAppColors } from "@/hooks/use-app-colors";
-import { Pressable, Text, View } from "react-native";
+import { Image } from "expo-image";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { HomeSectionHeading } from "./HomeSectionHeading";
 
 type CategorySectionProps = {
@@ -17,38 +18,51 @@ export function CategorySection({
   const colors = useAppColors();
 
   return (
-    <View className="mt-7">
+    <View className="mt-6">
       <HomeSectionHeading
         actionLabel="Tất cả"
         onActionPress={onSeeAll}
-        title="Danh mục tuyển chọn"
+        title="Danh mục sản phẩm"
       />
-      <View className="flex-row flex-wrap justify-between gap-y-3 px-4">
-        {categories.map(({ id, title, subtitle, Icon }) => (
-          <Pressable
-            accessibilityRole="button"
-            className="w-[31.5%] items-center rounded-2xl border border-[#F0F4EC] bg-surface-container-lowest px-2 py-4 shadow-sm dark:border-[#00E676]/[0.12]"
-            key={id}
-            onPress={() => onCategoryPress?.({ id, title, subtitle, Icon })}
-          >
-            <View className="mb-2 h-12 w-12 items-center justify-center rounded-full bg-surface-container-low">
-              <Icon color={colors.primary} size={25} strokeWidth={1.9} />
-            </View>
-            <Text
-              className="w-full text-center font-vietnam text-label-md text-ink"
-              numberOfLines={1}
+      <ScrollView
+        horizontal
+        nestedScrollEnabled
+        showsHorizontalScrollIndicator={false}
+      >
+        <View className="flex-row gap-2 px-4">
+          {categories.map((category) => (
+            <Pressable
+              accessibilityLabel={`${category.title}, ${category.subtitle}`}
+              accessibilityRole="button"
+              className="min-h-12 flex-row items-center gap-2 rounded-full border border-card-border bg-surface py-1 pl-2 pr-3 active:bg-surface-container"
+              key={category.id}
+              onPress={() => onCategoryPress?.(category)}
             >
-              {title}
-            </Text>
-            <Text
-              className="mt-1 w-full text-center font-vietnam text-body-sm text-muted"
-              numberOfLines={1}
-            >
-              {subtitle}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+              <View className="h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-surface-container">
+                <category.Icon color={colors.primary} size={18} />
+                <Image
+                  cachePolicy="disk"
+                  contentFit="cover"
+                  source={category.image}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                  }}
+                />
+              </View>
+              <Text
+                className="font-vietnam text-label-md text-ink"
+                numberOfLines={1}
+              >
+                {category.title}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 }

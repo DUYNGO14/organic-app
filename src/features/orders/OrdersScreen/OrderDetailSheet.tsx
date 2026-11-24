@@ -1,13 +1,8 @@
-import { IconButton, PrimaryBtn } from "@/components/common";
+import { AppSheet } from "@/components/common/BottomSheet";
+import { PrimaryBtn } from "@/components/common";
 import { formatPrice } from "@/features/products/ProductDetailScreen/components/format-price";
 import { useAppColors } from "@/hooks/use-app-colors";
-import {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetScrollView,
-  type BottomSheetBackdropProps,
-  type BottomSheetBackgroundProps,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { AppleMaps, GoogleMaps } from "expo-maps";
@@ -21,24 +16,15 @@ import {
   ReceiptText,
   Truck,
   UserRound,
-  X,
 } from "lucide-react-native";
-import { useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
-import { BackHandler, Linking, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { useMemo, type ReactNode } from "react";
+import { Linking, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { NativeViewGestureHandler } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import type { CustomerOrder, DeliveryTracking, OrderStatus } from "./orders.data";
 
 const snapPoints = ["92%"];
-
-function DetailBackdrop(props: BottomSheetBackdropProps) {
-  return <BottomSheetBackdrop {...props} accessible={false} appearsOnIndex={0} disappearsOnIndex={-1} pressBehavior="close" />;
-}
-
-function DetailBackground({ style }: BottomSheetBackgroundProps) {
-  return <View pointerEvents="none" className="rounded-t-lg border border-card-border bg-surface" style={style} />;
-}
 
 function InfoRow({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
@@ -140,7 +126,7 @@ function OrderTimeline({ order }: { order: CustomerOrder }) {
           <View key={step} className="flex-row gap-3">
             <View className="items-center">
               <View className={`h-7 w-7 items-center justify-center rounded-full ${current ? "bg-primary" : "bg-primary-container"}`}>
-                {current ? <Clock3 color={colors.onPrimary} size={14} /> : <Check color={colors.primary} size={14} />}
+                {current ? <Clock3 color={colors.onPrimary} size={14} /> : <Check color={colors.onPrimaryContainer} size={14} />}
               </View>
               {index < steps.length - 1 ? <View className="h-8 w-px bg-border-strong" /> : null}
             </View>
@@ -153,132 +139,110 @@ function OrderTimeline({ order }: { order: CustomerOrder }) {
 }
 
 export function OrderDetailSheet({ order, onClose }: { order: CustomerOrder; onClose: () => void }) {
-  const sheet = useRef<BottomSheetModal>(null);
   const colors = useAppColors();
-  const { top, bottom } = useSafeAreaInsets();
+  const { bottom } = useSafeAreaInsets();
   const tracking = order.tracking;
-  const dismiss = useCallback(() => sheet.current?.dismiss(), []);
-
-  useEffect(() => {
-    sheet.current?.present();
-    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
-      dismiss();
-      return true;
-    });
-    return () => subscription.remove();
-  }, [dismiss]);
 
   return (
-    <BottomSheetModal
-      ref={sheet}
+    <AppSheet
+      header={{
+        title: tracking ? "Theo dõi đơn hàng" : "Chi tiết đơn hàng",
+        actionLabel: "Đóng chi tiết đơn hàng",
+        subtitle: `#${order.id} · ${order.statusLabel}`,
+        className: "gap-3",
+        icon: (
+          <View className="h-10 w-10 items-center justify-center rounded-full bg-primary-container">
+            {tracking ? <Navigation color={colors.onPrimaryContainer} size={20} /> : <ReceiptText color={colors.onPrimaryContainer} size={20} />}
+          </View>
+        ),
+      }}
       snapPoints={snapPoints}
-      topInset={top}
-      enableDynamicSizing={false}
       enableContentPanningGesture={false}
-      enablePanDownToClose
-      backdropComponent={DetailBackdrop}
-      backgroundComponent={DetailBackground}
-      handleIndicatorStyle={{ backgroundColor: colors.muted }}
       onDismiss={onClose}
     >
-      <View className="flex-1" accessibilityViewIsModal onAccessibilityEscape={dismiss}>
-        <View className="min-h-12 flex-row items-center gap-3 border-b border-border px-4 pb-2">
-          <View className="h-10 w-10 items-center justify-center rounded-full bg-primary-container">
-            {tracking ? <Navigation color={colors.primary} size={20} /> : <ReceiptText color={colors.primary} size={20} />}
-          </View>
-          <View className="min-w-0 flex-1">
-            <Text accessibilityRole="header" className="font-vietnam text-title-md text-ink">
-              {tracking ? "Theo dõi đơn hàng" : "Chi tiết đơn hàng"}
-            </Text>
-            <Text className="font-vietnam text-body-sm text-muted">#{order.id} · {order.statusLabel}</Text>
-          </View>
-          <IconButton icon={<X color={colors.ink} size={21} />} label="Đóng chi tiết đơn hàng" size="lg" onPress={dismiss} />
-        </View>
-
-        <BottomSheetScrollView contentContainerStyle={{ padding: 16, paddingBottom: bottom + 24 }} showsVerticalScrollIndicator={false}>
-          <View className="gap-5">
-            {tracking ? (
-              <>
-                <View className="flex-row items-center justify-between gap-3 rounded-lg bg-primary-container p-4">
-                  <View className="min-w-0 flex-1">
-                    <Text className="font-vietnam text-label-sm text-muted">Dự kiến giao tới</Text>
-                    <Text className="font-vietnam text-title-md text-primary">{tracking.eta}</Text>
-                    <Text className="font-vietnam text-body-sm text-muted">Còn {tracking.distance}</Text>
-                  </View>
-                  <View className="h-12 w-12 items-center justify-center rounded-full bg-primary">
-                    <Truck color={colors.onPrimary} size={23} />
-                  </View>
+      <BottomSheetScrollView contentContainerStyle={{ padding: 16, paddingBottom: bottom + 24 }} showsVerticalScrollIndicator={false}>
+        <View className="gap-5">
+          {tracking ? (
+            <>
+              <View className="flex-row items-center justify-between gap-3 rounded-lg bg-primary-container p-4">
+                <View className="min-w-0 flex-1">
+                  <Text className="font-vietnam text-label-sm text-on-primary-container">Dự kiến giao tới</Text>
+                  <Text className="font-vietnam text-title-md text-on-primary-container">{tracking.eta}</Text>
+                  <Text className="font-vietnam text-body-sm text-on-primary-container">Còn {tracking.distance}</Text>
                 </View>
-
-                <TrackingMap tracking={tracking} />
-
-                <View className="gap-3 rounded-lg border border-card-border bg-surface p-4">
-                  <View className="flex-row items-center gap-3">
-                    <View className="h-12 w-12 items-center justify-center rounded-full bg-surface-container">
-                      <UserRound color={colors.primary} size={23} />
-                    </View>
-                    <View className="min-w-0 flex-1">
-                      <Text className="font-vietnam text-body-emphasis text-ink">{tracking.courierName}</Text>
-                      <Text className="font-vietnam text-body-sm text-muted">{tracking.vehicle}</Text>
-                    </View>
-                  </View>
-                  <View className="flex-row gap-2">
-                    <PrimaryBtn
-                      title="Gọi tài xế"
-                      variant="secondary"
-                      className="flex-1"
-                      leadingIcon={<Phone color={colors.primary} size={17} />}
-                      onPress={() => Linking.openURL(`tel:${tracking.courierPhone.replace(/\s/g, "")}`)}
-                    />
-                    <Pressable
-                      accessibilityRole="button"
-                      className="min-h-12 flex-1 flex-row items-center justify-center gap-2 rounded border border-border bg-surface-soft px-3 active:bg-surface-container"
-                      onPress={() => Toast.show({ type: "info", text1: "Nhắn tin với tài xế", text2: "Kênh trò chuyện sẽ được kết nối khi có backend vận chuyển." })}
-                    >
-                      <MessageCircle color={colors.primary} size={17} />
-                      <Text className="font-vietnam text-label-md text-primary">Nhắn tin</Text>
-                    </Pressable>
-                  </View>
+                <View className="h-12 w-12 items-center justify-center rounded-full bg-primary">
+                  <Truck color={colors.onPrimary} size={23} />
                 </View>
-
-                <View className="gap-3 rounded-lg bg-surface-soft p-4">
-                  <InfoRow icon={<Navigation color={colors.primary} size={17} />} label="Vị trí hiện tại" value={tracking.currentLocation} />
-                  <InfoRow icon={<MapPin color={colors.primary} size={17} />} label="Giao đến" value={tracking.destination} />
-                </View>
-              </>
-            ) : null}
-
-            <View className="gap-2">
-              <Text className="font-vietnam text-body-emphasis text-ink">Tiến trình đơn hàng</Text>
-              <OrderTimeline order={order} />
-            </View>
-
-            <View className="gap-3">
-              <Text className="font-vietnam text-body-emphasis text-ink">Sản phẩm</Text>
-              {order.items.map(({ product, quantity }) => (
-                <View key={product.id} className="flex-row items-center gap-3 rounded-md bg-surface-soft p-3">
-                  <View className="h-14 w-14 overflow-hidden rounded bg-surface-container">
-                    <Image source={product.image} contentFit="cover" style={StyleSheet.absoluteFill} />
-                  </View>
-                  <View className="min-w-0 flex-1">
-                    <Text numberOfLines={2} className="font-vietnam text-body-emphasis text-ink">{product.name}</Text>
-                    <Text className="font-vietnam text-body-sm text-muted">x{quantity} · {formatPrice(product.price * quantity)}</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
-
-            <View className="gap-3 rounded-lg border border-card-border bg-surface p-4">
-              <InfoRow icon={<MapPin color={colors.primary} size={17} />} label="Địa chỉ nhận hàng" value={order.shippingAddress} />
-              <InfoRow icon={<ReceiptText color={colors.primary} size={17} />} label="Thanh toán" value={order.paymentMethod} />
-              <View className="flex-row items-center justify-between border-t border-border pt-3">
-                <Text className="font-vietnam text-label-md text-muted">Thành tiền</Text>
-                <Text style={{ fontVariant: ["tabular-nums"] }} className="font-vietnam text-title-md text-primary">{formatPrice(order.total)}</Text>
               </View>
+
+              <TrackingMap tracking={tracking} />
+
+              <View className="gap-3 rounded-lg border border-card-border bg-surface p-4">
+                <View className="flex-row items-center gap-3">
+                  <View className="h-12 w-12 items-center justify-center rounded-full bg-surface-container">
+                    <UserRound color={colors.primary} size={23} />
+                  </View>
+                  <View className="min-w-0 flex-1">
+                    <Text className="font-vietnam text-body-emphasis text-ink">{tracking.courierName}</Text>
+                    <Text className="font-vietnam text-body-sm text-muted">{tracking.vehicle}</Text>
+                  </View>
+                </View>
+                <View className="flex-row gap-2">
+                  <PrimaryBtn
+                    title="Gọi tài xế"
+                    variant="secondary"
+                    className="flex-1"
+                    leadingIcon={<Phone color={colors.primary} size={17} />}
+                    onPress={() => Linking.openURL(`tel:${tracking.courierPhone.replace(/\s/g, "")}`)}
+                  />
+                  <Pressable
+                    accessibilityRole="button"
+                    className="min-h-12 flex-1 flex-row items-center justify-center gap-2 rounded border border-border bg-surface-soft px-3 active:bg-surface-container"
+                    onPress={() => Toast.show({ type: "info", text1: "Nhắn tin với tài xế", text2: "Kênh trò chuyện sẽ được kết nối khi có backend vận chuyển." })}
+                  >
+                    <MessageCircle color={colors.primary} size={17} />
+                    <Text className="font-vietnam text-label-md text-primary">Nhắn tin</Text>
+                  </Pressable>
+                </View>
+              </View>
+
+              <View className="gap-3 rounded-lg bg-surface-soft p-4">
+                <InfoRow icon={<Navigation color={colors.onPrimaryContainer} size={17} />} label="Vị trí hiện tại" value={tracking.currentLocation} />
+                <InfoRow icon={<MapPin color={colors.onPrimaryContainer} size={17} />} label="Giao đến" value={tracking.destination} />
+              </View>
+            </>
+          ) : null}
+
+          <View className="gap-2">
+            <Text className="font-vietnam text-body-emphasis text-ink">Tiến trình đơn hàng</Text>
+            <OrderTimeline order={order} />
+          </View>
+
+          <View className="gap-3">
+            <Text className="font-vietnam text-body-emphasis text-ink">Sản phẩm</Text>
+            {order.items.map(({ product, quantity }) => (
+              <View key={product.id} className="flex-row items-center gap-3 rounded-md bg-surface-soft p-3">
+                <View className="h-14 w-14 overflow-hidden rounded bg-surface-container">
+                  <Image source={product.image} contentFit="cover" style={StyleSheet.absoluteFill} />
+                </View>
+                <View className="min-w-0 flex-1">
+                  <Text numberOfLines={2} className="font-vietnam text-body-emphasis text-ink">{product.name}</Text>
+                  <Text className="font-vietnam text-body-sm text-muted">x{quantity} · {formatPrice(product.price * quantity)}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+
+          <View className="gap-3 rounded-lg border border-card-border bg-surface p-4">
+            <InfoRow icon={<MapPin color={colors.onPrimaryContainer} size={17} />} label="Địa chỉ nhận hàng" value={order.shippingAddress} />
+            <InfoRow icon={<ReceiptText color={colors.onPrimaryContainer} size={17} />} label="Thanh toán" value={order.paymentMethod} />
+            <View className="flex-row items-center justify-between border-t border-border pt-3">
+              <Text className="font-vietnam text-label-md text-muted">Thành tiền</Text>
+              <Text style={{ fontVariant: ["tabular-nums"] }} className="font-vietnam text-title-md text-primary">{formatPrice(order.total)}</Text>
             </View>
           </View>
-        </BottomSheetScrollView>
-      </View>
-    </BottomSheetModal>
+        </View>
+      </BottomSheetScrollView>
+    </AppSheet>
   );
 }
