@@ -103,7 +103,7 @@ export function MainHeader({
             size="sm"
           />
           {unreadNotificationsCount > 0 ? (
-            <View className="absolute right-2 top-2 h-2 w-2 rounded-full border border-surface bg-danger" />
+            <View pointerEvents="none" className="absolute right-2 top-2 h-2 w-2 rounded-full border border-surface bg-danger" />
           ) : null}
         </View>
 
