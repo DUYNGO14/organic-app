@@ -50,13 +50,13 @@ export function MainHeader({
     <View className="min-h-[76px] flex-row items-center justify-between gap-2 rounded-b-lg border-b border-border bg-surface px-3 py-2">
       <View className="min-w-0 flex-1 flex-row items-center gap-2.5">
         <View
-          accessibilityLabel="Organic Việt Nam"
+          accessibilityLabel="ADIGO"
           className="h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary-container/50 dark:bg-primary/20"
         >
           <Image
-            accessibilityLabel="Organic Việt Nam"
+            accessibilityLabel="ADIGO"
             className="h-full w-full"
-            source={require("@/assets/images/logo.png")}
+            source={require("@/assets/images/adigo-logo.png")}
           />
         </View>
 

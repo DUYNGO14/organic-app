@@ -22,7 +22,7 @@ import {
 import { useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
 import { NativeViewGestureHandler } from "react-native-gesture-handler";
-import { CartBottomSheet, CartSheetFooter } from "./CartBottomSheet";
+import { AppSheet, SheetFooter } from "@/components/common/BottomSheet";
 import { DeliveryAddressForm } from "./DeliveryAddressForm";
 
 type AddressEntryProps = {
@@ -175,27 +175,28 @@ export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <CartBottomSheet
-      title={
-        editor
+    <AppSheet
+      mode="inline"
+      header={{
+        title: editor
           ? editor.address
             ? "Sửa địa chỉ nhận hàng"
             : "Thêm địa chỉ nhận hàng mới"
-          : "Sổ địa chỉ giao hàng"
-      }
-      subtitle={editor ? undefined : `${addresses.length} địa chỉ đã lưu`}
+          : "Sổ địa chỉ giao hàng",
+        subtitle: editor ? undefined : `${addresses.length} địa chỉ đã lưu`,
+        icon: (
+          <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+            {editor ? (
+              <MapPinPlus color={colors.primary} size={21} />
+            ) : (
+              <MapPin color={colors.primary} size={21} />
+            )}
+          </View>
+        ),
+      }}
       enableContentPanningGesture={!editor}
-      icon={
-        <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-          {editor ? (
-            <MapPinPlus color={colors.primary} size={21} />
-          ) : (
-            <MapPin color={colors.primary} size={21} />
-          )}
-        </View>
-      }
       onBack={editor ? () => setEditor(null) : undefined}
-      onClose={onClose}
+      onDismiss={onClose}
     >
       {editor ? (
         <DeliveryAddressForm
@@ -253,7 +254,7 @@ export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
               </NativeViewGestureHandler>
             }
           />
-          <CartSheetFooter>
+          <SheetFooter guardGesture>
             <PrimaryBtn
               fullWidth
               title="Xác nhận địa chỉ giao hàng"
@@ -265,9 +266,9 @@ export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
                 onClose();
               }}
             />
-          </CartSheetFooter>
+          </SheetFooter>
         </>
       )}
-    </CartBottomSheet>
+    </AppSheet>
   );
 }

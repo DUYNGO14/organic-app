@@ -1,5 +1,11 @@
 # @gorhom/bottom-sheet — Hướng dẫn cho AI
 
+## Bottom sheet trong ứng dụng
+
+- Dùng `AppSheet` từ `@/components/common/BottomSheet`. Render component khi cần mở và cập nhật trạng thái màn hình trong `onDismiss`.
+- Mặc định dùng chế độ modal. Dùng `mode="inline"` cho sheet nằm trong màn hình. Truyền `snapPoints` nếu cần chiều cao cố định. Modal có thể tự đo chiều cao nội dung khi bỏ qua `snapPoints`.
+- Truyền `header` cho tiêu đề và nút đóng theo chuẩn. Dùng `SheetFooter` cho vùng nút cố định và `SheetTextInput` cho ô nhập. Giữ logic lưu dữ liệu trong tính năng và gọi `dismiss()` qua ref để đóng sau khi hoàn tất.
+
 > Nguồn: https://gorhom.dev/react-native-bottom-sheet/
 > Phiên bản mục tiêu: v5.x. Khi nghi ngờ, kiểm tra lại docs chính thức.
 

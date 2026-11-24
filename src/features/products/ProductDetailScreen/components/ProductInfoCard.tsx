@@ -14,27 +14,71 @@ type ProductInfoCardProps = {
   colors: AppColors;
 };
 
-export function ProductInfoCard({ product, selectedPackage, packageIndex, discount, colors }: ProductInfoCardProps) {
+export function ProductInfoCard({
+  product,
+  selectedPackage,
+  packageIndex,
+  discount,
+  colors,
+}: ProductInfoCardProps) {
   return (
     <DetailCard>
       <View className="mb-3 flex-row flex-wrap items-center gap-2">
         <View className="rounded-lg bg-secondary-container px-2.5 py-1">
-          <Text className="font-vietnam text-label-sm text-on-secondary-container">LOẠI 1 SIÊU TƯƠI</Text>
+          <Text className="font-vietnam text-label-sm text-on-secondary-container">
+            LOẠI 1 SIÊU TƯƠI
+          </Text>
         </View>
-        <View className="flex-row items-center gap-1"><BadgeCheck color={colors.primary} size={16} /><Text className="font-vietnam text-label-sm text-primary">Chính ngạch Organic</Text></View>
+        <View className="flex-row items-center gap-1">
+          <BadgeCheck color={colors.primary} size={16} />
+          <Text className="font-vietnam text-label-sm text-primary">
+            Chính ngạch Organic
+          </Text>
+        </View>
       </View>
       <Text className="font-vietnam text-headline-sm text-ink">
-        {product.id === "kale" ? "Cải Kale Thủy Canh Đà Lạt (Loại 1 Siêu Tươi)" : product.name}
+        {product.id === "kale"
+          ? "Cải Kale Thủy Canh Đà Lạt (Loại 1 Siêu Tươi)"
+          : product.name}
       </Text>
-      <View className="mt-3 flex-row flex-wrap items-baseline gap-x-2.5 gap-y-1">
-        <Text className="font-vietnam text-headline-lg-mobile text-primary">{formatPrice(selectedPackage.price)}</Text>
-        {selectedPackage.oldPrice ? <Text className="font-vietnam text-body-md text-muted line-through">{formatPrice(selectedPackage.oldPrice)}</Text> : product.oldPrice && packageIndex === 0 ? <Text className="font-vietnam text-body-md text-muted line-through">{formatPrice(product.oldPrice)}</Text> : null}
-        {discount > 0 ? <Text className="rounded bg-danger-container px-2 py-1 font-vietnam text-label-sm text-on-danger-container">-{discount}%</Text> : null}
+      <View className="mt-3 flex-row flex-wrap items-center gap-x-2.5 gap-y-1">
+        <Text className="font-vietnam text-headline-lg-mobile text-primary">
+          {formatPrice(selectedPackage.price)}
+        </Text>
+        {selectedPackage.oldPrice ? (
+          <Text className="font-vietnam text-body-md text-muted line-through">
+            {formatPrice(selectedPackage.oldPrice)}
+          </Text>
+        ) : product.oldPrice && packageIndex === 0 ? (
+          <Text className="font-vietnam text-body-md text-muted line-through">
+            {formatPrice(product.oldPrice)}
+          </Text>
+        ) : null}
+        {discount > 0 ? (
+          <Text className="rounded bg-danger-container px-2 py-1 font-vietnam text-label-sm text-on-danger-container">
+            -{discount}%
+          </Text>
+        ) : null}
       </View>
       <View className="mt-4 flex-row flex-wrap items-center justify-between gap-y-2 border-t border-border pt-3">
-        <View className="flex-row items-center gap-1"><Star color="#F59E0B" fill="#F59E0B" size={16} /><Text className="font-vietnam text-label-md text-ink">{product.rating ?? "4.9"}</Text><Text className="font-vietnam text-body-sm text-muted">({product.reviewCount ?? 156} đánh giá)</Text></View>
-        <Text className="font-vietnam text-label-md text-muted">Đã bán 1.2k+</Text>
-        <View className="flex-row items-center gap-1"><Package color={colors.secondary} size={15} /><Text className="font-vietnam text-label-sm text-secondary">{selectedPackage.label}</Text></View>
+        <View className="flex-row items-center gap-1">
+          <Star color="#F59E0B" fill="#F59E0B" size={16} />
+          <Text className="font-vietnam text-label-md text-ink">
+            {product.rating ?? "4.9"}
+          </Text>
+          <Text className="font-vietnam text-body-sm text-muted">
+            ({product.reviewCount ?? 156} đánh giá)
+          </Text>
+        </View>
+        <Text className="font-vietnam text-label-md text-muted">
+          Đã bán 1.2k+
+        </Text>
+        <View className="flex-row items-center gap-1">
+          <Package color={colors.secondary} size={15} />
+          <Text className="font-vietnam text-label-sm text-secondary">
+            {selectedPackage.label}
+          </Text>
+        </View>
       </View>
     </DetailCard>
   );

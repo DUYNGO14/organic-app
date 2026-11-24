@@ -24,6 +24,8 @@ module.exports = {
         "photo-scrim": "rgb(var(--color-photo-scrim) / <alpha-value>)",
         "on-photo": "rgb(var(--color-on-photo) / <alpha-value>)",
         luminous: "rgb(var(--color-luminous) / <alpha-value>)",
+        "logo-start": "rgb(var(--color-logo-start) / <alpha-value>)",
+        "logo-end": "rgb(var(--color-logo-end) / <alpha-value>)",
         warning: "rgb(var(--color-warning) / <alpha-value>)",
         "warning-container": "rgb(var(--color-warning-container) / <alpha-value>)",
         cold: "rgb(var(--color-cold) / <alpha-value>)",

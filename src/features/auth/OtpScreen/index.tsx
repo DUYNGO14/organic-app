@@ -1,8 +1,21 @@
-import { OTPInput, PrimaryBtn } from "@/components/common";
-import { StackHeader } from "@/components/layout";
-import { DEMO_OTP, verifyOtp } from "@/features/auth/auth.service";
+import { OTPInput } from "@/components/common";
+import {
+  DEMO_OTP,
+  getOtpExpiresAt,
+  OTP_EXPIRED_MESSAGE,
+  requestOtp,
+  verifyOtp,
+} from "@/features/auth/auth.service";
 import { useAuthStore } from "@/features/auth/auth.store";
+import {
+  AuthScreenLayout,
+  AuthSubmitButton,
+} from "@/features/auth/components/AuthScreenLayout";
+import { useAppColors } from "@/hooks/use-app-colors";
+import { useCountdown } from "@/hooks/use-countdown";
 import { router, useLocalSearchParams } from "expo-router";
+import { ArrowRight, Pencil, Phone } from "lucide-react-native";
+import { useState } from "react";
 import {
   Controller,
   useForm,
@@ -10,8 +23,7 @@ import {
   type ResolverResult,
   type ResolverSuccess,
 } from "react-hook-form";
-import { Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, Text, View } from "react-native";
 import { z } from "zod";
 
 const otpSchema = z.object({
@@ -19,6 +31,12 @@ const otpSchema = z.object({
 });
 
 type OtpFormValues = z.infer<typeof otpSchema>;
+
+function maskPhoneNumber(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length <= 6) return digits;
+  return `${digits.slice(0, 3)} *** ${digits.slice(-3)}`;
+}
 
 const otpResolver: Resolver<OtpFormValues> = async (
   values,
@@ -43,10 +61,14 @@ const otpResolver: Resolver<OtpFormValues> = async (
 };
 
 export default function OtpScreen() {
+  const { onPrimary, primary } = useAppColors();
   const { phone: phoneParam } = useLocalSearchParams<{ phone?: string }>();
   const phone = typeof phoneParam === "string" ? phoneParam : "";
+  const [expiresAt, setExpiresAt] = useState(() => getOtpExpiresAt(phone));
+  const { remainingSeconds, isExpired } = useCountdown(expiresAt);
+  const needsNewCode = expiresAt === null || isExpired;
   const signIn = useAuthStore((state) => state.signIn);
-  const { control, handleSubmit, setError, formState } = useForm<OtpFormValues>(
+  const { control, handleSubmit, reset, setError, formState } = useForm<OtpFormValues>(
     {
       defaultValues: { code: "" },
       mode: "onChange",
@@ -78,44 +100,109 @@ export default function OtpScreen() {
     }
   }
 
+  function editPhone() {
+    if (router.canGoBack()) router.back();
+    else router.replace("/(auth)/login");
+  }
+
+  function resendOtp() {
+    if (!phone) {
+      editPhone();
+      return;
+    }
+
+    reset({ code: "" });
+    setExpiresAt(requestOtp(phone));
+  }
+
   return (
-    <SafeAreaView className="flex-1 bg-canvas" edges={["top", "bottom"]}>
-      <StackHeader title="Xác minh mã OTP" />
-      <View className="flex-1 px-6 pt-10">
-        <Text className="font-vietnam text-headline-md text-ink">
-          Nhập mã xác thực
-        </Text>
-        <Text className="mt-3 font-vietnam text-body-md text-muted">
-          Mã xác thực được gửi đến số điện thoại +84 {phone}.
-        </Text>
-        <View className="mt-8">
-          <Controller
-            control={control}
-            name="code"
-            render={({ field, fieldState }) => (
-              <OTPInput
-                required
-                autoFocus
-                error={fieldState.error?.message}
-                label="Mã OTP 6 chữ số"
-                onChangeText={field.onChange}
-                value={field.value}
-              />
-            )}
-          />
-          <Text className="mt-3 font-vietnam text-body-sm text-muted">
-            Chế độ demo: dùng mã {DEMO_OTP}. Chưa gửi SMS thật.
+    <AuthScreenLayout
+      title="Nhập mã xác thực"
+      subtitle={phone ? "Mã OTP đã được gửi đến số điện thoại của bạn." : "Vui lòng nhập số điện thoại để nhận mã OTP."}
+    >
+      <View className="gap-3">
+        {phone ? (
+          <View className="min-h-12 flex-row items-center rounded-full border border-card-border bg-surface-container-low/90 pl-4">
+            <Phone color={primary} size={15} />
+            <Text className="ml-2 min-w-0 flex-1 font-vietnam text-label-md text-ink">
+              +84 {maskPhoneNumber(phone)}
+            </Text>
+            <Pressable
+              accessibilityLabel="Thay đổi số điện thoại"
+              accessibilityRole="button"
+              className="min-h-12 flex-row items-center gap-1 rounded-full px-3 active:bg-surface-container"
+              hitSlop={4}
+              onPress={editPhone}
+            >
+              <Text className="font-vietnam text-label-sm text-primary">Thay đổi</Text>
+              <Pencil color={primary} size={13} />
+            </Pressable>
+          </View>
+        ) : null}
+        <Controller
+          control={control}
+          name="code"
+          render={({ field, fieldState }) => (
+            <OTPInput
+              required
+              autoFocus={!needsNewCode}
+              disabled={needsNewCode || formState.isSubmitting}
+              variant="inset"
+              error={fieldState.error?.message}
+              label="Mã OTP 6 chữ số"
+              onChangeText={field.onChange}
+              value={field.value}
+            />
+          )}
+        />
+        {needsNewCode ? (
+          <Text
+            accessibilityLiveRegion="polite"
+            className="font-vietnam text-body-sm text-danger"
+          >
+            {phone
+              ? OTP_EXPIRED_MESSAGE
+              : "Vui lòng nhập số điện thoại để nhận mã OTP."}
           </Text>
-        </View>
-        <PrimaryBtn
-          className="mt-8 w-full"
-          disabled={!formState.isValid || !phone}
-          fullWidth
+        ) : remainingSeconds !== null ? (
+          <>
+            <Text className="font-vietnam text-body-sm text-muted">
+              Mã hết hạn sau{" "}
+              <Text
+                className="font-vietnam text-label-md text-primary"
+                style={{ fontVariant: ["tabular-nums"] }}
+              >
+                {String(Math.floor(remainingSeconds / 60)).padStart(2, "0")}:
+                {String(remainingSeconds % 60).padStart(2, "0")}
+              </Text>
+            </Text>
+            <View className="rounded-md border border-card-border bg-surface-container-low/90 px-3 py-2">
+              <Text className="font-vietnam text-body-sm text-muted">
+                Chế độ demo: dùng mã{" "}
+                <Text className="font-vietnam text-label-sm text-ink">
+                  {DEMO_OTP}
+                </Text>
+                . Chưa gửi SMS thật.
+              </Text>
+            </View>
+          </>
+        ) : null}
+      </View>
+
+      {needsNewCode ? (
+        <AuthSubmitButton
+          onPress={phone ? resendOtp : editPhone}
+          title={phone ? "Nhận lại mã OTP" : "Nhập số điện thoại"}
+        />
+      ) : (
+        <AuthSubmitButton
+          disabled={!formState.isValid}
           loading={formState.isSubmitting}
           onPress={() => void handleSubmit(handleVerify)()}
           title="Xác nhận và tiếp tục"
+          trailingIcon={<ArrowRight color={onPrimary} size={18} />}
         />
-      </View>
-    </SafeAreaView>
+      )}
+    </AuthScreenLayout>
   );
 }

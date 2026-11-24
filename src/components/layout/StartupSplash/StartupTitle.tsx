@@ -14,7 +14,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { scheduleOnRN } from "react-native-worklets";
 
-export const startupTitle = "Organic Việt Nam";
+export const startupTitle = "ADIGO";
 const words = Array.from(startupTitle.matchAll(/\S+/g));
 const letterDelay = 52;
 const letterDuration = 220;
@@ -47,7 +47,7 @@ function StartupLetter({
 
   return (
     <Animated.View style={style}>
-      <Text className="font-vietnam text-headline-lg" style={{ color }}>
+      <Text className="font-vietnam text-headline-lg font-bold" style={{ color }}>
         {letter}
       </Text>
     </Animated.View>
@@ -81,7 +81,7 @@ export function StartupTitle({
   }, [elapsed, onComplete]);
 
   return (
-    <View className="flex-row flex-wrap justify-center gap-x-1.5">
+    <View className="flex-row flex-wrap justify-center gap-x-1">
       {words.map(({ 0: word, index: offset = 0 }) => (
         <View key={offset} className="flex-row">
           {Array.from(word, (letter, position) => {

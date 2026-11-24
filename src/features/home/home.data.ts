@@ -15,6 +15,7 @@ export type HomeCategory = {
   title: string;
   subtitle: string;
   Icon: LucideIcon;
+  image: string | number;
 };
 
 export type HomeProduct = {
@@ -30,6 +31,15 @@ export type HomeProduct = {
   rating?: string;
   reviewCount?: number;
 };
+
+const tomatoesImage =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuCQVakrDhUbzLDowKYIsoC44Af3tYB4h6b1NZv-Ru4dyXLuD3OWkEEc8jX-xicMYukqTr2Zwt8C3KiLXKU7DqOjswKUoVRxr5NjrvH9hya0ofg0saoonpBP9Cx7xY81OPffgeF5Oo4x2Cr9mZSMRtAtP5Pb2T4pAAD4Re7lkSpoWnhkZyYtU34llq__0EbAuo3kGyPqS_C_ui0XyOt9fHEcRhMLlhx57F0Jph-KMC8";
+
+const eggsImage =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuBl57Bdt8zIGaaTjhDTex3vftiPiNaohQVXqby4QJeNV_ccqr9lxRkmF59pLfEo9D_EghHD1sJMEcsJyfm3pB1q2K7gK_5im6VU1igsuPVnZgyf7oRxpwgdokoHXZYwSTUR0-pl7p9y7dvFXj0yBlpFHtdBmvJ705XcXqt3umhUZptGHCDtyFUo2cCVYhCaHgSNfInyqx3_HJdRNaw1kb6JbhEHT8lacXMv3bi9eEg";
+
+const riceImage =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuDXrUd1PSdH22wJKdyyUGxNURtWZOtnUTjYVbfltNWNt6nXz27RWU8FHeYWysNsZaQ8I336fBZ9cJ7rIBCiFy3TzaXJKgQ1aYwx5lr-eoFEuhc7qQ6dZRWUdF-qAhcYnlBVaWrTZSJJ_-mRFNHm0N6wf3I2HiayD4jn0OdgDowIPVueAgtVlXWv_jtyI42akdTYxUtHZHYFwmza3r0K2JZfKNBaY5b-iNhMWpnDJd0";
 
 export const homeBanners: HomeBanner[] = [
   {
@@ -55,19 +65,54 @@ export const homeBanners: HomeBanner[] = [
     eyebrow: "Tươi ngon mỗi ngày",
     title: "Thu hoạch buổi sáng, giao đến tận nhà",
     description: "Rau củ theo mùa được chọn lọc từ các nông trại địa phương.",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCQVakrDhUbzLDowKYIsoC44Af3tYB4h6b1NZv-Ru4dyXLuD3OWkEEc8jX-xicMYukqTr2Zwt8C3KiLXKU7DqOjswKUoVRxr5NjrvH9hya0ofg0saoonpBP9Cx7xY81OPffgeF5Oo4x2Cr9mZSMRtAtP5Pb2T4pAAD4Re7lkSpoWnhkZyYtU34llq__0EbAuo3kGyPqS_C_ui0XyOt9fHEcRhMLlhx57F0Jph-KMC8",
+    image: tomatoesImage,
     actionLabel: "Xem sản phẩm",
   },
 ];
 
 export const homeCategories: HomeCategory[] = [
-  { id: "greens", title: "Rau lá xanh", subtitle: "Cải Kale, xà lách", Icon: Leaf },
-  { id: "fruit", title: "Trái cây sạch", subtitle: "Bơ sáp, cam ngọt", Icon: Apple },
-  { id: "roots", title: "Củ quả tươi", subtitle: "Cà chua, cà rốt", Icon: Carrot },
-  { id: "eggs", title: "Trứng & sữa", subtitle: "Gà ta, sữa hạt", Icon: Egg },
-  { id: "grains", title: "Gạo hữu cơ", subtitle: "ST25 lúa tôm", Icon: Wheat },
-  { id: "farms", title: "Nông trại", subtitle: "Nhật ký vườn", Icon: Sprout },
+  {
+    id: "greens",
+    title: "Rau lá xanh",
+    subtitle: "Cải Kale, xà lách",
+    Icon: Leaf,
+    image: require("@/assets/images/farm/kale.jpg"),
+  },
+  {
+    id: "fruit",
+    title: "Trái cây sạch",
+    subtitle: "Bơ sáp, cam ngọt",
+    Icon: Apple,
+    image: require("@/assets/images/farm/strawberries.jpg"),
+  },
+  {
+    id: "roots",
+    title: "Củ quả tươi",
+    subtitle: "Cà chua, cà rốt",
+    Icon: Carrot,
+    image: tomatoesImage,
+  },
+  {
+    id: "eggs",
+    title: "Trứng & sữa",
+    subtitle: "Gà ta, sữa hạt",
+    Icon: Egg,
+    image: eggsImage,
+  },
+  {
+    id: "grains",
+    title: "Gạo hữu cơ",
+    subtitle: "ST25 lúa tôm",
+    Icon: Wheat,
+    image: riceImage,
+  },
+  {
+    id: "farms",
+    title: "Nông trại",
+    subtitle: "Nhật ký vườn",
+    Icon: Sprout,
+    image: require("@/assets/images/farm/greenhouse.jpg"),
+  },
 ];
 
 export const dealProducts: HomeProduct[] = [
@@ -102,8 +147,7 @@ export const dealProducts: HomeProduct[] = [
     origin: "VietGAP • Đà Lạt",
     price: 39_000,
     oldPrice: 52_000,
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCQVakrDhUbzLDowKYIsoC44Af3tYB4h6b1NZv-Ru4dyXLuD3OWkEEc8jX-xicMYukqTr2Zwt8C3KiLXKU7DqOjswKUoVRxr5NjrvH9hya0ofg0saoonpBP9Cx7xY81OPffgeF5Oo4x2Cr9mZSMRtAtP5Pb2T4pAAD4Re7lkSpoWnhkZyYtU34llq__0EbAuo3kGyPqS_C_ui0XyOt9fHEcRhMLlhx57F0Jph-KMC8",
+    image: tomatoesImage,
     badge: "Thu hoạch hôm nay",
     soldPercent: 74,
   },
@@ -128,8 +172,7 @@ export const recommendedProducts: HomeProduct[] = [
     subtitle: "Hộp giấy 10 quả",
     origin: "Thảo mộc",
     price: 48_000,
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBl57Bdt8zIGaaTjhDTex3vftiPiNaohQVXqby4QJeNV_ccqr9lxRkmF59pLfEo9D_EghHD1sJMEcsJyfm3pB1q2K7gK_5im6VU1igsuPVnZgyf7oRxpwgdokoHXZYwSTUR0-pl7p9y7dvFXj0yBlpFHtdBmvJ705XcXqt3umhUZptGHCDtyFUo2cCVYhCaHgSNfInyqx3_HJdRNaw1kb6JbhEHT8lacXMv3bi9eEg",
+    image: eggsImage,
     badge: "Thảo mộc",
     rating: "5.0",
     reviewCount: 94,
@@ -152,8 +195,7 @@ export const recommendedProducts: HomeProduct[] = [
     subtitle: "Túi hút chân không 2kg",
     origin: "USDA Organic",
     price: 115_000,
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDXrUd1PSdH22wJKdyyUGxNURtWZOtnUTjYVbfltNWNt6nXz27RWU8FHeYWysNsZaQ8I336fBZ9cJ7rIBCiFy3TzaXJKgQ1aYwx5lr-eoFEuhc7qQ6dZRWUdF-qAhcYnlBVaWrTZSJJ_-mRFNHm0N6wf3I2HiayD4jn0OdgDowIPVueAgtVlXWv_jtyI42akdTYxUtHZHYFwmza3r0K2JZfKNBaY5b-iNhMWpnDJd0",
+    image: riceImage,
     badge: "USDA Organic",
     rating: "5.0",
     reviewCount: 312,

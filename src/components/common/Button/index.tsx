@@ -45,6 +45,7 @@ export function PrimaryBtn({
   className = "",
   ...props
 }: PrimaryBtnProps) {
+  const { onPrimary, primary } = useAppColors();
   const isDisabled = disabled || loading;
 
   return (
@@ -56,7 +57,7 @@ export function PrimaryBtn({
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={variant === "primary" ? "#ffffff" : "#006b35"} />
+        <ActivityIndicator color={variant === "primary" ? onPrimary : primary} />
       ) : (
         <>
           {leadingIcon}

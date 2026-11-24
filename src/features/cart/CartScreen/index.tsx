@@ -166,9 +166,7 @@ export default function CartScreen() {
         <AddressBookBottomSheet onClose={() => setAddressBookOpen(false)} />
       ) : checkoutOpen ? (
         <CheckoutBottomSheet
-          address={address}
           lines={selectedLines}
-          onEditAddress={() => setAddressBookOpen(true)}
           onClose={() => setCheckoutOpen(false)}
         />
       ) : null}

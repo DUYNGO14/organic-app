@@ -1,6 +1,8 @@
-import { Check } from "lucide-react-native";
-import { Modal, Pressable, Text, View } from "react-native";
+import { AppSheet, type AppSheetHandle } from "@/components/common/BottomSheet";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { Check } from "lucide-react-native";
+import { useMemo, useRef } from "react";
+import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type ProductSortId = "harvest" | "price-asc" | "price-desc";
@@ -26,48 +28,52 @@ export function ProductSortSheet({
 }: ProductSortSheetProps) {
   const colors = useAppColors();
   const insets = useSafeAreaInsets();
+  const sheet = useRef<AppSheetHandle>(null);
+  const backdropStyle = useMemo(() => ({ backgroundColor: colors.ink }), [colors.ink]);
+
+  if (!visible) return null;
 
   return (
-    <Modal
-      animationType="slide"
-      onRequestClose={onClose}
-      transparent
-      visible={visible}
+    <AppSheet
+      ref={sheet}
+      backdropLabel="Đóng sắp xếp"
+      backdropStyle={backdropStyle}
+      backdropOpacity={0.4}
+      fullWindowOnIOS
+      hideHandle
+      enableContentPanningGesture={false}
+      onDismiss={onClose}
     >
-      <View className="flex-1 justify-end">
-        <Pressable
-          accessibilityLabel="Đóng sắp xếp"
-          className="absolute inset-0 bg-ink/40"
-          onPress={onClose}
-        />
-        <View
-          className="rounded-t-3xl bg-surface-container-lowest px-5 pt-5"
-          style={{ paddingBottom: Math.max(insets.bottom, 16) }}
-        >
-          <Text className="mb-3 font-vietnam text-headline-sm text-ink">
-            Sắp xếp theo
-          </Text>
-          {sortOptions.map((option) => {
-            const active = selected === option.id;
-            return (
-              <Pressable
-                key={option.id}
-                accessibilityRole="button"
-                accessibilityState={{ selected: active }}
-                className="min-h-12 flex-row items-center justify-between border-b border-border"
-                onPress={() => onSelect(option.id)}
+      <View
+        className="px-5 pt-5"
+        style={{ paddingBottom: Math.max(insets.bottom, 16) }}
+      >
+        <Text className="mb-3 font-vietnam text-headline-sm text-ink">
+          Sắp xếp theo
+        </Text>
+        {sortOptions.map((option) => {
+          const active = selected === option.id;
+          return (
+            <Pressable
+              key={option.id}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              className="min-h-12 flex-row items-center justify-between border-b border-border"
+              onPress={() => {
+                onSelect(option.id);
+                sheet.current?.dismiss();
+              }}
+            >
+              <Text
+                className={`font-vietnam text-body-md ${active ? "text-primary" : "text-ink"}`}
               >
-                <Text
-                  className={`font-vietnam text-body-md ${active ? "text-primary" : "text-ink"}`}
-                >
-                  {option.label}
-                </Text>
-                {active ? <Check color={colors.primary} size={19} /> : null}
-              </Pressable>
-            );
-          })}
-        </View>
+                {option.label}
+              </Text>
+              {active ? <Check color={colors.primary} size={19} /> : null}
+            </Pressable>
+          );
+        })}
       </View>
-    </Modal>
+    </AppSheet>
   );
 }

@@ -17,7 +17,7 @@ import { StartupTitle, startupTitle } from "./StartupTitle";
 
 const exitAnimation = FadeOut.duration(240).reduceMotion(ReduceMotion.System);
 const previewHoldMs = 2_000;
-const logo = require("@/assets/images/logo.png");
+const logo = require("@/assets/images/adigo-logo.png");
 
 export function StartupSplash({
   fontsReady,
@@ -98,9 +98,9 @@ export function StartupSplash({
             />
           </Animated.View>
           {showTitle ? (
-            <View className="absolute inset-x-0 top-full px-4">
+            <View className="absolute inset-x-0 top-full px-2">
               <StartupTitle
-                colors={[colors.primary, colors.secondary]}
+                colors={[colors.logoStart, colors.logoEnd]}
                 onComplete={completeTitle}
               />
             </View>

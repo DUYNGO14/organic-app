@@ -12,7 +12,7 @@ import {
   UsersRound,
   X,
 } from "lucide-react-native";
-import { useRef, useState, type ComponentRef } from "react";
+import { useCallback, useRef, useState, type ComponentRef } from "react";
 import {
   Alert,
   Linking,
@@ -23,13 +23,14 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { coldChain, greenhouse, type FarmDetail } from "./farm.data";
+import { coldChain, greenhouse, type FarmDetail, type FarmStory } from "./farm.data";
 import {
   FarmCommitments,
   FarmJournal,
   FarmOverview,
   FarmRegions,
 } from "./FarmSections";
+import { FarmStorySheet } from "./FarmStorySheet";
 
 type Section = "journal" | "regions";
 
@@ -49,6 +50,8 @@ export default function FarmScreen() {
   });
   const [section, setSection] = useState<Section>("journal");
   const [detail, setDetail] = useState<FarmDetail | null>(null);
+  const [story, setStory] = useState<FarmStory | null>(null);
+  const closeStory = useCallback(() => setStory(null), []);
   const mapQuery = detail?.mapQuery;
   const relatedProducts = detail?.productIds?.flatMap((id) => {
     const product = catalogProducts.find((item) => item.id === id);
@@ -83,6 +86,8 @@ export default function FarmScreen() {
         ref={scroll}
         className="flex-1"
         showsVerticalScrollIndicator={false}
+        accessibilityElementsHidden={story !== null}
+        importantForAccessibility={story ? "no-hide-descendants" : "auto"}
       >
         <View className="w-full max-w-3xl self-center gap-6 px-4 pb-6 pt-3">
           <FarmOverview onOpen={setDetail} />
@@ -134,7 +139,7 @@ export default function FarmScreen() {
               sectionOffsets.current.journal = event.nativeEvent.layout.y;
             }}
           >
-            <FarmJournal onOpen={setDetail} />
+            <FarmJournal onOpen={setStory} />
           </View>
           <View
             onLayout={(event) => {
@@ -158,6 +163,7 @@ export default function FarmScreen() {
           </View>
         </View>
       </ScrollView>
+      {story ? <FarmStorySheet story={story} onClose={closeStory} /> : null}
       {detail ? (
         <Modal
           visible
