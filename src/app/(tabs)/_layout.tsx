@@ -5,6 +5,7 @@ import {
   selectDeliveryAddress,
   useCartStore,
 } from "@/features/cart/cart.store";
+import { selectUnreadNotificationCount, useNotificationStore } from "@/features/notifications/notifications.store";
 import { router, Stack } from "expo-router";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function MainLayout() {
   const cartItemsCount = useCartStore(selectCartQuantity);
   const address = useCartStore(selectDeliveryAddress);
+  const unreadNotificationsCount = useNotificationStore(selectUnreadNotificationCount);
 
   return (
     <View className="flex-1 bg-canvas">
@@ -25,6 +27,8 @@ export default function MainLayout() {
             router.push({ pathname: "/cart", params: { address: "edit" } })
           }
           onCartClick={() => router.push("/cart")}
+          unreadNotificationsCount={unreadNotificationsCount}
+          onNotificationClick={() => router.push("/notifications")}
           onProfileClick={() => router.navigate("/(tabs)/profile")}
         />
       </SafeAreaView>

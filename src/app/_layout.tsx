@@ -124,6 +124,7 @@ function AuthNavigator() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(product)" />
         <Stack.Screen name="cart" />
+        <Stack.Screen name="notifications" />
         <Stack.Screen name="scan-qr" />
       </Stack.Protected>
       <Stack.Screen name="index" />
