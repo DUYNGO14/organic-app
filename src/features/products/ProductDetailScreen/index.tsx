@@ -1,3 +1,4 @@
+import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { StackHeader } from "@/components/layout";
 import {
@@ -28,7 +29,7 @@ import { ScrollView, Share, Text, View } from "react-native";
 
 const products = catalogProducts;
 
-export default function ProductDetailScreen() {
+export default function ProductDetailScreen({ isLoading = false }: ScreenLoadingProps = {}) {
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const colors = useAppColors();
   const cartItemsCount = useCartStore(selectCartQuantity);
@@ -41,6 +42,21 @@ export default function ProductDetailScreen() {
   const [packageIndex, setPackageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [buyNowOpen, setBuyNowOpen] = useState(false);
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-canvas">
+        <StackHeader
+          title="Chi tiết sản phẩm"
+          onBack={() => {
+            if (router.canGoBack()) router.back();
+            else router.replace("/(tabs)/categories");
+          }}
+        />
+        <ScreenSkeleton variant="product" />
+      </View>
+    );
+  }
 
   if (!product || !spec) {
     return (
@@ -121,10 +137,10 @@ export default function ProductDetailScreen() {
         <ScrollView
           className="flex-1"
           contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingTop: 12,
+            paddingHorizontal: 8,
+            paddingTop: 6,
             paddingBottom: 24,
-            gap: 14,
+            gap: 12,
           }}
           showsVerticalScrollIndicator={false}
         >
@@ -151,7 +167,7 @@ export default function ProductDetailScreen() {
             colors={colors}
           />
           <ProductCommitmentsCard colors={colors} />
-          <ProductTraceabilityCard spec={spec} colors={colors} />
+          <ProductTraceabilityCard colors={colors} onScan={() => router.push("/scan-qr")} />
 
           <ProductNutritionCard spec={spec} colors={colors} />
           <ProductOriginCard spec={spec} colors={colors} />

@@ -1,3 +1,4 @@
+import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
 import { PrimaryBtn } from "@/components/common";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { FlashList } from "@shopify/flash-list";
@@ -10,7 +11,7 @@ import { OrderDetailSheet } from "./OrderDetailSheet";
 import { OrderReviewSheet, type OrderReview } from "./OrderReviewSheet";
 import { demoOrders, orderFilters, type CustomerOrder, type OrderFilter } from "./orders.data";
 
-export default function OrdersScreen() {
+export default function OrdersScreen({ isLoading = false }: ScreenLoadingProps = {}) {
   const colors = useAppColors();
   const [filter, setFilter] = useState<OrderFilter>("all");
   const [detailOrder, setDetailOrder] = useState<CustomerOrder | null>(null);
@@ -57,6 +58,8 @@ export default function OrdersScreen() {
       text2: `Cảm ơn bạn đã đánh giá ${review.rating} sao.`,
     });
   }
+
+  if (isLoading) return <ScreenSkeleton variant="orders" />;
 
   return (
     <View className="flex-1 bg-canvas">

@@ -1,3 +1,4 @@
+import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
 import { PrimaryBtn } from "@/components/common";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuthStore } from "@/features/auth/auth.store";
@@ -368,7 +369,7 @@ function SettingsSection({ onSignOut }: { onSignOut: () => void }) {
   );
 }
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ isLoading = false }: ScreenLoadingProps = {}) {
   const session = useAuthStore((state) => state.session);
   const signOut = useAuthStore((state) => state.signOut);
   const [points, setPoints] = useState(1_450);
@@ -412,6 +413,8 @@ export default function ProfileScreen() {
     if (item === "management") return <ManagementSection onShortcut={openShortcut} />;
     return <SettingsSection onSignOut={confirmSignOut} />;
   }
+
+  if (isLoading) return <ScreenSkeleton variant="profile" />;
 
   return (
     <View className="flex-1 bg-surface-soft">

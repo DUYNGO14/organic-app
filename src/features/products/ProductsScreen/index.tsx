@@ -1,3 +1,4 @@
+import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
 import { IconButton } from "@/components/common";
 import { QualityPromise } from "@/features/home/components/QualityPromise";
 import {
@@ -61,14 +62,21 @@ function SelectedCategoryLabel({
   return `${selected.length} danh mục đã chọn`;
 }
 
-export default function ProductsScreen({ initialSearch }: { initialSearch: string }) {
+export default function ProductsScreen({
+  initialSearch,
+  initialCategoryId,
+  isLoading = false,
+}: ScreenLoadingProps & {
+  initialSearch: string;
+  initialCategoryId?: ProductCategoryId;
+}) {
   const colors = useAppColors();
   const listRef = useRef<FlashListRef<CatalogProduct>>(null);
   const [search, setSearch] = useState(initialSearch);
   const [sort, setSort] = useState<ProductSortId>("harvest");
   const [filters, setFilters] = useState<ProductFilters>({
     ...emptyProductFilters,
-    categoryIds: initialSearch ? [] : ["greens"],
+    categoryIds: initialCategoryId ? [initialCategoryId] : initialSearch ? [] : ["greens"],
   });
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
@@ -215,6 +223,8 @@ export default function ProductsScreen({ initialSearch }: { initialSearch: strin
       sort,
     ],
   );
+
+  if (isLoading) return <ScreenSkeleton variant="catalog" />;
 
   return (
     <View className="flex-1 bg-canvas">

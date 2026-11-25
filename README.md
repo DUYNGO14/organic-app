@@ -51,6 +51,64 @@ EXPO_PUBLIC_API_URL=https://api.example.com
 
 Nếu không khai báo, ứng dụng dùng DummyJSON làm API mẫu. Không đặt token, khoá riêng tư hoặc bí mật trong biến `EXPO_PUBLIC_*` vì chúng được đóng gói vào ứng dụng.
 
+## Nối dữ liệu API với skeleton
+
+Dùng `QueryClient` hiện có và giữ dữ liệu máy chủ trong TanStack Query. Khi nối API, truyền `isLoading={query.isLoading && query.data === undefined}` cho màn hình, ví dụ `<ProductsScreen initialSearch="" isLoading={isLoading} />`. Đồng thời thay nguồn dữ liệu mẫu bằng dữ liệu query đã chuyển đổi sang kiểu mà màn hình dùng.
+
+- Lần tải đầu hiện skeleton. Khi refetch nền hoặc chuyển trang bằng `keepPreviousData`, tiếp tục hiện dữ liệu đang có.
+- Nếu request bị tạm dừng khi ngoại tuyến và chưa có dữ liệu, hiện trạng thái ngoại tuyến. Nếu request lỗi và chưa có dữ liệu, hiện lỗi và nút thử lại bằng `refetch()`. Mảng rỗng từ request thành công dùng giao diện trống.
+
+### Phân trang và cuộn vô hạn
+
+`useProducts({ limit: 20, skip: pageIndex * 20 })` dùng cho phân trang theo số trang. Dùng `isPlaceholderData` để nhận biết khi danh sách còn hiển thị trang trước. Với cuộn vô hạn, dùng `useInfiniteProducts({ limit: 20 })` và ghép `data.pages`:
+
+```tsx
+const products = useInfiniteProducts({ limit: 20 });
+
+<FlashList
+  data={products.data?.pages.flatMap((page) => page.products) ?? []}
+  keyExtractor={(product) => String(product.id)}
+  renderItem={renderProduct}
+  onEndReached={() => {
+    if (products.hasNextPage && !products.isFetching) {
+      void products.fetchNextPage({ cancelRefetch: false });
+    }
+  }}
+  ListFooterComponent={products.isFetchingNextPage ? <ActivityIndicator /> : null}
+/>;
+```
+
+### Đồng bộ cache sau khi ghi
+
+Khi có endpoint thêm, sửa hoặc xoá, dùng `useMutation` gọi API. Sau khi máy chủ xác nhận, cập nhật cache chi tiết từ phản hồi hoặc xoá bản ghi chi tiết đã bị xoá. Sau đó gọi `invalidateQueries({ queryKey: productKeys.lists() })` để đồng bộ cả danh sách phân trang và danh sách cuộn vô hạn.
+
+Với optimistic update, ví dụ sau dành cho API sửa một sản phẩm khi endpoint đã sẵn sàng. Khoá nút lưu cho sản phẩm đang gửi để các lượt sửa trên cùng sản phẩm không ghi đè bản sao dùng để rollback.
+
+```tsx
+const updateProduct = useMutation({
+  mutationFn: ({ id, title }: { id: number; title: string }) =>
+    updateProductApi(id, { title }),
+  onMutate: async ({ id, title }) => {
+    const key = productKeys.detail(id);
+    await queryClient.cancelQueries({ queryKey: key, exact: true });
+    const previous = queryClient.getQueryData<Product>(key);
+    if (previous) queryClient.setQueryData(key, { ...previous, title });
+    return { key, previous };
+  },
+  onError: (_error, _variables, context) => {
+    if (context?.previous) {
+      queryClient.setQueryData(context.key, context.previous);
+    }
+  },
+  onSettled: async (_data, _error, { id }) => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: productKeys.detail(id), exact: true }),
+      queryClient.invalidateQueries({ queryKey: productKeys.lists() }),
+    ]);
+  },
+});
+```
+
 ## Cấu trúc dự án
 
 ```text
@@ -87,6 +145,19 @@ assets/                  # Font Be Vietnam Pro, ảnh và biểu tượng
 - Camera: quét mã QR truy xuất nguồn gốc.
 
 Nội dung mô tả quyền nằm trong `app.json`. Khi thay đổi quyền hoặc thêm native module, cần tạo development build mới để kiểm thử đầy đủ.
+
+## Thử quét QR truy xuất nguồn gốc
+
+Mở **Quét mã QR** trong app, rồi dùng camera quét một trong hai ảnh sau trên màn hình khác hoặc trên bản in:
+
+| Ảnh QR | Nội dung mã | Thu hoạch (giờ Việt Nam) |
+| --- | --- | --- |
+| [Lô KL-2408](assets/images/traceability-demo/KL-2408.png) | `ADIGO:LOT:KL-2408` | 05:14 ngày 24/08/2026 |
+| [Lô KL-2508](assets/images/traceability-demo/KL-2508.png) | `ADIGO:LOT:KL-2508` | 06:10 ngày 25/08/2026 |
+
+Cả hai mã mở cùng sản phẩm **Cải Kale Thủy Canh** nhưng tra cứu hai lô khác nhau. QR chứa mã lô để tra cứu trong app. Kết quả có nhãn **Dữ liệu mẫu**.
+
+Khi có backend, thay hàm tra cứu mẫu trong `src/features/products/traceability.queries.ts` bằng lời gọi API có truyền `AbortSignal`. Giữ cache key theo mã lô, trả về `null` cho mã không tồn tại và để lỗi kết nối đi vào trạng thái thử lại. Bỏ `networkMode: "always"` khi tra cứu bắt đầu cần mạng.
 
 ## Pháp lý và quyền riêng tư
 

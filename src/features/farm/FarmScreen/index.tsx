@@ -1,3 +1,4 @@
+import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { catalogProducts } from "@/features/products/catalog.data";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -41,7 +42,7 @@ const shortcuts = [
   { label: "Tham quan", Icon: Compass, detail: greenhouse },
 ] as const;
 
-export default function FarmScreen() {
+export default function FarmScreen({ isLoading = false }: ScreenLoadingProps = {}) {
   const colors = useAppColors();
   const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
   const sectionOffsets = useRef<Record<Section, number>>({
@@ -79,6 +80,8 @@ export default function FarmScreen() {
       `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`,
     ).catch(() => Alert.alert("Không thể mở bản đồ", "Vui lòng thử lại."));
   }
+
+  if (isLoading) return <ScreenSkeleton variant="farm" />;
 
   return (
     <View className="flex-1 bg-canvas">

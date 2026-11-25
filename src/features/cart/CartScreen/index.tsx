@@ -1,3 +1,4 @@
+import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
 import { Checkbox, PrimaryBtn } from "@/components/common";
 import { StackHeader } from "@/components/layout";
 import {
@@ -29,7 +30,7 @@ function LineSeparator() {
   return <View className="h-3" />;
 }
 
-export default function CartScreen() {
+export default function CartScreen({ isLoading = false }: ScreenLoadingProps = {}) {
   const { address: addressAction } = useLocalSearchParams<{
     address?: string;
   }>();
@@ -75,7 +76,9 @@ export default function CartScreen() {
           // }
         />
         <View className="flex-1 bg-surface-soft">
-          {lines.length === 0 ? (
+          {isLoading ? (
+            <ScreenSkeleton variant="cart" />
+          ) : lines.length === 0 ? (
             <EmptyCart />
           ) : (
             <>

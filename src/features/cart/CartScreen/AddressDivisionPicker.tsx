@@ -1,6 +1,7 @@
 import { AppSheet, SheetFooter, type AppSheetHandle } from "@/components/common/BottomSheet";
 import { PrimaryBtn, SearchInput } from "@/components/common";
 import { SheetTextInput } from "@/components/common/Input/SheetTextInput";
+import { SkeletonBlock, SkeletonGroup } from "@/components/common/Skeleton";
 import {
   fetchProvinces,
   fetchSubdivisions,
@@ -14,6 +15,7 @@ import { cn } from "@/lib/cn";
 import { useBottomSheetScrollableCreator } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
+import { useIsFocused } from "expo-router";
 import { Check } from "lucide-react-native";
 import { useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
 import { Pressable, Text, View, type ScrollViewProps } from "react-native";
@@ -50,6 +52,7 @@ export function AddressDivisionPicker({
 }) {
   const ref = useRef<AppSheetHandle>(null);
   const colors = useAppColors();
+  const focused = useIsFocused();
   const [mode, setMode] = useState(initialMode);
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
@@ -80,8 +83,11 @@ export function AddressDivisionPicker({
   const activeQuery = level === "province" || provinceCode === undefined
     ? provinces
     : usesDistrict && districtCode !== undefined ? districtChildren : provinceChildren;
-  const parentMissing = (level !== "province" && provinces.isSuccess && provinceCode === undefined)
-    || (usesDistrict && provinceChildren.isSuccess && districtCode === undefined);
+  const parentMissing = (level !== "province" && provinces.data !== undefined && provinceCode === undefined)
+    || (usesDistrict && provinceChildren.data !== undefined && districtCode === undefined);
+  const hasData = activeQuery.data !== undefined;
+  const showSkeleton = !manual && !parentMissing && !hasData && activeQuery.isLoading;
+  const showLoadError = !parentMissing && !hasData && activeQuery.isError;
   const divisions = useMemo(() => {
     const searchTerm = normalizeDivision(deferredSearch);
     return parentMissing ? [] : (activeQuery.data ?? []).filter(({ name }) =>
@@ -142,7 +148,15 @@ export function AddressDivisionPicker({
         style={{ flex: 1, minHeight: 0 }}
         onLayout={(event) => setViewportHeight(event.nativeEvent.layout.height)}
       >
-        {!manual && viewportHeight > 0 ? (
+        {showSkeleton ? (
+          <SkeletonGroup active={focused} className="overflow-hidden px-4" label="Đang tải địa phương">
+            {[0, 1, 2, 3, 4, 5].map((index) => (
+              <View key={index} className="h-12 justify-center border-b border-border">
+                <SkeletonBlock className={index % 2 === 0 ? "h-4 w-2/3" : "h-4 w-1/2"} />
+              </View>
+            ))}
+          </SkeletonGroup>
+        ) : !manual && viewportHeight > 0 ? (
           <FlashList
             style={{ flex: 0, height: viewportHeight }}
             contentContainerStyle={{ paddingHorizontal: 16 }}
@@ -168,11 +182,11 @@ export function AddressDivisionPicker({
               <View className="items-center gap-2 py-5">
                 <Text accessibilityLiveRegion="polite" className="text-center font-vietnam text-body-md text-muted">
                   {parentMissing ? "Không tìm thấy đơn vị cấp trên. Bạn có thể chọn lại hoặc nhập thủ công."
-                    : activeQuery.isPaused ? "Đang ngoại tuyến. Bạn có thể nhập thủ công."
-                      : activeQuery.isError ? "Chưa tải được danh sách địa phương."
-                        : activeQuery.isPending ? "Đang tải địa phương…" : "Không tìm thấy địa phương."}
+                    : !hasData && activeQuery.isPaused ? "Đang ngoại tuyến. Bạn có thể nhập thủ công."
+                      : showLoadError ? "Chưa tải được danh sách địa phương."
+                        : "Không tìm thấy địa phương."}
                 </Text>
-                {activeQuery.isError ? (
+                {showLoadError ? (
                   <PrimaryBtn title="Thử lại" variant="secondary" onPress={() => void activeQuery.refetch()} />
                 ) : null}
               </View>

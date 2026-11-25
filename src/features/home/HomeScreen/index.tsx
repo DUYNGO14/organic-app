@@ -1,3 +1,7 @@
+import {
+  ScreenSkeleton,
+  type ScreenLoadingProps,
+} from "@/components/common/Skeleton/ScreenSkeleton";
 import { addToCart } from "@/features/cart/add-to-cart";
 import { CategorySection } from "@/features/home/components/CategorySection";
 import { DealSection } from "@/features/home/components/DealProductCard";
@@ -16,7 +20,9 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { Keyboard, ScrollView, View } from "react-native";
 
-export default function HomeScreen() {
+export default function HomeScreen({
+  isLoading = false,
+}: ScreenLoadingProps = {}) {
   const [search, setSearch] = useState("");
 
   const openProduct = (product: (typeof dealProducts)[number]) => {
@@ -36,6 +42,8 @@ export default function HomeScreen() {
     Keyboard.dismiss();
     router.push({ pathname: "/(tabs)/categories", params: { query } });
   }
+
+  if (isLoading) return <ScreenSkeleton variant="home" />;
 
   return (
     <View className="flex-1 bg-canvas">
@@ -65,11 +73,28 @@ export default function HomeScreen() {
         </View>
         <CategorySection
           categories={homeCategories}
-          onCategoryPress={() => router.push("/(tabs)/categories")}
+          onCategoryPress={({ id }) => {
+            if (id === "farms") {
+              router.push("/(tabs)/farm");
+              return;
+            }
+
+            router.push({
+              pathname: "/(tabs)/categories",
+              params: { categoryId: id },
+            });
+          }}
           onSeeAll={() => router.push("/(tabs)/categories")}
         />
-        <DealSection onAddProduct={addToCart} onProductPress={openProduct} products={dealProducts} />
-        <TraceabilityCard onScanPress={openScanner} onJournalPress={() => router.push("/(tabs)/farm")} />
+        <DealSection
+          onAddProduct={addToCart}
+          onProductPress={openProduct}
+          products={dealProducts}
+        />
+        <TraceabilityCard
+          onScanPress={openScanner}
+          onJournalPress={() => router.push("/(tabs)/farm")}
+        />
         <RecommendationSection
           onAddProduct={addToCart}
           onProductPress={openProduct}

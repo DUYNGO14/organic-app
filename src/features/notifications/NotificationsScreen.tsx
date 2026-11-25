@@ -1,3 +1,4 @@
+import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
 import { PrimaryBtn } from "@/components/common";
 import { StackHeader } from "@/components/layout";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -63,7 +64,7 @@ function NotificationSeparator() {
   return <View className="h-3" />;
 }
 
-export default function NotificationsScreen() {
+export default function NotificationsScreen({ isLoading = false }: ScreenLoadingProps = {}) {
   const colors = useAppColors();
   const [filter, setFilter] = useState<(typeof filters)[number]["id"]>("all");
   const readIds = useNotificationStore((state) => state.readIds);
@@ -83,75 +84,81 @@ export default function NotificationsScreen() {
           else router.replace("/(tabs)/home");
         }}
       />
-      <View className="gap-2 border-b border-border bg-surface px-4 py-3">
-        <View className="min-h-12 flex-row flex-wrap items-center justify-between gap-2">
-          <Text accessibilityLiveRegion="polite" className="font-vietnam text-body-emphasis text-ink">
-            {unreadCount ? `${unreadCount} thông báo chưa đọc` : "Bạn đã đọc hết thông báo"}
-          </Text>
-          {unreadCount ? (
-            <PrimaryBtn
-              variant="ghost"
-              className="px-2"
-              labelClassName="text-label-md"
-              title="Đọc tất cả"
-              leadingIcon={<CheckCheck color={colors.primary} size={16} />}
-              onPress={markAllRead}
-            />
-          ) : null}
-        </View>
-        <View className="flex-row gap-2" accessibilityRole="tablist">
-          {filters.map(({ id, label }) => {
-            const selected = filter === id;
-            return (
-              <Pressable
-                key={id}
-                accessibilityLabel={label}
-                accessibilityRole="tab"
-                accessibilityState={{ selected }}
-                className={cn(
-                  "min-h-12 justify-center rounded-full border px-4",
-                  selected ? "border-primary bg-primary/10" : "border-border bg-surface active:bg-surface-container",
-                )}
-                onPress={() => setFilter(id)}
-              >
-                <Text className={cn("font-vietnam text-label-md", selected ? "text-primary" : "text-muted")}>
-                  {label}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
-      <FlashList
-        data={unreadOnly ? unreadNotifications : notifications}
-        contentContainerStyle={{ padding: 16 }}
-        keyExtractor={({ id }) => id}
-        extraData={readIds}
-        ItemSeparatorComponent={NotificationSeparator}
-        renderItem={({ item }) => (
-          <NotificationCard
-            notification={item}
-            unread={!readIds.includes(item.id)}
-            onPress={() => {
-              markRead(item.id);
-              router.navigate(item.href);
-            }}
-          />
-        )}
-        ListEmptyComponent={
-          <View className="items-center gap-3 px-4 py-12">
-            <View className="h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-              <EmptyIcon color={colors.primary} size={25} />
+      {isLoading ? (
+        <ScreenSkeleton variant="notifications" />
+      ) : (
+        <>
+          <View className="gap-2 border-b border-border bg-surface px-4 py-3">
+            <View className="min-h-12 flex-row flex-wrap items-center justify-between gap-2">
+              <Text accessibilityLiveRegion="polite" className="font-vietnam text-body-emphasis text-ink">
+                {unreadCount ? `${unreadCount} thông báo chưa đọc` : "Bạn đã đọc hết thông báo"}
+              </Text>
+              {unreadCount ? (
+                <PrimaryBtn
+                  variant="ghost"
+                  className="px-2"
+                  labelClassName="text-label-md"
+                  title="Đọc tất cả"
+                  leadingIcon={<CheckCheck color={colors.primary} size={16} />}
+                  onPress={markAllRead}
+                />
+              ) : null}
             </View>
-            <Text className="text-center font-vietnam text-title-md text-ink">
-              {unreadOnly ? "Không còn thông báo chưa đọc" : "Chưa có thông báo"}
-            </Text>
-            {unreadOnly ? (
-              <PrimaryBtn className="self-center" title="Xem tất cả" variant="ghost" onPress={() => setFilter("all")} />
-            ) : null}
+            <View className="flex-row gap-2" accessibilityRole="tablist">
+              {filters.map(({ id, label }) => {
+                const selected = filter === id;
+                return (
+                  <Pressable
+                    key={id}
+                    accessibilityLabel={label}
+                    accessibilityRole="tab"
+                    accessibilityState={{ selected }}
+                    className={cn(
+                      "min-h-12 justify-center rounded-full border px-4",
+                      selected ? "border-primary bg-primary/10" : "border-border bg-surface active:bg-surface-container",
+                    )}
+                    onPress={() => setFilter(id)}
+                  >
+                    <Text className={cn("font-vietnam text-label-md", selected ? "text-primary" : "text-muted")}>
+                      {label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
-        }
-      />
+          <FlashList
+            data={unreadOnly ? unreadNotifications : notifications}
+            contentContainerStyle={{ padding: 16 }}
+            keyExtractor={({ id }) => id}
+            extraData={readIds}
+            ItemSeparatorComponent={NotificationSeparator}
+            renderItem={({ item }) => (
+              <NotificationCard
+                notification={item}
+                unread={!readIds.includes(item.id)}
+                onPress={() => {
+                  markRead(item.id);
+                  router.navigate(item.href);
+                }}
+              />
+            )}
+            ListEmptyComponent={
+              <View className="items-center gap-3 px-4 py-12">
+                <View className="h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                  <EmptyIcon color={colors.primary} size={25} />
+                </View>
+                <Text className="text-center font-vietnam text-title-md text-ink">
+                  {unreadOnly ? "Không còn thông báo chưa đọc" : "Chưa có thông báo"}
+                </Text>
+                {unreadOnly ? (
+                  <PrimaryBtn className="self-center" title="Xem tất cả" variant="ghost" onPress={() => setFilter("all")} />
+                ) : null}
+              </View>
+            }
+          />
+        </>
+      )}
     </SafeAreaView>
   );
 }

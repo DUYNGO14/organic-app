@@ -8,9 +8,17 @@ import { Camera, ScanLine } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, AppState, Linking, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { BatchResult } from "./BatchResult";
 import { readQrResult } from "./qr-result";
 
 const scannerSettings: BarcodeSettings = { barcodeTypes: ["qr"] };
+
+function openProduct(productId: string) {
+  router.replace({
+    pathname: "/(product)/product/[productId]",
+    params: { productId },
+  });
+}
 
 export default function QrScannerScreen() {
   const colors = useAppColors();
@@ -23,7 +31,10 @@ export default function QrScannerScreen() {
   const [result, setResult] = useState<ReturnType<typeof readQrResult>>(null);
   const scanned = useRef(false);
   const active = focused && (appState === "active" || appState === null);
-  const product = result?.productId ? catalogProducts.find(({ id }) => id === result.productId) : undefined;
+  const otherResult = result?.kind === "other" ? result : null;
+  const product = otherResult?.productId
+    ? catalogProducts.find(({ id }) => id === otherResult.productId)
+    : undefined;
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (state) => {
@@ -70,25 +81,37 @@ export default function QrScannerScreen() {
       }} />
       {result ? (
         <ScrollView contentContainerClassName="gap-4 p-4">
-          <View className="gap-3 rounded-lg border border-card-border bg-surface p-4">
-            <Text accessibilityRole="header" accessibilityLiveRegion="polite" className="font-vietnam text-title-md text-ink">
-              {product ? product.name : "Nội dung mã QR"}
-            </Text>
-            <Text selectable className="font-vietnam text-body-md text-muted">{result.data}</Text>
-          </View>
-          {product ? (
-            <PrimaryBtn fullWidth title="Xem sản phẩm" onPress={() => router.replace({
-              pathname: "/(product)/product/[productId]",
-              params: { productId: product.id },
-            })} />
-          ) : result.url ? (
-            <PrimaryBtn fullWidth title="Mở liên kết" onPress={() => {
-              const url = result.url;
-              if (!url) return;
-              setMessage("");
-              void Linking.openURL(url).catch(() => setMessage("Không thể mở liên kết này."));
-            }} />
-          ) : null}
+          {result.kind === "batch" ? (
+            <BatchResult batchCode={result.batchCode} active={active} onOpenProduct={openProduct} />
+          ) : result.kind === "invalid-batch" ? (
+            <View className="gap-2 rounded-lg border border-card-border bg-surface p-4">
+              <Text accessibilityRole="alert" className="font-vietnam text-title-md text-ink">
+                Mã truy xuất không hợp lệ
+              </Text>
+              <Text className="font-vietnam text-body-md text-muted">
+                Hãy kiểm tra mã QR trên bao bì sản phẩm rồi quét lại.
+              </Text>
+            </View>
+          ) : (
+            <>
+              <View className="gap-3 rounded-lg border border-card-border bg-surface p-4">
+                <Text accessibilityRole="header" accessibilityLiveRegion="polite" className="font-vietnam text-title-md text-ink">
+                  {product ? product.name : "Nội dung mã QR"}
+                </Text>
+                <Text selectable className="font-vietnam text-body-md text-muted">{result.data}</Text>
+              </View>
+              {product ? (
+                <PrimaryBtn fullWidth title="Xem sản phẩm" onPress={() => openProduct(product.id)} />
+              ) : result.url ? (
+                <PrimaryBtn fullWidth title="Mở liên kết" onPress={() => {
+                  const url = result.url;
+                  if (!url) return;
+                  setMessage("");
+                  void Linking.openURL(url).catch(() => setMessage("Không thể mở liên kết này."));
+                }} />
+              ) : null}
+            </>
+          )}
           <PrimaryBtn fullWidth variant="secondary" title="Quét mã khác" onPress={restart} />
           {message ? <Text accessibilityRole="alert" className="font-vietnam text-body-sm text-danger">{message}</Text> : null}
         </ScrollView>
