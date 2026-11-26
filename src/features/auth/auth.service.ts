@@ -1,4 +1,4 @@
-import type { AuthSession } from "@/features/auth/auth.store";
+import type { AuthSession } from "@/types/user";
 
 /** Local demo authentication. Replace with the real send/verify OTP API before release. */
 export const DEMO_OTP = "123456";

@@ -1,3 +1,4 @@
+import type { Product } from "@/types/product";
 import type { LucideIcon } from "lucide-react-native";
 import { Apple, Carrot, Egg, Leaf, Sprout, Wheat } from "lucide-react-native";
 
@@ -16,20 +17,6 @@ export type HomeCategory = {
   subtitle: string;
   Icon: LucideIcon;
   image: string | number;
-};
-
-export type HomeProduct = {
-  id: string;
-  name: string;
-  subtitle: string;
-  origin: string;
-  price: number;
-  oldPrice?: number;
-  image: string;
-  badge: string;
-  soldPercent?: number;
-  rating?: string;
-  reviewCount?: number;
 };
 
 const tomatoesImage =
@@ -115,7 +102,11 @@ export const homeCategories: HomeCategory[] = [
   },
 ];
 
-export const dealProducts: HomeProduct[] = [
+// Keep the mock offer deadline fixed for the app session.
+const dealDurationSeconds = 2 * 60 * 60 + 45 * 60 + 18;
+export const dealEndsAt = Date.now() + dealDurationSeconds * 1_000;
+
+export const dealProducts: Product[] = [
   {
     id: "kale",
     name: "Cải Kale Thủy Canh",
@@ -126,6 +117,7 @@ export const dealProducts: HomeProduct[] = [
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuDykkbF26NvhK3_oOx_6C6Ge5XUdtEvspJzE2IqsbMV9sxiKH5fCnw4HTcMlhX7TUDEAje-T3r_5zT3OIXsRrvlzZ3XiK7CJb8kfPidleYbIA5XdWJR87sY16ATkb37spBtfagDasUHSSAMQNIGSsU8gIb1stqDNnveqmafE_soQmlkuVOG6v-k2f_PUaSRjzxtNpw--ezPxNm5pM9MaS_VVH7FvDLf7sQlcDDlWgk",
     badge: "Hái 05:00 sáng",
+    certification: "VietGAP",
     soldPercent: 86,
   },
   {
@@ -138,6 +130,7 @@ export const dealProducts: HomeProduct[] = [
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCGAaroUVf33coPAsGUApO-saC8lgCnFf4OXU52XSpVASF8wPQI5xtlWKXkPSMkvcxDb_WtGWiAsfISKwAzcG6er4bIzQe0b2G9gfB0ISBVObLdrzwQkL9k1vh5GlZAR2DIz3kqbk3NmZxZgKmhhVSBl5EUjR_SoquL1CR4hkcI96-jEVkJs0OrK490WyYKQUyFHGsWJKS0wYIoc5KT1vlyuEbw2lAxVosXJCUthcI",
     badge: "GlobalGAP",
+    certification: "GlobalGAP",
     soldPercent: 62,
   },
   {
@@ -149,11 +142,12 @@ export const dealProducts: HomeProduct[] = [
     oldPrice: 52_000,
     image: tomatoesImage,
     badge: "Thu hoạch hôm nay",
+    certification: "VietGAP",
     soldPercent: 74,
   },
 ];
 
-export const recommendedProducts: HomeProduct[] = [
+export const recommendedProducts: Product[] = [
   {
     id: "avocado",
     name: "Bơ Sáp Đắk Lắk Dẻo",
@@ -163,7 +157,8 @@ export const recommendedProducts: HomeProduct[] = [
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCoJ5bvVRKNhaml3G9ct-EzXyO9a3iiKdx8uBWFagF8NO85wbPe7gI6eQPbdRgnYrNbr4Kuf2UaTdaV2rYOT_UoETbhf9N3g7VHoslwQM4NV2WIIC9hKtSuuFRDnr07KbuHFEklvdzrjN1XptLLYCEEqO6B1gZT6GEvfx5qOqohdSbTDUlf8eA7QfkVcRrCvXyBsPoXv8A1CuH2oN2CqDV-QaOBnvwdub5ve4GX1iE",
     badge: "VietGAP",
-    rating: "4.9",
+    certification: "VietGAP",
+    rating: 4.9,
     reviewCount: 128,
   },
   {
@@ -174,7 +169,8 @@ export const recommendedProducts: HomeProduct[] = [
     price: 48_000,
     image: eggsImage,
     badge: "Thảo mộc",
-    rating: "5.0",
+    certification: "Organic",
+    rating: 5,
     reviewCount: 94,
   },
   {
@@ -186,7 +182,8 @@ export const recommendedProducts: HomeProduct[] = [
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAd0ko1ppm-H0apnp_0mLqx5IGU10sx-ttt68eXo4bi9VmufTR6hCrQUkoA7GLbZG72muyw3PQCpZCajalVVe8QJ1gL9nlwPLimjJ7EELDsgFuR3he70AXm_rLOrFYWL8wmm9z6IW_gAGcNQZXUn7c-u7aTKB9oC6HnMgA-bqiplONnSIzLmxKpuN9vn6Cwe18j-iYdoHb_QNxhlJs0MASlxNTweY45XtKAlYH1jXA",
     badge: "Organic",
-    rating: "4.8",
+    certification: "Organic",
+    rating: 4.8,
     reviewCount: 56,
   },
   {
@@ -197,7 +194,8 @@ export const recommendedProducts: HomeProduct[] = [
     price: 115_000,
     image: riceImage,
     badge: "USDA Organic",
-    rating: "5.0",
+    certification: "USDA Organic",
+    rating: 5,
     reviewCount: 312,
   },
 ];

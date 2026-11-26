@@ -417,7 +417,7 @@ export default function ProfileScreen({ isLoading = false }: ScreenLoadingProps 
   if (isLoading) return <ScreenSkeleton variant="profile" />;
 
   return (
-    <View className="flex-1 bg-surface-soft">
+    <View className="flex-1 bg-canvas">
       <FlashList
         data={sections}
         keyExtractor={(item) => item}

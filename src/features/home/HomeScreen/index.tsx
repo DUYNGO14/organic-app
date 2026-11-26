@@ -10,6 +10,7 @@ import { QualityPromise } from "@/features/home/components/QualityPromise";
 import { RecommendationSection } from "@/features/home/components/RecommendedProductCard";
 import { TraceabilityCard } from "@/features/home/components/TraceabilityCard";
 import {
+  dealEndsAt,
   dealProducts,
   homeBanners,
   homeCategories,
@@ -84,9 +85,15 @@ export default function HomeScreen({
               params: { categoryId: id },
             });
           }}
-          onSeeAll={() => router.push("/(tabs)/categories")}
+          onSeeAll={() =>
+            router.push({
+              pathname: "/(tabs)/categories",
+              params: { resetId: String(Date.now()) },
+            })
+          }
         />
         <DealSection
+          endsAt={dealEndsAt}
           onAddProduct={addToCart}
           onProductPress={openProduct}
           products={dealProducts}

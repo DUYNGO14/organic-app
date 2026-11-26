@@ -1,11 +1,13 @@
-import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
-import { IconButton } from "@/components/common";
+import { IconButton, PrimaryBtn } from "@/components/common";
+import {
+  ScreenSkeleton,
+  type ScreenLoadingProps,
+} from "@/components/common/Skeleton/ScreenSkeleton";
+import { addToCart } from "@/features/cart/add-to-cart";
 import { QualityPromise } from "@/features/home/components/QualityPromise";
 import {
   catalogProducts,
   productCategories,
-  type CatalogProduct,
-  type ProductCategoryId,
 } from "@/features/products/catalog.data";
 import { ProductSearchBar } from "@/features/products/components/ProductSearchBar";
 import { CatalogProductCard } from "@/features/products/ProductsScreen/components/CatalogProductCard";
@@ -14,12 +16,18 @@ import {
   ProductFilterSheet,
   type ProductFilters,
 } from "@/features/products/ProductsScreen/components/ProductFilterSheet";
-import {
-  ProductSortSheet,
-  type ProductSortId,
-} from "@/features/products/ProductsScreen/components/ProductSortSheet";
+import { ProductSortSheet } from "@/features/products/ProductsScreen/components/ProductSortSheet";
+import { isCatalogApiConfigured } from "@/features/products/products.api";
+import { productKeys, useInfiniteProducts } from "@/features/products/products.queries";
+import type { ProductSortId } from "@/features/products/products.types";
 import { useAppColors } from "@/hooks/use-app-colors";
-import { FlashList, type FlashListRef, type ListRenderItem } from "@shopify/flash-list";
+import type { CatalogProduct, ProductCategoryId } from "@/types/product";
+import {
+  FlashList,
+  type FlashListRef,
+  type ListRenderItem,
+} from "@shopify/flash-list";
+import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import {
   ArrowDownUp,
@@ -27,8 +35,35 @@ import {
   SlidersHorizontal,
   Sprout,
 } from "lucide-react-native";
-import { useCallback, useMemo, useRef, useState } from "react";
-import { Keyboard, Pressable, Text, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, Keyboard, Pressable, Text, View } from "react-native";
+
+function CatalogStatus({
+  message,
+  loading,
+  onRetry,
+}: {
+  message: string;
+  loading?: boolean;
+  onRetry?: () => void;
+}) {
+  const { primary } = useAppColors();
+
+  return (
+    <View className="items-center gap-2 px-4 py-6" accessibilityLiveRegion="polite">
+      {loading ? <ActivityIndicator color={primary} /> : null}
+      <Text className="text-center font-vietnam text-body-sm text-muted">{message}</Text>
+      {onRetry ? (
+        <PrimaryBtn
+          className="self-center"
+          title="Thử lại"
+          variant="secondary"
+          onPress={onRetry}
+        />
+      ) : null}
+    </View>
+  );
+}
 
 function ProductRowSeparator() {
   return <View className="h-3" />;
@@ -55,7 +90,9 @@ function SelectedCategoryLabel({
   selectedIds: readonly ProductCategoryId[];
 }) {
   if (selectedIds.length === 0) return "Tất cả sản phẩm";
-  const selected = productCategories.filter(({ id }) => selectedIds.includes(id));
+  const selected = productCategories.filter(({ id }) =>
+    selectedIds.includes(id),
+  );
   if (selected.length === 1) return selected[0].label;
   if (selected.length === 2)
     return selected.map(({ label }) => label).join(" & ");
@@ -71,29 +108,75 @@ export default function ProductsScreen({
   initialCategoryId?: ProductCategoryId;
 }) {
   const colors = useAppColors();
+  const queryClient = useQueryClient();
   const listRef = useRef<FlashListRef<CatalogProduct>>(null);
   const [search, setSearch] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch.trim());
   const [sort, setSort] = useState<ProductSortId>("harvest");
-  const [filters, setFilters] = useState<ProductFilters>({
-    ...emptyProductFilters,
-    categoryIds: initialCategoryId ? [initialCategoryId] : initialSearch ? [] : ["greens"],
-  });
+  const [filters, setFilters] = useState<ProductFilters>(() =>
+    initialCategoryId
+      ? { ...emptyProductFilters, categoryIds: [initialCategoryId] }
+      : emptyProductFilters,
+  );
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [sortSheetVisible, setSortSheetVisible] = useState(false);
 
+  useEffect(() => {
+    if (!isCatalogApiConfigured) return;
+    const timeout = setTimeout(() => setDebouncedSearch(search.trim()), 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  const {
+    data: catalogData,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    isPending,
+    isPaused,
+    isError,
+    refetch,
+  } = useInfiniteProducts({
+    query: debouncedSearch || undefined,
+    categoryIds: filters.categoryIds.length ? [...filters.categoryIds].sort() : undefined,
+    season: filters.season === "all" ? undefined : filters.season,
+    certifications: filters.certifications.length ? [...filters.certifications].sort() : undefined,
+    priceBand: filters.priceBand ?? undefined,
+    sort,
+  });
+  const isSearchPending = isCatalogApiConfigured && search.trim() !== debouncedSearch;
+
   const certifications = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          catalogProducts
-            .map((product) => product.certification)
-            .filter((value): value is string => Boolean(value)),
-        ),
-      ),
-    [],
+    () => {
+      const available = isCatalogApiConfigured
+        ? catalogData?.pages[0]?.certifications ??
+          catalogData?.pages.flatMap((page) =>
+            page.items.flatMap((product) =>
+              product.certification ? [product.certification] : [],
+            ),
+          ) ??
+          []
+        : catalogProducts.flatMap((product) =>
+            product.certification ? [product.certification] : [],
+          );
+      return Array.from(new Set([...available, ...filters.certifications]));
+    },
+    [catalogData, filters.certifications],
   );
 
   const visibleProducts = useMemo(() => {
+    if (isCatalogApiConfigured) {
+      const products = new Map<string, CatalogProduct>();
+      for (const page of catalogData?.pages ?? []) {
+        for (const product of page.items) {
+          if (!products.has(product.id)) products.set(product.id, product);
+        }
+      }
+      return Array.from(products.values());
+    }
+
     const query = search.trim().toLocaleLowerCase("vi-VN");
     const selected = catalogProducts.filter((product) => {
       const categoryMatches =
@@ -125,26 +208,45 @@ export default function ProductsScreen({
       if (sort === "price-desc") return b.price - a.price;
       return b.harvestOrder - a.harvestOrder;
     });
-  }, [filters, search, sort]);
+  }, [catalogData, filters, search, sort]);
+
+  function scrollToTop() {
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }
+
+  function loadNextPage() {
+    if (!hasNextPage || isFetching || isPaused || isSearchPending) return;
+    void fetchNextPage({ cancelRefetch: false });
+  }
 
   const openProduct = useCallback((product: CatalogProduct) => {
+    if (isCatalogApiConfigured) {
+      queryClient.setQueryData(productKeys.detail(product.id), product);
+    }
     router.push({
       pathname: "/(product)/product/[productId]",
       params: { productId: product.id },
     });
-  }, []);
+  }, [queryClient]);
 
   const renderProduct = useCallback<ListRenderItem<CatalogProduct>>(
-    ({ item }) => <CatalogProductCard onPress={openProduct} product={item} />,
+    ({ item }) => (
+      <CatalogProductCard
+        className="mx-1.5 flex-1"
+        onAdd={addToCart}
+        onPress={openProduct}
+        product={item}
+      />
+    ),
     [openProduct],
   );
 
   function applyFilters(nextFilters: ProductFilters) {
-    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+    scrollToTop();
     setFilters(nextFilters);
   }
 
-  const activeProductCount = visibleProducts.length;
+  const activeProductCount = catalogData?.pages[0]?.total ?? visibleProducts.length;
 
   const header = useMemo(
     () => (
@@ -230,7 +332,10 @@ export default function ProductsScreen({
     <View className="flex-1 bg-canvas">
       <ProductSearchBar
         value={search}
-        onChangeText={setSearch}
+        onChangeText={(value) => {
+          scrollToTop();
+          setSearch(value);
+        }}
         onScanPress={() => {
           Keyboard.dismiss();
           router.push("/scan-qr");
@@ -243,30 +348,54 @@ export default function ProductsScreen({
         contentContainerStyle={{ paddingBottom: 28, paddingHorizontal: 10 }}
         data={visibleProducts}
         maintainVisibleContentPosition={{ disabled: true }}
+        onEndReached={isCatalogApiConfigured && !isFetchNextPageError ? loadNextPage : undefined}
+        onEndReachedThreshold={0.5}
         keyExtractor={(product) => product.id}
         ListEmptyComponent={
-          <View className="items-center px-6 py-12">
-            <Text className="font-vietnam text-title-md text-ink">
-              Không tìm thấy sản phẩm
-            </Text>
-            <Text className="mt-1 text-center font-vietnam text-body-sm text-muted">
-              Thử đổi danh mục hoặc xóa bớt bộ lọc đang chọn.
-            </Text>
-            <Pressable
-              accessibilityRole="button"
-              className="mt-3 min-h-11 justify-center px-3"
-              onPress={() => {
-                setSearch("");
-                applyFilters(emptyProductFilters);
-              }}
-            >
-              <Text className="font-vietnam text-label-md text-primary">
-                Xóa tìm kiếm và bộ lọc
+          isCatalogApiConfigured && (isPending || isSearchPending) ? (
+            <CatalogStatus
+              loading={!isPaused}
+              message={isPaused ? "Đang chờ kết nối mạng…" : "Đang tải sản phẩm…"}
+            />
+          ) : isCatalogApiConfigured && isError ? (
+            <CatalogStatus
+              message="Không thể tải sản phẩm."
+              onRetry={() => void refetch({ cancelRefetch: false })}
+            />
+          ) : (
+            <View className="items-center px-6 py-12">
+              <Text className="font-vietnam text-title-md text-ink">
+                Không tìm thấy sản phẩm
               </Text>
-            </Pressable>
-          </View>
+              <Text className="mt-1 text-center font-vietnam text-body-sm text-muted">
+                Thử đổi danh mục hoặc xóa bớt bộ lọc đang chọn.
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                className="mt-3 min-h-11 justify-center px-3"
+                onPress={() => {
+                  setSearch("");
+                  applyFilters(emptyProductFilters);
+                }}
+              >
+                <Text className="font-vietnam text-label-md text-primary">
+                  Xóa tìm kiếm và bộ lọc
+                </Text>
+              </Pressable>
+            </View>
+          )
         }
-        ListFooterComponent={<QualityPromise />}
+        ListFooterComponent={
+          isCatalogApiConfigured && isFetchingNextPage ? (
+            <CatalogStatus message="Đang tải thêm sản phẩm…" loading />
+          ) : isCatalogApiConfigured && isPaused && hasNextPage ? (
+            <CatalogStatus message="Đang chờ kết nối mạng…" />
+          ) : isCatalogApiConfigured && isFetchNextPageError ? (
+            <CatalogStatus message="Không thể tải thêm sản phẩm." onRetry={loadNextPage} />
+          ) : !isCatalogApiConfigured || (catalogData && !hasNextPage) ? (
+            <QualityPromise />
+          ) : null
+        }
         ListHeaderComponent={header}
         numColumns={2}
         renderItem={renderProduct}
@@ -275,7 +404,10 @@ export default function ProductsScreen({
 
       <ProductSortSheet
         onClose={() => setSortSheetVisible(false)}
-        onSelect={setSort}
+        onSelect={(value) => {
+          scrollToTop();
+          setSort(value);
+        }}
         selected={sort}
         visible={sortSheetVisible}
       />

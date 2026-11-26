@@ -9,6 +9,7 @@ import {
 import { CheckoutBottomSheet } from "@/features/cart/CartScreen/CheckoutBottomSheet";
 import { catalogProducts } from "@/features/products/catalog.data";
 import { getProductDetailSpec } from "@/features/products/product-detail.data";
+import { productKeys } from "@/features/products/products.queries";
 import {
   ProductCommitmentsCard,
   ProductGallery,
@@ -20,8 +21,10 @@ import {
   ProductReviewsCard,
   ProductTraceabilityCard,
 } from "@/features/products/ProductDetailScreen/components";
-import { formatPrice } from "@/features/products/ProductDetailScreen/components/format-price";
+import { formatPrice } from "@/utils/format-price";
 import { useAppColors } from "@/hooks/use-app-colors";
+import type { CatalogProduct } from "@/types/product";
+import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Share2, ShoppingBag } from "lucide-react-native";
 import { useMemo, useState } from "react";
@@ -32,8 +35,11 @@ const products = catalogProducts;
 export default function ProductDetailScreen({ isLoading = false }: ScreenLoadingProps = {}) {
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const colors = useAppColors();
+  const queryClient = useQueryClient();
   const cartItemsCount = useCartStore(selectCartQuantity);
-  const product = products.find((item) => item.id === productId);
+  const product =
+    queryClient.getQueryData<CatalogProduct>(productKeys.detail(productId)) ??
+    products.find((item) => item.id === productId);
   const spec = useMemo(
     () => (product ? getProductDetailSpec(product) : null),
     [product],

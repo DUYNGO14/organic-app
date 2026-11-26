@@ -3,7 +3,7 @@ import type { ProductDetailSpec } from "@/features/products/product-detail.data"
 import type { AppColors } from "@/hooks/use-app-colors";
 import { Pressable, Text, View } from "react-native";
 import { DetailCard } from "./DetailCard";
-import { formatPrice } from "./format-price";
+import { formatPrice } from "@/utils/format-price";
 
 type ProductPackageSelectorProps = {
   spec: ProductDetailSpec;

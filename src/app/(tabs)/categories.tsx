@@ -3,9 +3,10 @@ import ProductsScreen from "@/features/products/ProductsScreen";
 import { useLocalSearchParams } from "expo-router";
 
 export default function CategoriesRoute() {
-  const { query, categoryId } = useLocalSearchParams<{
+  const { query, categoryId, resetId } = useLocalSearchParams<{
     query?: string | string[];
     categoryId?: string | string[];
+    resetId?: string;
   }>();
   const initialSearch = (Array.isArray(query) ? query[0] : query)?.trim() ?? "";
   const requestedId = Array.isArray(categoryId) ? categoryId[0] : categoryId;
@@ -15,7 +16,7 @@ export default function CategoriesRoute() {
 
   return (
     <ProductsScreen
-      key={JSON.stringify([initialSearch, initialCategoryId])}
+      key={JSON.stringify([initialSearch, initialCategoryId, resetId])}
       initialSearch={initialSearch}
       initialCategoryId={initialCategoryId}
     />

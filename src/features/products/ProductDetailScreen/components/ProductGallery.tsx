@@ -1,4 +1,4 @@
-import type { HomeProduct } from "@/features/home/home.data";
+import type { Product } from "@/types/product";
 import type { ProductDetailSpec } from "@/features/products/product-detail.data";
 import type { AppColors } from "@/hooks/use-app-colors";
 import { Image } from "expo-image";
@@ -6,7 +6,7 @@ import { Activity, Clock3, Leaf } from "lucide-react-native";
 import { Pressable, ScrollView, Text, View } from "react-native";
 
 type ProductGalleryProps = {
-  product: HomeProduct;
+  product: Product;
   spec: ProductDetailSpec;
   imageIndex: number;
   onImageSelect: (index: number) => void;

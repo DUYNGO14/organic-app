@@ -1,14 +1,11 @@
-import type { HomeProduct } from "@/features/home/home.data";
 import type { DivisionMode } from "@/features/cart/address-divisions";
-import {
-  getProductDetailSpec,
-  type PackageOption,
-} from "@/features/products/product-detail.data";
+import { getProductDetailSpec } from "@/features/products/product-detail.data";
+import type { PackageOption, Product } from "@/types/product";
 import { create } from "zustand";
 
 export type CartLine = {
   id: string;
-  product: HomeProduct;
+  product: Product;
   pack: PackageOption;
   quantity: number;
   selected: boolean;
@@ -53,7 +50,7 @@ type CartState = {
   defaultAddressId: string | null;
   paymentMethod: PaymentMethod;
   appliedVouchers: AppliedVouchers;
-  addProduct: (product: HomeProduct, pack?: PackageOption, quantity?: number) => boolean;
+  addProduct: (product: Product, pack?: PackageOption, quantity?: number) => boolean;
   setQuantity: (id: string, quantity: number) => void;
   setSelected: (id: string, selected: boolean) => void;
   setAllSelected: (selected: boolean) => void;

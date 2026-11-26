@@ -1,4 +1,4 @@
-import type { HomeProduct } from "@/features/home/home.data";
+import type { Product } from "@/types/product";
 import type { AppColors } from "@/hooks/use-app-colors";
 import { Star } from "lucide-react-native";
 import { Text, View } from "react-native";
@@ -9,12 +9,12 @@ const reviews = [
   { initials: "VT", name: "Văn Tuấn (Bình Thạnh)", date: "3 ngày trước", text: "Nguồn gốc rõ ràng, sản phẩm đúng mô tả. Trải nghiệm mua hàng rất yên tâm." },
 ];
 
-export function ProductReviewsCard({ product, colors }: { product: HomeProduct; colors: AppColors }) {
+export function ProductReviewsCard({ product, colors }: { product: Product; colors: AppColors }) {
   return (
     <DetailCard>
       <View className="mb-3 flex-row items-center justify-between">
         <Text className="font-vietnam text-title-md text-ink">Đánh giá từ khách hàng</Text>
-        <View className="flex-row items-center gap-1 rounded-full bg-secondary-container px-2.5 py-1"><Star color={colors.secondary} fill={colors.secondary} size={14} /><Text className="font-vietnam text-label-sm text-on-secondary-container">{product.rating ?? "4.9"}</Text></View>
+        <View className="flex-row items-center gap-1 rounded-full bg-secondary-container px-2.5 py-1"><Star color={colors.secondary} fill={colors.secondary} size={14} /><Text className="font-vietnam text-label-sm text-on-secondary-container">{(product.rating ?? 4.9).toFixed(1)}</Text></View>
       </View>
       {reviews.map((review) => (
         <View key={review.initials} className="mb-2.5 rounded-xl bg-surface-container-low p-3 last:mb-0">

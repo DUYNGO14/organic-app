@@ -1,4 +1,8 @@
-import { BottomTabBar, MainHeader } from "@/components/layout";
+import {
+  BottomTabBar,
+  MainHeader,
+  type BottomTabBarProps,
+} from "@/components/layout";
 import {
   formatDeliveryAddress,
   selectCartQuantity,
@@ -6,9 +10,14 @@ import {
   useCartStore,
 } from "@/features/cart/cart.store";
 import { selectUnreadNotificationCount, useNotificationStore } from "@/features/notifications/notifications.store";
-import { router, Stack } from "expo-router";
+import { router } from "expo-router";
+import { Tabs } from "expo-router/js-tabs";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+function renderBottomTabBar(props: BottomTabBarProps) {
+  return <BottomTabBar {...props} />;
+}
 
 export default function MainLayout() {
   const cartItemsCount = useCartStore(selectCartQuantity);
@@ -32,10 +41,17 @@ export default function MainLayout() {
           onProfileClick={() => router.navigate("/(tabs)/profile")}
         />
       </SafeAreaView>
-      <SafeAreaView className="flex-1 bg-canvas" edges={["bottom"]}>
-        <Stack screenOptions={{ headerShown: false }} />
-        <BottomTabBar />
-      </SafeAreaView>
+      <Tabs
+        backBehavior="history"
+        screenOptions={{ headerShown: false, animation: "none" }}
+        tabBar={renderBottomTabBar}
+      >
+        <Tabs.Screen name="home" />
+        <Tabs.Screen name="categories" />
+        <Tabs.Screen name="farm" />
+        <Tabs.Screen name="orders" />
+        <Tabs.Screen name="profile" />
+      </Tabs>
     </View>
   );
 }

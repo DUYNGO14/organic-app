@@ -104,7 +104,7 @@ export default function OrdersScreen({ isLoading = false }: ScreenLoadingProps =
       </View>
 
       <FlashList
-        className="flex-1 bg-surface-soft"
+        className="flex-1 bg-canvas"
         contentContainerStyle={{ padding: 16 }}
         data={visibleOrders}
         keyExtractor={(order) => order.id}

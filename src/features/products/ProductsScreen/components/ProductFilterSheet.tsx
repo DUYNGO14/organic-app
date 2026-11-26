@@ -1,16 +1,13 @@
 import { AppSheet, SheetFooter, type AppSheetHandle } from "@/components/common/BottomSheet";
 import { Checkbox, PrimaryBtn } from "@/components/common";
-import {
-  productCategories,
-  type ProductCategoryId,
-  type SeasonFilterId,
-} from "@/features/products/catalog.data";
+import { productCategories } from "@/features/products/catalog.data";
+import type { PriceBandId } from "@/features/products/products.types";
 import { cn } from "@/lib/cn";
+import type { ProductCategoryId, SeasonFilterId } from "@/types/product";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useCallback, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
-export type PriceBandId = "under-25" | "25-50" | "50-100" | "over-100";
 type SeasonFilterValue = SeasonFilterId | "all";
 
 export type ProductFilters = {

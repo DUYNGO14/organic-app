@@ -1,4 +1,5 @@
-import { router, usePathname, type Href } from "expo-router";
+import { useAppColors } from "@/hooks/use-app-colors";
+import type { BottomTabBarProps as RouterTabBarProps } from "expo-router/js-tabs";
 import type { LucideIcon } from "lucide-react-native";
 import {
   ClipboardList,
@@ -7,98 +8,50 @@ import {
   Sprout,
   UserRound,
 } from "lucide-react-native";
-import { useAppColors } from "@/hooks/use-app-colors";
-import { useColorScheme } from "nativewind";
-import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, {
+  Easing,
   ReduceMotion,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export type TabKey = "home" | "categories" | "farm" | "orders" | "profile";
-
-export type TabItem = {
-  key: TabKey;
-  label: string;
-  icon: (active: boolean) => ReactNode;
-  badge?: number | boolean;
-  href: Href;
-};
-
-export type BottomTabBarProps = {
-  currentTab?: TabKey;
-  onChangeTab?: (key: TabKey) => void;
+export type BottomTabBarProps = RouterTabBarProps & {
   orderBadge?: number | boolean;
 };
 
 const tabDefinitions: {
-  key: TabKey;
+  key: string;
   label: string;
-  href: Href;
   Icon: LucideIcon;
 }[] = [
-  { key: "home", label: "Trang chủ", href: "/(tabs)/home", Icon: Home },
+  { key: "home", label: "Trang chủ", Icon: Home },
   {
     key: "categories",
     label: "Danh mục",
-    href: "/(tabs)/categories",
     Icon: LayoutGrid,
   },
-  { key: "farm", label: "Nông trại", href: "/(tabs)/farm", Icon: Sprout },
+  { key: "farm", label: "Nông trại", Icon: Sprout },
   {
     key: "orders",
     label: "Đơn hàng",
-    href: "/(tabs)/orders",
     Icon: ClipboardList,
   },
   {
     key: "profile",
     label: "Tài khoản",
-    href: "/(tabs)/profile",
     Icon: UserRound,
   },
 ];
 
-const TAB_INDICATOR_WIDTH = 56;
-const TAB_SPRING = {
-  damping: 18,
-  stiffness: 190,
-  mass: 0.65,
+const TAB_INDICATOR_WIDTH = 24;
+const INDICATOR_TIMING = {
+  duration: 150,
+  easing: Easing.out(Easing.cubic),
   reduceMotion: ReduceMotion.System,
 } as const;
-
-function TabIcon({
-  Icon,
-  active,
-  color,
-  fill,
-}: {
-  Icon: LucideIcon;
-  active: boolean;
-  color: string;
-  fill: string;
-}) {
-  const animatedStyle = useAnimatedStyle(
-    () => ({
-      transform: [{ scale: withSpring(active ? 1.06 : 1, TAB_SPRING) }],
-    }),
-    [active],
-  );
-
-  return (
-    <Animated.View style={animatedStyle}>
-      <Icon
-        color={color}
-        fill={fill}
-        size={22}
-        strokeWidth={active ? 2.3 : 1.8}
-      />
-    </Animated.View>
-  );
-}
 
 function RouteBadge({ badge }: { badge?: number | boolean }) {
   if (!badge) return null;
@@ -119,104 +72,96 @@ function RouteBadge({ badge }: { badge?: number | boolean }) {
 }
 
 export function BottomTabBar({
-  currentTab,
-  onChangeTab,
+  state,
+  emitter,
+  navigateToTab,
   orderBadge = false,
 }: BottomTabBarProps) {
-  const pathname = usePathname();
-  const { colorScheme } = useColorScheme();
   const colors = useAppColors();
-  const activeKey =
-    currentTab ??
-    tabDefinitions.find((tab) => pathname.endsWith(`/${tab.key}`))?.key ??
-    "home";
+  const activeKey = state.routes[state.index]?.name;
   const activeIndex = Math.max(
     0,
     tabDefinitions.findIndex((tab) => tab.key === activeKey),
   );
-  const activeColor = colors.primary;
-  const inactiveColor = colors.muted;
-  const containerWidth = useSharedValue(0);
+  const rowWidth = useSharedValue(0);
 
   const indicatorStyle = useAnimatedStyle(() => {
-    const innerWidth = Math.max(0, containerWidth.value - 10);
-    const itemWidth = innerWidth / tabDefinitions.length;
+    const itemWidth = rowWidth.value / tabDefinitions.length;
     const translateX =
-      5 + itemWidth * activeIndex + (itemWidth - TAB_INDICATOR_WIDTH) / 2;
+      itemWidth * (activeIndex + 0.5) - TAB_INDICATOR_WIDTH / 2;
 
     return {
-      transform: [{ translateX: withSpring(translateX, TAB_SPRING) }],
+      opacity: rowWidth.value > 0 ? 1 : 0,
+      transform: [{ translateX: withTiming(translateX, INDICATOR_TIMING) }],
     };
   }, [activeIndex]);
 
   return (
-    <View
-      className="z-10 mx-3 mb-3 flex-row items-center justify-around rounded-3xl border border-border bg-surface px-1 pb-1 pt-2 dark:border-primary/35 dark:bg-surface-container-high"
-      onLayout={({ nativeEvent }) => {
-        containerWidth.value = nativeEvent.layout.width;
-      }}
-      style={{
-        elevation: 8,
-        shadowColor: "#000000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: colorScheme === "dark" ? 0.2 : 0.07,
-        shadowRadius: 12,
-      }}
+    <SafeAreaView
+      className="overflow-hidden rounded-t-xl border-x border-t border-border-strong bg-surface"
+      edges={["bottom", "left", "right"]}
     >
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          {
-            position: "absolute",
-            left: 0,
-            top: 9,
-            width: TAB_INDICATOR_WIDTH,
-            height: 36,
-            borderRadius: 16,
-            backgroundColor:
-              colorScheme === "dark"
-                ? "rgba(56, 193, 114, 0.2)"
-                : "rgba(88, 165, 0, 0.2)",
-          },
-          indicatorStyle,
-        ]}
-      />
+      <View
+        className="flex-row"
+        onLayout={({ nativeEvent }) => {
+          rowWidth.value = nativeEvent.layout.width;
+        }}
+      >
+        <View className="absolute left-0 top-0" pointerEvents="none">
+          <Animated.View style={indicatorStyle}>
+            <View
+              className="h-[4px] rounded-b-full bg-primary"
+              style={{ width: TAB_INDICATOR_WIDTH }}
+            />
+          </Animated.View>
+        </View>
 
-      {tabDefinitions.map(({ key, label, href, Icon }) => {
-        const active = activeKey === key;
-        const iconColor = active ? activeColor : inactiveColor;
-        const iconFill = key === "home" && active ? activeColor : "none";
-        const badge = key === "orders" ? orderBadge : undefined;
+        {tabDefinitions.map(({ key, label, Icon }) => {
+          const route = state.routes.find(({ name }) => name === key);
+          if (!route) return null;
 
-        return (
-          <Pressable
-            key={key}
-            accessibilityLabel={label}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: active }}
-            className="min-h-12 flex-1 items-center justify-center gap-0.5 py-1"
-            onPress={() => {
-              onChangeTab?.(key);
-              router.replace(href);
-            }}
-          >
-            <View className="relative h-9 w-14 items-center justify-center rounded-lg">
-              <TabIcon
-                Icon={Icon}
-                active={active}
-                color={iconColor}
-                fill={iconFill}
-              />
-              <RouteBadge badge={badge} />
-            </View>
-            {active ? (
-              <Text className="font-vietnam text-label-sm text-primary">
+          const active = activeKey === key;
+          const iconColor = active ? colors.primary : colors.muted;
+          const iconFill = key === "home" && active ? colors.primary : "none";
+          const badge = key === "orders" ? orderBadge : undefined;
+
+          return (
+            <Pressable
+              key={route.key}
+              accessibilityLabel={label}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: active }}
+              className="min-h-[56px] flex-1 items-center gap-1 px-0.5 pb-2 pt-3 active:opacity-70"
+              onPress={() => {
+                const event = emitter.emit({
+                  type: "tabPress",
+                  target: route.key,
+                  canPreventDefault: true,
+                });
+
+                if (!active && !event.defaultPrevented) {
+                  navigateToTab(route.key);
+                }
+              }}
+            >
+              <View className="relative h-[24px] w-9 items-center justify-center">
+                <Icon
+                  color={iconColor}
+                  fill={iconFill}
+                  size={22}
+                  strokeWidth={active ? 2.3 : 1.8}
+                />
+                <RouteBadge badge={badge} />
+              </View>
+              <Text
+                className={`text-center font-vietnam text-label-sm ${active ? "text-primary" : "text-muted"}`}
+              >
                 {label}
               </Text>
-            ) : null}
-          </Pressable>
-        );
-      })}
-    </View>
+            </Pressable>
+          );
+        })}
+      </View>
+    </SafeAreaView>
   );
 }

@@ -1,11 +1,11 @@
 import { AppSheet, type AppSheetHandle } from "@/components/common/BottomSheet";
+import type { ProductSortId } from "@/features/products/products.types";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { Check } from "lucide-react-native";
 import { useMemo, useRef } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export type ProductSortId = "harvest" | "price-asc" | "price-desc";
 
 const sortOptions: { id: ProductSortId; label: string }[] = [
   { id: "harvest", label: "Mới hái nhất" },

@@ -1,4 +1,5 @@
-import { catalogProducts, type CatalogProduct } from "@/features/products/catalog.data";
+import { catalogProducts } from "@/features/products/catalog.data";
+import type { CatalogProduct } from "@/types/product";
 
 export type OrderStatus =
   | "pending-payment"

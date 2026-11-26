@@ -18,19 +18,19 @@ const promises: {
   {
     id: "fresh",
     title: "Hái trong ngày",
-    note: "Giao tươi ngon",
+    // note: "Giao tươi ngon",
     Icon: Timer,
   },
   {
     id: "trace",
     title: "Truy xuất 100%",
-    note: "Mã QR từng lô",
+    // note: "Mã QR từng lô",
     Icon: BadgeCheck,
   },
   {
     id: "return",
     title: "Đổi trả tận nơi",
-    note: "Nếu không hài lòng",
+    // note: "Nếu không hài lòng",
     Icon: RefreshCw,
   },
 ];

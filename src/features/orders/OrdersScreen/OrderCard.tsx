@@ -1,5 +1,5 @@
 import { PrimaryBtn } from "@/components/common";
-import { formatPrice } from "@/features/products/ProductDetailScreen/components/format-price";
+import { formatPrice } from "@/utils/format-price";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { Image } from "expo-image";
 import {

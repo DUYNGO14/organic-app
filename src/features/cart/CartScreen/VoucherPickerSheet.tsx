@@ -1,7 +1,7 @@
 import { AppSheet, type AppSheetHandle, SheetFooter } from "@/components/common/BottomSheet";
 import { PrimaryBtn } from "@/components/common";
 import { CART_VOUCHERS, useCartStore, type AppliedVouchers, type VoucherType } from "@/features/cart/cart.store";
-import { formatPrice } from "@/features/products/ProductDetailScreen/components/format-price";
+import { formatPrice } from "@/utils/format-price";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { cn } from "@/lib/cn";
 import { useBottomSheetScrollableCreator } from "@gorhom/bottom-sheet";

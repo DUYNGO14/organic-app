@@ -1,99 +1,61 @@
-import { IconButton } from "@/components/common";
-import type { HomeProduct } from "@/features/home/home.data";
+import { ProductCard } from "@/components/product/ProductCard";
+import { getProductCardBadges } from "@/components/product/product-card-badges";
+import type { Product } from "@/types/product";
 import { useAppColors } from "@/hooks/use-app-colors";
-import { Image } from "expo-image";
-import { ShoppingCartPlus, Star } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Star } from "lucide-react-native";
+import { Text, View } from "react-native";
 import { HomeSectionHeading } from "./HomeSectionHeading";
 
 type RecommendedProductCardProps = {
-  product: HomeProduct;
-  onPress?: (product: HomeProduct) => void;
-  onAdd?: (product: HomeProduct) => void;
+  product: Product;
+  className?: string;
+  onPress?: (product: Product) => void;
+  onAdd?: (product: Product) => void;
 };
 
-function formatPrice(price: number) {
-  return `${price.toLocaleString("vi-VN")}đ`;
-}
+function Rating({ rating, reviewCount = 0 }: Pick<Product, "rating" | "reviewCount">) {
+  const { secondary } = useAppColors();
 
-export function RecommendedProductCard({
-  product,
-  onPress,
-  onAdd,
-}: RecommendedProductCardProps) {
-  const colors = useAppColors();
+  if (reviewCount <= 0 || rating === undefined || !Number.isFinite(rating)) {
+    return <Text className="font-vietnam text-label-md text-muted">Mới</Text>;
+  }
 
   return (
-    <View className="w-[48.5%] rounded-2xl border border-[#F0F4EC] bg-surface-container-lowest p-3 shadow-sm dark:border-[#00E676]/[0.12]">
-      <Pressable accessibilityRole="button" onPress={() => onPress?.(product)}>
-        <View className="relative h-36 overflow-hidden rounded-xl bg-surface-container-low">
-          <Image
-            accessibilityLabel={product.name}
-            cachePolicy="disk"
-            contentFit="cover"
-            source={product.image}
-            style={{ width: "100%", height: "100%" }}
-            transition={200}
-          />
-          <View className="absolute left-2 top-2 rounded-lg bg-surface-container-lowest/95 px-2 py-1">
-            <Text className="font-vietnam text-label-sm text-secondary">
-              {product.badge}
-            </Text>
-          </View>
-        </View>
-        <View className="mt-3 flex-row items-center gap-1">
-          <Star color={colors.secondary} fill={colors.secondary} size={14} />
-          <Text className="font-vietnam text-label-md text-secondary">
-            {product.rating}
-          </Text>
-          <Text className="font-vietnam text-body-sm text-muted">
-            ({product.reviewCount})
-          </Text>
-        </View>
-        <Text
-          className="mt-2 font-vietnam text-body-emphasis text-ink"
-          numberOfLines={1}
-        >
-          {product.name}
-        </Text>
-        <Text
-          className="mt-1 font-vietnam text-body-sm text-muted"
-          numberOfLines={1}
-        >
-          {product.subtitle}
-        </Text>
-      </Pressable>
-      <View className="mt-4 flex-row items-center justify-between gap-1">
-        <Pressable
-          accessibilityRole="button"
-          className="flex-1"
-          onPress={() => onPress?.(product)}
-        >
-          <Text
-            className="font-vietnam text-title-md text-primary"
-            numberOfLines={1}
-          >
-            {formatPrice(product.price)}
-          </Text>
-        </Pressable>
-        <IconButton
-          label={`Thêm ${product.name} vào giỏ`}
-          size="sm"
-          variant="filled"
-          disabled={!onAdd}
-          onPress={() => onAdd?.(product)}
-          icon={<ShoppingCartPlus color={colors.onPrimary} size={16} />}
-        />
-      </View>
+    <View className="flex-row items-center gap-1">
+      <Star color={secondary} fill={secondary} size={14} />
+      <Text className="font-vietnam text-label-md text-secondary">
+        {rating.toFixed(1)}
+      </Text>
+      <Text className="shrink font-vietnam text-label-md text-muted" numberOfLines={1}>
+        ({reviewCount.toLocaleString("vi-VN")})
+      </Text>
     </View>
   );
 }
 
+export function RecommendedProductCard({
+  product,
+  className,
+  onPress,
+  onAdd,
+}: RecommendedProductCardProps) {
+  return (
+    <ProductCard
+      {...product}
+      {...getProductCardBadges(product, { topLabel: product.badge })}
+      className={className}
+      meta={<Rating rating={product.rating} reviewCount={product.reviewCount} />}
+      onPress={onPress && (() => onPress(product))}
+      onAdd={onAdd && (() => onAdd(product))}
+    />
+  );
+}
+
 type RecommendationSectionProps = {
-  products: HomeProduct[];
-  onProductPress?: (product: HomeProduct) => void;
+  products: Product[];
+  onProductPress?: (product: Product) => void;
   onSeeMore?: () => void;
-  onAddProduct?: (product: HomeProduct) => void;
+  onAddProduct?: (product: Product) => void;
 };
 
 export function RecommendationSection({
@@ -114,6 +76,7 @@ export function RecommendationSection({
         {products.map((product) => (
           <RecommendedProductCard
             key={product.id}
+            className="w-[48.5%]"
             onPress={onProductPress}
             onAdd={onAddProduct}
             product={product}

@@ -1,7 +1,8 @@
 import { IconButton, PrimaryBtn, StatusChip } from "@/components/common";
 import { addToCart } from "@/features/cart/add-to-cart";
-import { catalogProducts, type CatalogProduct } from "@/features/products/catalog.data";
-import { formatPrice } from "@/features/products/ProductDetailScreen/components/format-price";
+import { catalogProducts } from "@/features/products/catalog.data";
+import type { CatalogProduct } from "@/types/product";
+import { formatPrice } from "@/utils/format-price";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";

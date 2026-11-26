@@ -1,4 +1,5 @@
-import { useAuthStore } from "@/features/auth/auth.store";
+import { getAccessToken } from "@/features/auth/auth.store";
+import type { ApiError, ApiResponse } from "@/types/api";
 import { create, isAxiosError } from "axios";
 
 /**
@@ -15,17 +16,34 @@ export const api = create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().session?.accessToken;
+  const token = getAccessToken();
   if (token && !token.startsWith("demo-")) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-type ApiErrorBody = {
-  message?: string;
-  error?: string;
-};
+type ApiErrorBody = Partial<ApiError> & { error?: string };
+
+export function unwrapApiResponse<T>(response: ApiResponse<T> | ApiError): T {
+  if (response?.success !== true || !("data" in response)) {
+    throw new Error(
+      getResponseErrorMessage(response) ?? "Phản hồi từ máy chủ không hợp lệ.",
+    );
+  }
+  return response.data;
+}
+
+function getResponseErrorMessage(body?: ApiErrorBody | ApiResponse) {
+  if (typeof body?.message === "string" && body.message) return body.message;
+  if (!body || typeof body !== "object") return undefined;
+
+  const fieldMessage = "errors" in body && Array.isArray(body.errors)
+    ? body.errors[0]?.message
+    : undefined;
+  if (typeof fieldMessage === "string" && fieldMessage) return fieldMessage;
+  if ("error" in body && typeof body.error === "string") return body.error;
+}
 
 export function getApiErrorMessage(
   error: unknown,
@@ -38,7 +56,7 @@ export function getApiErrorMessage(
     if (!error.response) {
       return "Không thể kết nối máy chủ. Vui lòng kiểm tra mạng.";
     }
-    return error.response.data?.message ?? error.response.data?.error ?? fallback;
+    return getResponseErrorMessage(error.response.data) ?? fallback;
   }
   return error instanceof Error ? error.message : fallback;
 }

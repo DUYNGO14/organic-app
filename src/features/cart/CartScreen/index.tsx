@@ -7,7 +7,7 @@ import {
   useCartStore,
   type CartLine,
 } from "@/features/cart/cart.store";
-import { formatPrice } from "@/features/products/ProductDetailScreen/components/format-price";
+import { formatPrice } from "@/utils/format-price";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { FlashList } from "@shopify/flash-list";
 import { router, useLocalSearchParams } from "expo-router";

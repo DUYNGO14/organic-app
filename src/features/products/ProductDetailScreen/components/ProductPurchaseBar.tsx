@@ -1,13 +1,12 @@
 import { PrimaryBtn } from "@/components/common";
 import { addToCart } from "@/features/cart/add-to-cart";
-import type { HomeProduct } from "@/features/home/home.data";
-import type { PackageOption } from "@/features/products/product-detail.data";
+import type { PackageOption, Product } from "@/types/product";
 import type { AppColors } from "@/hooks/use-app-colors";
 import { MessageCircle, Plus, Zap } from "lucide-react-native";
 import { Alert, Pressable, View } from "react-native";
 
 type ProductPurchaseBarProps = {
-  product: HomeProduct;
+  product: Product;
   selectedPackage: PackageOption;
   quantity: number;
   colors: AppColors;

@@ -1,13 +1,12 @@
-import type { HomeProduct } from "@/features/home/home.data";
-import type { PackageOption } from "@/features/products/product-detail.data";
+import type { PackageOption, Product } from "@/types/product";
 import type { AppColors } from "@/hooks/use-app-colors";
 import { BadgeCheck, Package, Star } from "lucide-react-native";
 import { Text, View } from "react-native";
 import { DetailCard } from "./DetailCard";
-import { formatPrice } from "./format-price";
+import { formatPrice } from "@/utils/format-price";
 
 type ProductInfoCardProps = {
-  product: HomeProduct;
+  product: Product;
   selectedPackage: PackageOption;
   packageIndex: number;
   discount: number;
@@ -64,7 +63,7 @@ export function ProductInfoCard({
         <View className="flex-row items-center gap-1">
           <Star color="#F59E0B" fill="#F59E0B" size={16} />
           <Text className="font-vietnam text-label-md text-ink">
-            {product.rating ?? "4.9"}
+            {(product.rating ?? 4.9).toFixed(1)}
           </Text>
           <Text className="font-vietnam text-body-sm text-muted">
             ({product.reviewCount ?? 156} đánh giá)

@@ -1,11 +1,10 @@
 import { AppSheet } from "@/components/common/BottomSheet";
 import { PrimaryBtn } from "@/components/common";
-import { formatPrice } from "@/features/products/ProductDetailScreen/components/format-price";
+import { formatPrice } from "@/utils/format-price";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
-import { AppleMaps, GoogleMaps } from "expo-maps";
 import {
   Check,
   Clock3,
@@ -17,7 +16,7 @@ import {
   Truck,
   UserRound,
 } from "lucide-react-native";
-import { useMemo, type ReactNode } from "react";
+import { lazy, Suspense, useMemo, type ReactNode } from "react";
 import { Linking, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { NativeViewGestureHandler } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -25,6 +24,8 @@ import Toast from "react-native-toast-message";
 import type { CustomerOrder, DeliveryTracking, OrderStatus } from "./orders.data";
 
 const snapPoints = ["92%"];
+// Load the native map only on iOS. The Android app has no Maps SDK key.
+const AppleMapView = lazy(async () => ({ default: (await import("expo-maps")).AppleMaps.View }));
 
 function InfoRow({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
@@ -55,13 +56,48 @@ function TrackingMapFallback({ tracking }: { tracking: DeliveryTracking }) {
       </View>
       <View className="absolute bottom-3 left-3 right-3 rounded-md bg-surface/95 p-2">
         <Text numberOfLines={1} className="font-vietnam text-label-sm text-ink">{tracking.currentLocation}</Text>
-        <Text className="font-vietnam text-label-sm text-muted">Bản đồ trực tiếp khả dụng trong development build</Text>
+        <Text className="font-vietnam text-label-sm text-muted">Sơ đồ giao hàng · {tracking.updatedAt}</Text>
       </View>
     </View>
   );
 }
 
 function TrackingMap({ tracking }: { tracking: DeliveryTracking }) {
+  const colors = useAppColors();
+  const showAppleMap = Platform.OS === "ios" && Constants.appOwnership !== "expo";
+  const { driverCoordinates, destinationCoordinates } = tracking;
+
+  function openDirections() {
+    const origin = `${driverCoordinates.latitude},${driverCoordinates.longitude}`;
+    const destination = `${destinationCoordinates.latitude},${destinationCoordinates.longitude}`;
+    const url = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`;
+
+    void Linking.openURL(url).catch(() => {
+      Toast.show({ type: "error", text1: "Không thể mở Google Maps", text2: "Vui lòng thử lại." });
+    });
+  }
+
+  const preview = <TrackingMapFallback tracking={tracking} />;
+
+  return (
+    <View className="gap-3">
+      {showAppleMap ? (
+        <Suspense fallback={preview}>
+          <TrackingAppleMap tracking={tracking} />
+        </Suspense>
+      ) : preview}
+      <PrimaryBtn
+        fullWidth
+        variant="secondary"
+        title="Xem tuyến đường trên Google Maps"
+        leadingIcon={<Navigation color={colors.primary} size={17} />}
+        onPress={openDirections}
+      />
+    </View>
+  );
+}
+
+function TrackingAppleMap({ tracking }: { tracking: DeliveryTracking }) {
   const colors = useAppColors();
   const cameraPosition = useMemo(() => ({
     coordinates: {
@@ -70,34 +106,18 @@ function TrackingMap({ tracking }: { tracking: DeliveryTracking }) {
     },
     zoom: 14,
   }), [tracking]);
-  const isExpoGo = Constants.appOwnership === "expo";
-
-  if (isExpoGo || Platform.OS === "web") return <TrackingMapFallback tracking={tracking} />;
-
   return (
     <NativeViewGestureHandler disallowInterruption>
       <View className="h-56 overflow-hidden rounded-lg border border-border bg-surface-container">
-        {Platform.OS === "android" ? (
-          <GoogleMaps.View
-            style={StyleSheet.absoluteFill}
-            cameraPosition={cameraPosition}
-            markers={[
-              { id: "courier", coordinates: tracking.driverCoordinates, title: "Tài xế đang ở đây", snippet: tracking.currentLocation, showCallout: true },
-              { id: "destination", coordinates: tracking.destinationCoordinates, title: "Địa chỉ nhận hàng", snippet: tracking.destination, showCallout: true },
-            ]}
-            polylines={[{ id: "delivery-route", coordinates: [...tracking.route], color: colors.primary, width: 7 }]}
-          />
-        ) : (
-          <AppleMaps.View
-            style={StyleSheet.absoluteFill}
-            cameraPosition={cameraPosition}
-            markers={[
-              { id: "courier", coordinates: tracking.driverCoordinates, title: "Tài xế đang ở đây", systemImage: "scooter", tintColor: colors.primary },
-              { id: "destination", coordinates: tracking.destinationCoordinates, title: "Địa chỉ nhận hàng", systemImage: "house.fill", tintColor: colors.cold },
-            ]}
-            polylines={[{ id: "delivery-route", coordinates: [...tracking.route], color: colors.primary, width: 7 }]}
-          />
-        )}
+        <AppleMapView
+          style={StyleSheet.absoluteFill}
+          cameraPosition={cameraPosition}
+          markers={[
+            { id: "courier", coordinates: tracking.driverCoordinates, title: "Tài xế đang ở đây", systemImage: "scooter", tintColor: colors.primary },
+            { id: "destination", coordinates: tracking.destinationCoordinates, title: "Địa chỉ nhận hàng", systemImage: "house.fill", tintColor: colors.cold },
+          ]}
+          polylines={[{ id: "delivery-route", coordinates: [...tracking.route], color: colors.primary, width: 7 }]}
+        />
         <View pointerEvents="none" className="absolute left-3 top-3 rounded-full bg-surface/95 px-3 py-1.5">
           <Text className="font-vietnam text-label-sm text-primary">{tracking.updatedAt}</Text>
         </View>
