@@ -19,7 +19,7 @@ export function LegalDocumentScreen() {
   const { document: documentId } = useLocalSearchParams<{ document?: string }>();
   const document = getLegalDocument(documentId);
   const colors = useAppColors();
-  const phone = useAuthStore((state) => state.session?.phone);
+  const phone = useAuthStore((state) => state.user?.phone);
   const [acceptance, setAcceptance] = useState<LegalAcceptance | null>(null);
   const [saving, setSaving] = useState(false);
 

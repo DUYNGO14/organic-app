@@ -139,7 +139,7 @@ function callSupport() {
 export default function NotFoundScreen() {
   const colors = useAppColors();
   const href = useUnstableGlobalHref();
-  const signedIn = useAuthStore((state) => Boolean(state.session));
+  const signedIn = useAuthStore((state) => state.status === "authenticated");
 
   function goToStart() {
     router.replace("/");

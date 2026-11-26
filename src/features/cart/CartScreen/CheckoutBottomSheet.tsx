@@ -34,7 +34,7 @@ export function CheckoutBottomSheet({
   const renderScrollComponent = useBottomSheetScrollableCreator<ScrollViewProps>();
   const address = useCartStore(selectDeliveryAddress);
   const appliedVouchers = useCartStore((state) => state.appliedVouchers);
-  const phone = useAuthStore((state) => state.session?.phone);
+  const phone = useAuthStore((state) => state.user?.phone);
   const totals = getCartTotals(lines, appliedVouchers);
   const [hasAcceptedCheckoutTerms, setHasAcceptedCheckoutTerms] = useState(false);
 

@@ -21,7 +21,7 @@ const requestKinds: readonly { id: PrivacyRequestKind; label: string }[] = [
 export function PrivacyRequestSheet({ onClose }: { onClose: () => void }) {
   const sheet = useRef<AppSheetHandle>(null);
   const colors = useAppColors();
-  const phone = useAuthStore((state) => state.session?.phone);
+  const phone = useAuthStore((state) => state.user?.phone);
   const [kind, setKind] = useState<PrivacyRequestKind>("access");
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);

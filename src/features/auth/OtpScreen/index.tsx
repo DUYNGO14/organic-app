@@ -13,7 +13,7 @@ import {
 } from "@/features/auth/components/AuthScreenLayout";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useCountdown } from "@/hooks/use-countdown";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, type Href } from "expo-router";
 import { ArrowRight, Pencil, Phone } from "lucide-react-native";
 import { useState } from "react";
 import {
@@ -88,7 +88,9 @@ export default function OtpScreen() {
     try {
       const session = await verifyOtp(phone, code);
       await signIn(session);
-      router.replace("/(tabs)/home");
+      const { returnTo } = useAuthStore.getState();
+      useAuthStore.setState({ returnTo: null });
+      router.replace((returnTo as Href | null) ?? "/(tabs)/home");
     } catch (error) {
       setError("code", {
         type: "server",

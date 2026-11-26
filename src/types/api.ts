@@ -21,6 +21,7 @@ export type SimpleResponse<T> = ApiResponse<T>;
 export interface ApiError {
   success: false;
   code: number;
+  errorCode: string;
   message: string;
   errors?: {
     field?: string;

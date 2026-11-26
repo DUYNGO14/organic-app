@@ -370,7 +370,7 @@ function SettingsSection({ onSignOut }: { onSignOut: () => void }) {
 }
 
 export default function ProfileScreen({ isLoading = false }: ScreenLoadingProps = {}) {
-  const session = useAuthStore((state) => state.session);
+  const phone = useAuthStore((state) => state.user?.phone);
   const signOut = useAuthStore((state) => state.signOut);
   const [points, setPoints] = useState(1_450);
   const [redeemedIds, setRedeemedIds] = useState<ReadonlySet<string>>(new Set());
@@ -401,13 +401,15 @@ export default function ProfileScreen({ isLoading = false }: ScreenLoadingProps 
       {
         text: "Đăng xuất",
         style: "destructive",
-        onPress: () => void signOut().then(() => router.replace("/(auth)/login")),
+        onPress: () => void signOut().catch(() => {
+          Alert.alert("Không thể xóa hết dữ liệu phiên trên thiết bị.");
+        }),
       },
     ]);
   }
 
   function renderSection(item: ProfileSection) {
-    if (item === "hero") return <ProfileHero phone={session?.phone} points={points} onHistory={() => setHistoryVisible(true)} />;
+    if (item === "hero") return <ProfileHero phone={phone} points={points} onHistory={() => setHistoryVisible(true)} />;
     if (item === "impact") return <ImpactSection />;
     if (item === "rewards") return <RewardsSection points={points} redeemedIds={redeemedIds} onRedeem={redeemReward} />;
     if (item === "management") return <ManagementSection onShortcut={openShortcut} />;

@@ -1,9 +1,11 @@
 import { StartupSplash } from "@/components/layout/StartupSplash";
+import { getAuthReturnPath } from "@/features/auth/auth-return-path";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { AppProviders } from "@/providers/app-providers";
 import { useAppStore } from "@/stores/app-store";
 import { useFonts } from "expo-font";
-import { Stack, usePathname } from "expo-router";
+import { useLinkingURL } from "expo-linking";
+import { Stack, usePathname, useUnstableGlobalHref } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StatusBar, View } from "react-native";
@@ -16,8 +18,10 @@ const shouldShowStartupSplash = __DEV__;
 
 export default function RootLayout() {
   const pathname = usePathname();
-  const hydrateAuth = useAuthStore((state) => state.hydrate);
-  const isLoading = useAuthStore((state) => state.isLoading);
+  const href = useUnstableGlobalHref();
+  const linkingUrl = useLinkingURL();
+  const bootstrap = useAuthStore((state) => state.bootstrap);
+  const isBooting = useAuthStore((state) => state.status === "booting");
   const isThemeHydrated = useAppStore((state) => state.isThemeHydrated);
   const nativeSplashHidden = useRef(false);
   const [splashComplete, setSplashComplete] = useState(false);
@@ -47,8 +51,18 @@ export default function RootLayout() {
   ]);
 
   useEffect(() => {
-    void hydrateAuth();
-  }, [hydrateAuth]);
+    void bootstrap();
+  }, [bootstrap]);
+
+  useEffect(() => {
+    const returnTo = getAuthReturnPath(href);
+    if (returnTo) useAuthStore.setState({ returnTo });
+  }, [href]);
+
+  useEffect(() => {
+    const returnTo = linkingUrl && getAuthReturnPath(linkingUrl);
+    if (returnTo) useAuthStore.setState({ returnTo });
+  }, [linkingUrl]);
 
   const fontsReady = fontsLoaded || Boolean(fontError);
 
@@ -56,7 +70,7 @@ export default function RootLayout() {
     if (
       startupComplete ||
       !fontsReady ||
-      isLoading ||
+      isBooting ||
       !isThemeHydrated ||
       pathname === "/"
     )
@@ -64,8 +78,8 @@ export default function RootLayout() {
 
     if (!shouldShowStartupSplash) {
       handOffSplash();
-      setStartupComplete(true);
-      return;
+      const frame = requestAnimationFrame(() => setStartupComplete(true));
+      return () => cancelAnimationFrame(frame);
     }
 
     if (!splashComplete) return;
@@ -75,7 +89,7 @@ export default function RootLayout() {
     startupComplete,
     splashComplete,
     fontsReady,
-    isLoading,
+    isBooting,
     isThemeHydrated,
     pathname,
   ]);
@@ -91,7 +105,7 @@ export default function RootLayout() {
   return (
     <View className="flex-1 bg-canvas" collapsable={false}>
       <AppProviders>
-        {fontsReady && !isLoading ? <AuthNavigator /> : null}
+        {fontsReady && !isBooting ? <AuthNavigator /> : null}
       </AppProviders>
       {shouldShowStartupSplash && !startupComplete ? (
         <StartupSplash
@@ -105,7 +119,7 @@ export default function RootLayout() {
 }
 
 function AuthNavigator() {
-  const session = useAuthStore((state) => state.session);
+  const isAuthed = useAuthStore((state) => state.status === "authenticated");
   const hasCompletedOnboarding = useAuthStore(
     (state) => state.hasCompletedOnboarding,
   );
@@ -114,13 +128,13 @@ function AuthNavigator() {
     <Stack screenOptions={{ headerShown: false }}>
       <StatusBar barStyle="auto" />
       <Stack.Screen name="legal" />
-      <Stack.Protected guard={!session && hasCompletedOnboarding}>
+      <Stack.Protected guard={!isAuthed && hasCompletedOnboarding}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
-      <Stack.Protected guard={!session && !hasCompletedOnboarding}>
+      <Stack.Protected guard={!isAuthed && !hasCompletedOnboarding}>
         <Stack.Screen name="(onboarding)" />
       </Stack.Protected>
-      <Stack.Protected guard={!!session}>
+      <Stack.Protected guard={isAuthed}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(product)" />
         <Stack.Screen name="cart" />

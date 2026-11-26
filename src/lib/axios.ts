@@ -1,13 +1,19 @@
-import { getAccessToken } from "@/features/auth/auth.store";
+import { isAccountDisabled, shouldRefreshOn401 } from "@/features/auth/authErrors";
+import { apiBaseUrl, authSession, getHttpsOrigin, trustedApiOrigin } from "@/features/auth/authRuntime";
+import { logAuthEvent, SessionExpiredError, type AuthSessionManager } from "@/features/auth/authSession";
 import type { ApiError, ApiResponse } from "@/types/api";
-import { create, isAxiosError } from "axios";
+import {
+  CanceledError,
+  create,
+  isAxiosError,
+  isCancel,
+  type AxiosInstance,
+  type InternalAxiosRequestConfig,
+} from "axios";
+import { randomUUID } from "expo-crypto";
 
-/**
- * API root shared by all feature API modules.
- * Set EXPO_PUBLIC_API_URL to point to the real backend; DummyJSON is only the sample default.
- */
 export const api = create({
-  baseURL: process.env.EXPO_PUBLIC_API_URL ?? "https://dummyjson.com",
+  baseURL: apiBaseUrl,
   timeout: 15_000,
   headers: {
     Accept: "application/json",
@@ -15,13 +21,123 @@ export const api = create({
   },
 });
 
-api.interceptors.request.use((config) => {
-  const token = getAccessToken();
-  if (token && !token.startsWith("demo-")) {
-    config.headers.Authorization = `Bearer ${token}`;
+installAuthInterceptors(api, authSession, trustedApiOrigin, randomUUID);
+
+export default api;
+
+declare module "axios" {
+  interface AxiosRequestConfig {
+    skipAuthRefresh?: boolean;
+    retryOnAuth?: boolean;
   }
-  return config;
-});
+}
+
+type AuthConfig = InternalAxiosRequestConfig & {
+  _sid?: number;
+  _sentToken?: string;
+  _retry?: boolean;
+};
+
+function skipsAuth(url: string, trustedOrigin: string) {
+  try {
+    if (getHttpsOrigin(url) !== trustedOrigin) return true;
+    const segments: string[] = [];
+    for (const segment of decodeURIComponent(new URL(url).pathname).split(/[\\/]/)) {
+      if (segment === "..") segments.pop();
+      else if (segment && segment !== ".") segments.push(segment);
+    }
+    return /(?:^|\/)auth\/(?:login|register|otp|send[-_]?otp|verify[-_]?otp|logout)(?:\/|$)/i
+      .test(segments.join("/"));
+  } catch {
+    return true;
+  }
+}
+
+function waitForRefresh(promise: Promise<void>, config: AuthConfig) {
+  const signal = config.signal;
+  if (!signal?.addEventListener || !signal.removeEventListener) return promise;
+  return new Promise<void>((resolve, reject) => {
+    const cancel = () => reject(new CanceledError());
+    signal.addEventListener?.("abort", cancel);
+    if (signal.aborted) cancel();
+    void promise.then(resolve, reject).finally(() => {
+      signal.removeEventListener?.("abort", cancel);
+    });
+  });
+}
+
+export function installAuthInterceptors(
+  api: AxiosInstance,
+  session: AuthSessionManager,
+  trustedOrigin: string | null,
+  createId: () => string,
+) {
+  api.interceptors.request.use((config: AuthConfig) => {
+    const current = session.getSnapshot();
+    if (config._sid !== undefined && current?.sid !== config._sid) {
+      throw new CanceledError();
+    }
+
+    const uri = api.getUri(config);
+    if (!trustedOrigin || config.skipAuthRefresh || skipsAuth(uri, trustedOrigin)) {
+      return config;
+    }
+    if (current && !current.accessToken.startsWith("demo-")) {
+      config._sid ??= current.sid;
+      config._sentToken = current.accessToken;
+      config.headers.set("Authorization", `Bearer ${current.accessToken}`);
+    }
+    if (
+      /^(post|put|patch|delete)$/i.test(config.method ?? "") &&
+      !config.headers.has("Idempotency-Key")
+    ) {
+      config.headers.set("Idempotency-Key", createId());
+    }
+    return config;
+  }, (error: unknown) => { throw error; }, { synchronous: true });
+
+  api.interceptors.response.use(
+    (response) => {
+      const { _sid: sid } = response.config as AuthConfig;
+      if (sid !== undefined && session.getSnapshot()?.sid !== sid) throw new CanceledError();
+      return response;
+    },
+    async (error: unknown) => {
+      if (!isAxiosError(error) || isCancel(error)) throw error;
+      const config = error.config as AuthConfig | undefined;
+      if (config?.signal?.aborted) throw new CanceledError();
+      const current = session.getSnapshot();
+      if (!config?._sentToken || !current || config._sid !== current.sid) throw error;
+
+      if (isAccountDisabled(error)) {
+        await session.expire(current.sid);
+        throw error;
+      }
+      if (config._retry && error.response?.status === 401) {
+        logAuthEvent("auth.refresh.retry_unauthorized", { status: 401 });
+      }
+      if (config._retry || config.retryOnAuth === false || !shouldRefreshOn401(error)) {
+        throw error;
+      }
+
+      logAuthEvent("auth.refresh.unauthorized", { status: 401 });
+      config._retry = true;
+      if (current.accessToken === config._sentToken) {
+        try {
+          await waitForRefresh(session.refreshSession(current.sid), config);
+        } catch (refreshError) {
+          if (refreshError instanceof SessionExpiredError) throw error;
+          throw refreshError;
+        }
+      }
+
+      if (config.signal?.aborted) throw new CanceledError();
+      if (session.getSnapshot()?.sid !== current.sid) throw error;
+      logAuthEvent("auth.refresh.retry");
+      return api(config);
+    },
+  );
+}
 
 type ApiErrorBody = Partial<ApiError> & { error?: string };
 

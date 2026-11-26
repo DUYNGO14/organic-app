@@ -51,6 +51,15 @@ EXPO_PUBLIC_API_URL=https://api.example.com
 
 Nếu không khai báo, ứng dụng dùng DummyJSON làm API mẫu. Không đặt token, khoá riêng tư hoặc bí mật trong biến `EXPO_PUBLIC_*` vì chúng được đóng gói vào ứng dụng.
 
+## Hợp đồng xác thực với backend
+
+- API trả lỗi với `success: false`, `code` bằng HTTP status, `errorCode` ổn định và `message` dành để hiển thị. HTTP 401 với `ACCESS_TOKEN_EXPIRED` hoặc `ACCESS_TOKEN_INVALID` cho phép refresh và gửi lại một lần. HTTP 403 với `ACCOUNT_DISABLED` kết thúc phiên. `FORBIDDEN`, `VALIDATION_ERROR` và `RATE_LIMITED` được trả về caller.
+- `POST /auth/login/refreshToken` nhận `{ refreshToken }` và trả `{ success: true, code: 200, message, data: { accessToken, refreshToken } }`. HTTP 401 với `REFRESH_TOKEN_EXPIRED`, `REFRESH_TOKEN_INVALID`, `REFRESH_TOKEN_REVOKED` hoặc `REFRESH_TOKEN_REUSED` kết thúc phiên. Khi phản hồi chưa có `errorCode`, client dùng HTTP 401 cho request có Bearer và HTTP 401/403 cho refresh. Lỗi mạng, timeout, 400, 429, 5xx và response sai cấu trúc giữ phiên.
+- Middleware xác thực phải chạy trước nghiệp vụ. Backend xoay vòng refresh token và trả lại lần xoay vòng trước trong cửa sổ 10–30 giây nếu client gửi lại token vừa dùng. Access token có hạn 15 phút và refresh token có hạn trượt 30 ngày. `POST /auth/logout` nhận `{ refreshToken }` và thu hồi token. Hai endpoint auth dùng HTTPS và URL trực tiếp.
+- Các thao tác POST/PUT/PATCH/DELETE hỗ trợ `Idempotency-Key` với kết quả lưu 24 giờ. Client dùng cùng key khi gửi lại. Đặt `retryOnAuth: false` ở endpoint ghi chưa hỗ trợ điều này.
+
+Chạy `npm run test:auth` để kiểm thử với Axios và SecureStore mô phỏng. Đặt `EXPO_PUBLIC_AUTH_TELEMETRY=true` trong môi trường staging để bật log sự kiện auth trên bản build staging. Log có tên sự kiện, thời gian xử lý và mã HTTP, không chứa token hay dữ liệu request. Kiểm tra hợp đồng và theo dõi tỷ lệ refresh lỗi trên staging trước khi phát hành production. Luồng đăng nhập OTP hiện dùng dữ liệu demo.
+
 ## Nối dữ liệu API với skeleton
 
 Dùng `QueryClient` hiện có và giữ dữ liệu máy chủ trong TanStack Query. Khi nối API, truyền `isLoading={query.isLoading && query.data === undefined}` cho màn hình, ví dụ `<ProductsScreen initialSearch="" isLoading={isLoading} />`. Đồng thời thay nguồn dữ liệu mẫu bằng dữ liệu query đã chuyển đổi sang kiểu mà màn hình dùng.

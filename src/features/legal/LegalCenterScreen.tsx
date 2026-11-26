@@ -13,7 +13,7 @@ import { PrivacyRequestSheet } from "./PrivacyRequestSheet";
 
 export function LegalCenterScreen() {
   const colors = useAppColors();
-  const phone = useAuthStore((state) => state.session?.phone);
+  const phone = useAuthStore((state) => state.user?.phone);
   const [acceptances, setAcceptances] = useState<LegalAcceptance[]>([]);
   const [requests, setRequests] = useState<PrivacyRequest[]>([]);
   const [requestOpen, setRequestOpen] = useState(false);
