@@ -9,6 +9,7 @@ export type AppColors = {
   ink: string;
   muted: string;
   danger: string;
+  onDanger: string;
   warning: string;
   cold: string;
   rating: string;
@@ -38,6 +39,7 @@ export function useAppColors(): AppColors {
     ink: isDark ? "#F0FDF4" : "#000000",
     muted: isDark ? "#94A3B8" : "#6B7280",
     danger: isDark ? "#FFB4AB" : "#BA1A1A",
+    onDanger: isDark ? "#690005" : "#FFFFFF",
     warning: isDark ? "#FCD34D" : "#92400E",
     cold: isDark ? "#7DD3FC" : "#075985",
     rating: isDark ? "#FBBF24" : "#F59E0B",

@@ -1,6 +1,8 @@
+import { useTranslation } from "react-i18next";
 import { AppSheet, SheetFooter, type AppSheetHandle } from "@/components/common/BottomSheet";
 import { PrimaryBtn, SearchInput } from "@/components/common";
 import { SheetTextInput } from "@/components/common/Input/SheetTextInput";
+import { SkeletonBlock, SkeletonGroup } from "@/components/common/Skeleton";
 import {
   fetchProvinces,
   fetchSubdivisions,
@@ -14,20 +16,21 @@ import { cn } from "@/lib/cn";
 import { useBottomSheetScrollableCreator } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import { useQuery } from "@tanstack/react-query";
+import { useIsFocused } from "expo-router";
 import { Check } from "lucide-react-native";
 import { useCallback, useDeferredValue, useMemo, useRef, useState } from "react";
 import { Pressable, Text, View, type ScrollViewProps } from "react-native";
 
-export const divisionLabels: Record<DivisionLevel, string> = {
-  province: "Tỉnh / Thành phố",
-  district: "Quận / Huyện",
-  ward: "Phường / Xã",
+export const divisionLabelKeys: Record<DivisionLevel, string> = {
+  province: "cart.provinceCity",
+  district: "cart.district",
+  ward: "cart.wardCommune",
 };
 
 const snapPoints = ["88%"];
 const modes = [
-  { id: "current", title: "Địa chỉ hiện hành" },
-  { id: "legacy", title: "Địa chỉ có quận/huyện" },
+  { id: "current", title: "cart.currentAddressFormat" },
+  { id: "legacy", title: "cart.addressWithADistrict" },
 ] as const;
 const queryOptions = { staleTime: 60 * 60 * 1000, retry: false } as const;
 
@@ -48,8 +51,10 @@ export function AddressDivisionPicker({
   onSelect: (name: string, mode: DivisionMode) => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const ref = useRef<AppSheetHandle>(null);
   const colors = useAppColors();
+  const focused = useIsFocused();
   const [mode, setMode] = useState(initialMode);
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
@@ -80,8 +85,11 @@ export function AddressDivisionPicker({
   const activeQuery = level === "province" || provinceCode === undefined
     ? provinces
     : usesDistrict && districtCode !== undefined ? districtChildren : provinceChildren;
-  const parentMissing = (level !== "province" && provinces.isSuccess && provinceCode === undefined)
-    || (usesDistrict && provinceChildren.isSuccess && districtCode === undefined);
+  const parentMissing = (level !== "province" && provinces.data !== undefined && provinceCode === undefined)
+    || (usesDistrict && provinceChildren.data !== undefined && districtCode === undefined);
+  const hasData = activeQuery.data !== undefined;
+  const showSkeleton = !manual && !parentMissing && !hasData && activeQuery.isLoading;
+  const showLoadError = !parentMissing && !hasData && activeQuery.isError;
   const divisions = useMemo(() => {
     const searchTerm = normalizeDivision(deferredSearch);
     return parentMissing ? [] : (activeQuery.data ?? []).filter(({ name }) =>
@@ -100,8 +108,8 @@ export function AddressDivisionPicker({
   return (
     <AppSheet
       header={{
-        title: divisionLabels[level],
-        actionLabel: "Đóng bộ chọn địa chỉ",
+        title: t(divisionLabelKeys[level]),
+        actionLabel: t("cart.closeAddressPicker"),
         className: "border-b-0 pb-0",
       }}
       ref={ref}
@@ -122,7 +130,7 @@ export function AddressDivisionPicker({
                 className={cn("min-h-12 flex-1 items-center justify-center rounded px-2 py-2", mode === id ? "bg-primary/10" : "bg-surface-soft")}
                 onPress={() => { setMode(id); setSearch(""); }}
               >
-                <Text className="text-center font-vietnam text-label-sm text-ink">{title}</Text>
+                <Text className="text-center font-vietnam text-label-sm text-ink">{t(title)}</Text>
               </Pressable>
             ))}
           </View>
@@ -130,8 +138,8 @@ export function AddressDivisionPicker({
         <SearchInput
           inputComponent={SheetTextInput}
           autoCorrect
-          accessibilityLabel={manual ? "Nhập tên địa phương" : "Tìm địa phương"}
-          placeholder={manual ? "Nhập tên địa phương" : "Tìm theo tên địa phương"}
+          accessibilityLabel={manual ? t("cart.enterALocalityName") : t("cart.findALocality")}
+          placeholder={manual ? t("cart.enterALocalityName") : t("cart.searchByLocalityName")}
           value={search}
           onChangeText={setSearch}
           onClear={() => setSearch("")}
@@ -142,7 +150,15 @@ export function AddressDivisionPicker({
         style={{ flex: 1, minHeight: 0 }}
         onLayout={(event) => setViewportHeight(event.nativeEvent.layout.height)}
       >
-        {!manual && viewportHeight > 0 ? (
+        {showSkeleton ? (
+          <SkeletonGroup active={focused} className="overflow-hidden px-4" label={t("cart.loadingLocalities")}>
+            {[0, 1, 2, 3, 4, 5].map((index) => (
+              <View key={index} className="h-12 justify-center border-b border-border">
+                <SkeletonBlock className={index % 2 === 0 ? "h-4 w-2/3" : "h-4 w-1/2"} />
+              </View>
+            ))}
+          </SkeletonGroup>
+        ) : !manual && viewportHeight > 0 ? (
           <FlashList
             style={{ flex: 0, height: viewportHeight }}
             contentContainerStyle={{ paddingHorizontal: 16 }}
@@ -167,13 +183,13 @@ export function AddressDivisionPicker({
             ListEmptyComponent={
               <View className="items-center gap-2 py-5">
                 <Text accessibilityLiveRegion="polite" className="text-center font-vietnam text-body-md text-muted">
-                  {parentMissing ? "Không tìm thấy đơn vị cấp trên. Bạn có thể chọn lại hoặc nhập thủ công."
-                    : activeQuery.isPaused ? "Đang ngoại tuyến. Bạn có thể nhập thủ công."
-                      : activeQuery.isError ? "Chưa tải được danh sách địa phương."
-                        : activeQuery.isPending ? "Đang tải địa phương…" : "Không tìm thấy địa phương."}
+                  {parentMissing ? t("cart.parentAreaNotFoundChooseAgain")
+                    : !hasData && activeQuery.isPaused ? t("cart.youReOfflineYouCanEnter")
+                      : showLoadError ? t("cart.couldNotLoadTheListOf")
+                        : t("cart.noLocalitiesFound")}
                 </Text>
-                {activeQuery.isError ? (
-                  <PrimaryBtn title="Thử lại" variant="secondary" onPress={() => void activeQuery.refetch()} />
+                {showLoadError ? (
+                  <PrimaryBtn title={t("cart.tryAgain")} variant="secondary" onPress={() => void activeQuery.refetch()} />
                 ) : null}
               </View>
             }
@@ -182,11 +198,11 @@ export function AddressDivisionPicker({
       </View>
       <SheetFooter className="flex-row justify-end pt-2" bottomPadding={8}>
         <PrimaryBtn
-          title={manual ? "Xem danh sách" : "Nhập thủ công"}
+          title={manual ? t("cart.viewList") : t("cart.enterManually")}
           variant="ghost"
           onPress={() => { setSearch(manual ? "" : value); setManual(!manual); }}
         />
-        {manual ? <PrimaryBtn title="Chọn" disabled={search.trim().length < 2} onPress={() => select(search)} /> : null}
+        {manual ? <PrimaryBtn title={t("cart.select")} disabled={search.trim().length < 2} onPress={() => select(search)} /> : null}
       </SheetFooter>
     </AppSheet>
   );

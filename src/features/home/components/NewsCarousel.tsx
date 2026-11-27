@@ -1,3 +1,4 @@
+import { useAppTranslation } from "@/localization/content";
 import type { HomeBanner } from "@/features/home/home.data";
 import { PrimaryBtn } from "@/components/common";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -25,6 +26,7 @@ export function NewsCarousel({
   onBannerPress,
   autoPlayInterval = 5_500,
 }: NewsCarouselProps) {
+  const { t, localize } = useAppTranslation();
   const colors = useAppColors();
   const { width } = useWindowDimensions();
   const listRef = useRef<FlatList<HomeBanner>>(null);
@@ -67,7 +69,7 @@ export function NewsCarousel({
       <View style={{ width }} className="px-4">
         <View className="h-[244px] overflow-hidden rounded-xl bg-primary shadow-md">
           <Image
-            accessibilityLabel={item.title}
+            accessibilityLabel={localize(item.title)}
             cachePolicy="disk"
             contentFit="cover"
             source={item.image}
@@ -79,20 +81,20 @@ export function NewsCarousel({
             <View className="self-start flex-row items-center gap-1.5 rounded-full bg-surface-container-lowest/90 px-3 py-2">
               <BadgeCheck color={colors.secondary} size={16} />
               <Text className="font-vietnam text-label-sm text-primary">
-                {item.eyebrow}
+                {localize(item.eyebrow)}
               </Text>
             </View>
             <View className="max-w-[92%]">
               <Text className="font-vietnam text-headline-sm text-white">
-                {item.title}
+                {localize(item.title)}
               </Text>
               <Text className="mt-2 font-vietnam text-body-md text-white/85">
-                {item.description}
+                {localize(item.description)}
               </Text>
             </View>
             <View className="flex-row items-end justify-between">
               <PrimaryBtn
-                title={item.actionLabel}
+                title={localize(item.actionLabel)}
                 variant="secondary"
                 className="min-h-0 rounded-xl border-0 bg-white px-4 py-2.5"
                 labelClassName="text-primary"
@@ -102,7 +104,7 @@ export function NewsCarousel({
               <View className="mb-1 flex-row items-center gap-1.5">
                 {banners.map((banner, index) => (
                   <Pressable
-                    accessibilityLabel={`Tin ${index + 1}`}
+                    accessibilityLabel={t("home.bannerPosition", { position: index + 1 })}
                     accessibilityRole="button"
                     key={banner.id}
                     onPress={() => {
@@ -129,7 +131,7 @@ export function NewsCarousel({
         </View>
       </View>
     ),
-    [activeIndex, banners, colors.primary, colors.secondary, onBannerPress, width],
+    [activeIndex, banners, colors.primary, colors.secondary, localize, onBannerPress, t, width],
   );
 
   if (banners.length === 0) return null;

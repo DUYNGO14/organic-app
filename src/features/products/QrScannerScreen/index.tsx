@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { PrimaryBtn } from "@/components/common";
 import { StackHeader } from "@/components/layout";
 import { catalogProducts } from "@/features/products/catalog.data";
@@ -8,11 +9,20 @@ import { Camera, ScanLine } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, AppState, Linking, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { BatchResult } from "./BatchResult";
 import { readQrResult } from "./qr-result";
 
 const scannerSettings: BarcodeSettings = { barcodeTypes: ["qr"] };
 
+function openProduct(productId: string) {
+  router.replace({
+    pathname: "/(product)/product/[productId]",
+    params: { productId },
+  });
+}
+
 export default function QrScannerScreen() {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const focused = useIsFocused();
   const [permission, requestPermission, getPermission] = useCameraPermissions();
@@ -23,7 +33,10 @@ export default function QrScannerScreen() {
   const [result, setResult] = useState<ReturnType<typeof readQrResult>>(null);
   const scanned = useRef(false);
   const active = focused && (appState === "active" || appState === null);
-  const product = result?.productId ? catalogProducts.find(({ id }) => id === result.productId) : undefined;
+  const otherResult = result?.kind === "other" ? result : null;
+  const product = otherResult?.productId
+    ? catalogProducts.find(({ id }) => id === otherResult.productId)
+    : undefined;
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (state) => {
@@ -41,7 +54,7 @@ export default function QrScannerScreen() {
       if (permission?.canAskAgain === false) await Linking.openSettings();
       else await requestPermission();
     } catch {
-      setMessage("Không thể cấp quyền camera. Vui lòng thử lại.");
+      setMessage(t("orders.couldNotGrantCameraAccessPlease"));
     } finally {
       setRequesting(false);
     }
@@ -64,55 +77,65 @@ export default function QrScannerScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-canvas" edges={["top", "bottom"]}>
-      <StackHeader title="Quét mã QR" onBack={() => {
+      <StackHeader title={t("products.scanQrCode")} onBack={() => {
         if (router.canGoBack()) router.back();
         else router.replace("/(tabs)/home");
       }} />
       {result ? (
         <ScrollView contentContainerClassName="gap-4 p-4">
-          <View className="gap-3 rounded-lg border border-card-border bg-surface p-4">
-            <Text accessibilityRole="header" accessibilityLiveRegion="polite" className="font-vietnam text-title-md text-ink">
-              {product ? product.name : "Nội dung mã QR"}
-            </Text>
-            <Text selectable className="font-vietnam text-body-md text-muted">{result.data}</Text>
-          </View>
-          {product ? (
-            <PrimaryBtn fullWidth title="Xem sản phẩm" onPress={() => router.replace({
-              pathname: "/(product)/product/[productId]",
-              params: { productId: product.id },
-            })} />
-          ) : result.url ? (
-            <PrimaryBtn fullWidth title="Mở liên kết" onPress={() => {
-              const url = result.url;
-              if (!url) return;
-              setMessage("");
-              void Linking.openURL(url).catch(() => setMessage("Không thể mở liên kết này."));
-            }} />
-          ) : null}
-          <PrimaryBtn fullWidth variant="secondary" title="Quét mã khác" onPress={restart} />
+          {result.kind === "batch" ? (
+            <BatchResult batchCode={result.batchCode} active={active} onOpenProduct={openProduct} />
+          ) : result.kind === "invalid-batch" ? (
+            <View className="gap-2 rounded-lg border border-card-border bg-surface p-4">
+              <Text accessibilityRole="alert" className="font-vietnam text-title-md text-ink">
+                {t("products.invalidTraceabilityCode")}</Text>
+              <Text className="font-vietnam text-body-md text-muted">
+                {t("products.checkTheQrCodeOnThe")}</Text>
+            </View>
+          ) : (
+            <>
+              <View className="gap-3 rounded-lg border border-card-border bg-surface p-4">
+                <Text accessibilityRole="header" accessibilityLiveRegion="polite" className="font-vietnam text-title-md text-ink">
+                  {product ? product.name : t("products.qrCodeContents")}
+                </Text>
+                <Text selectable className="font-vietnam text-body-md text-muted">{result.data}</Text>
+              </View>
+              {product ? (
+                <PrimaryBtn fullWidth title={t("products.browseProducts")} onPress={() => openProduct(product.id)} />
+              ) : result.url ? (
+                <PrimaryBtn fullWidth title={t("products.openLink")} onPress={() => {
+                  const url = result.url;
+                  if (!url) return;
+                  setMessage("");
+                  void Linking.openURL(url).catch(() => setMessage(t("products.couldNotOpenThisLink")));
+                }} />
+              ) : null}
+            </>
+          )}
+          <PrimaryBtn fullWidth variant="secondary" title={t("products.scanAnotherCode")} onPress={restart} />
           {message ? <Text accessibilityRole="alert" className="font-vietnam text-body-sm text-danger">{message}</Text> : null}
         </ScrollView>
       ) : !permission ? (
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator accessibilityLabel="Đang kiểm tra quyền camera" color={colors.primary} />
+          <ActivityIndicator accessibilityLabel={t("orders.checkingCameraPermissions")} color={colors.primary} />
         </View>
       ) : !permission.granted || cameraError ? (
         <View className="flex-1 justify-center gap-4 px-6">
           <Camera color={colors.primary} size={32} />
           <Text className="font-vietnam text-title-md text-ink">
-            {cameraError ? "Không thể mở camera" : "Cần quyền truy cập camera"}
+            {cameraError ? t("orders.couldNotOpenTheCamera") : t("orders.cameraAccessNeeded")}
           </Text>
           <Text className="font-vietnam text-body-md text-muted">
-            {cameraError ? "Hãy thử mở lại camera." : "Cho phép ứng dụng dùng camera để quét mã QR."}
+            {cameraError ? t("products.tryReopeningTheCamera") : t("products.allowCameraAccessToScanQr")}
           </Text>
           {message ? <Text accessibilityRole="alert" className="font-vietnam text-body-sm text-danger">{message}</Text> : null}
           {cameraError ? (
-            <PrimaryBtn fullWidth title="Thử lại" onPress={restart} />
+            <PrimaryBtn fullWidth title={t("cart.tryAgain")} onPress={restart} />
           ) : (
             <PrimaryBtn
               fullWidth
               loading={requesting}
-              title={permission.canAskAgain ? "Cho phép dùng camera" : "Mở cài đặt ứng dụng"}
+              title={permission.canAskAgain ? t("orders.allowCameraAccess") : t("cart.openAppSettings")}
               onPress={() => void enableCamera()}
             />
           )}
@@ -135,7 +158,7 @@ export default function QrScannerScreen() {
           </View>
           <View className="flex-row items-center justify-center gap-2">
             <ScanLine color={colors.primary} size={20} />
-            <Text className="font-vietnam text-body-md text-ink">Đưa mã QR vào trong khung.</Text>
+            <Text className="font-vietnam text-body-md text-ink">{t("products.placeTheQrCodeInsideThe")}</Text>
           </View>
         </View>
       )}

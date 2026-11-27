@@ -1,17 +1,25 @@
 import { PrimaryBtn } from "@/components/common";
+import { LanguageToggle } from "@/features/account/ProfileScreen/components/LanguageToggle";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { ArrowRight, ScanLine, ShieldCheck, Sparkles } from "lucide-react-native";
+import {
+    ArrowRight,
+    ScanLine,
+    ShieldCheck,
+    Sparkles,
+} from "lucide-react-native";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const logo = require("@/assets/images/adigo-logo.png");
+const logo = require("@/assets/images/logo-adiogo/adigo-logo.png");
 
 export default function WelcomeScreen() {
+  const { t } = useTranslation();
   const completeOnboarding = useAuthStore((state) => state.completeOnboarding);
   const colors = useAppColors();
   const [isStarting, setIsStarting] = useState(false);
@@ -43,21 +51,30 @@ export default function WelcomeScreen() {
       <View
         pointerEvents="none"
         className="absolute -left-20 -top-20 h-64 w-64 rounded-full"
-        style={{ backgroundColor: `${colors.logoStart}${colors.isDark ? "2E" : "14"}` }}
+        style={{
+          backgroundColor: `${colors.logoStart}${colors.isDark ? "2E" : "14"}`,
+        }}
       />
       <View
         pointerEvents="none"
         className="absolute -bottom-24 -right-16 h-72 w-72 rounded-full"
-        style={{ backgroundColor: `${colors.logoEnd}${colors.isDark ? "24" : "16"}` }}
+        style={{
+          backgroundColor: `${colors.logoEnd}${colors.isDark ? "24" : "16"}`,
+        }}
       />
       <View
         pointerEvents="none"
         className="absolute right-9 top-[31%] h-24 w-24 rounded-full"
-        style={{ backgroundColor: `${colors.logoStart}${colors.isDark ? "18" : "0E"}` }}
+        style={{
+          backgroundColor: `${colors.logoStart}${colors.isDark ? "18" : "0E"}`,
+        }}
       />
 
       <SafeAreaView className="flex-1" edges={["top", "bottom"]}>
-        <View className="flex-1 px-4 pb-4 pt-3">
+        <ScrollView
+          contentContainerClassName="grow px-4 pb-4 pt-3"
+          showsVerticalScrollIndicator={false}
+        >
           <View className="self-center overflow-hidden rounded-full border border-card-border bg-surface/85">
             <LinearGradient
               colors={[`${colors.logoStart}16`, `${colors.logoEnd}12`]}
@@ -67,7 +84,9 @@ export default function WelcomeScreen() {
             />
             <View className="min-h-10 flex-row items-center gap-2 px-4 py-2">
               <Sparkles color={colors.logoEnd} size={16} />
-              <Text className="font-vietnam text-label-sm text-ink">NÔNG SẢN MINH BẠCH</Text>
+              <Text className="font-vietnam text-label-sm text-ink">
+                {t("onboarding.traceableProduce")}
+              </Text>
             </View>
           </View>
 
@@ -75,7 +94,11 @@ export default function WelcomeScreen() {
             <View className="overflow-hidden rounded-xl border border-card-border bg-surface/90 p-6">
               <LinearGradient
                 pointerEvents="none"
-                colors={[`${colors.logoStart}20`, `${colors.logoEnd}0A`, `${colors.surface}00`]}
+                colors={[
+                  `${colors.logoStart}20`,
+                  `${colors.logoEnd}0A`,
+                  `${colors.surface}00`,
+                ]}
                 locations={[0, 0.5, 1]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -84,12 +107,19 @@ export default function WelcomeScreen() {
               <View className="items-center">
                 <View
                   className="h-36 w-36 items-center justify-center rounded-full border border-card-border bg-surface"
-                  style={{ shadowColor: colors.logoStart, shadowOpacity: 0.12, shadowRadius: 18, elevation: 2 }}
+                  style={{
+                    shadowColor: colors.logoStart,
+                    shadowOpacity: 0.12,
+                    shadowRadius: 18,
+                    elevation: 2,
+                  }}
                 >
                   <View
                     pointerEvents="none"
                     className="absolute h-28 w-28 rounded-full"
-                    style={{ backgroundColor: `${colors.logoEnd}${colors.isDark ? "12" : "0A"}` }}
+                    style={{
+                      backgroundColor: `${colors.logoEnd}${colors.isDark ? "12" : "0A"}`,
+                    }}
                   />
                   <Image
                     accessibilityLabel="Logo ADIGO"
@@ -106,10 +136,10 @@ export default function WelcomeScreen() {
                   ADIGO
                 </Text>
                 <Text className="mt-3 max-w-[300px] text-center font-vietnam text-body-lg text-ink">
-                  Từ nông trại hữu cơ thuần khiết đến bữa ăn lành mạnh của gia đình Việt.
+                  {t("onboarding.fromOrganicFarmsToHealthyMeals")}
                 </Text>
                 <Text className="mt-3 text-center font-vietnam text-body-md text-muted">
-                  Mỗi lựa chọn đều có nguồn gốc rõ ràng.
+                  {t("onboarding.knowWhereYourFoodComesFrom")}
                 </Text>
               </View>
 
@@ -119,8 +149,12 @@ export default function WelcomeScreen() {
                     <ScanLine color={colors.logoStart} size={19} />
                   </View>
                   <View className="min-w-0 flex-1">
-                    <Text className="font-vietnam text-label-md text-ink">Truy xuất rõ ràng</Text>
-                    <Text className="font-vietnam text-body-sm text-muted">Từng lô nông sản</Text>
+                    <Text className="font-vietnam text-label-md text-ink">
+                      {t("onboarding.easyToTrace")}
+                    </Text>
+                    <Text className="font-vietnam text-body-sm text-muted">
+                      {t("onboarding.everyBatchOfProduce")}
+                    </Text>
                   </View>
                 </View>
                 <View className="min-w-0 flex-1 flex-row items-center gap-2">
@@ -128,8 +162,12 @@ export default function WelcomeScreen() {
                     <ShieldCheck color={colors.logoEnd} size={19} />
                   </View>
                   <View className="min-w-0 flex-1">
-                    <Text className="font-vietnam text-label-md text-ink">Chọn lọc tử tế</Text>
-                    <Text className="font-vietnam text-body-sm text-muted">Cho bữa ăn nhà</Text>
+                    <Text className="font-vietnam text-label-md text-ink">
+                      {t("onboarding.carefullySelected")}
+                    </Text>
+                    <Text className="font-vietnam text-body-sm text-muted">
+                      {t("onboarding.forHomeCooking")}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -137,19 +175,20 @@ export default function WelcomeScreen() {
           </View>
 
           <View className="gap-3">
+            <LanguageToggle />
             <PrimaryBtn
               fullWidth
               className="min-h-[52px] rounded-xl"
               loading={isStarting}
-              title="Bắt đầu cùng ADIGO"
+              title={t("onboarding.getStartedWithAdigo")}
               trailingIcon={<ArrowRight color={colors.onPrimary} size={20} />}
               onPress={() => void handleStart()}
             />
             <Text className="px-4 text-center font-vietnam text-body-sm text-muted">
-              Bằng cách tiếp tục, bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của ADIGO.
+              {t("onboarding.byContinuingYouAgreeToAdigo")}
             </Text>
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );

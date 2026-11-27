@@ -1,11 +1,7 @@
+import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/common";
 import { useAppColors } from "@/hooks/use-app-colors";
-import {
-  Bell,
-  ChevronDown,
-  MapPin,
-  ShoppingBag
-} from "lucide-react-native";
+import { Bell, ChevronDown, MapPin, ShoppingBag } from "lucide-react-native";
 import { Image, Pressable, Text, View } from "react-native";
 
 export type MainHeaderProps = {
@@ -24,7 +20,10 @@ function CountBadge({ count }: { count: number }) {
   if (count < 1) return null;
 
   return (
-    <View pointerEvents="none" className="absolute -right-0.5 -top-0.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-surface bg-primary px-1">
+    <View
+      pointerEvents="none"
+      className="absolute -right-0.5 -top-0.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-surface bg-primary px-1"
+    >
       <Text className="font-vietnam text-label-sm font-bold text-on-primary">
         {count > 99 ? "99+" : count}
       </Text>
@@ -34,7 +33,7 @@ function CountBadge({ count }: { count: number }) {
 
 export function MainHeader({
   userName = "Minh An",
-  currentAddress = "Quận 1, TP. Hồ Chí Minh",
+  currentAddress: suppliedAddress,
   unreadNotificationsCount = 0,
   cartItemsCount = 0,
   userAvatarUrl,
@@ -43,6 +42,8 @@ export function MainHeader({
   onCartClick,
   onProfileClick,
 }: MainHeaderProps) {
+  const { t } = useTranslation();
+  const currentAddress = suppliedAddress ?? t("common.district1HoChiMinhCity");
   const colors = useAppColors();
   const iconColor = colors.isDark ? colors.ink : "#4B5563";
 
@@ -56,7 +57,7 @@ export function MainHeader({
           <Image
             accessibilityLabel="ADIGO"
             className="h-full w-full"
-            source={require("@/assets/images/adigo-logo.png")}
+            source={require("@/assets/images/logo-adiogo/adigo-logo.png")}
           />
         </View>
 
@@ -65,11 +66,11 @@ export function MainHeader({
             numberOfLines={1}
             className="font-vietnam text-body-sm text-ink"
           >
-            Xin chào, {userName} 👋
+            {t("common.hello", { userName })}
           </Text>
           <Pressable
-            accessibilityHint="Chọn địa chỉ giao hàng"
-            accessibilityLabel={`Địa chỉ giao hàng: ${currentAddress}`}
+            accessibilityHint={t("common.chooseADeliveryAddress")}
+            accessibilityLabel={t("common.deliveryAddress", { currentAddress })}
             accessibilityRole="button"
             className="mt-0.5 min-w-0 flex-row items-center gap-1"
             hitSlop={6}
@@ -83,7 +84,7 @@ export function MainHeader({
               numberOfLines={1}
               className="shrink font-vietnam text-label-md text-ink"
             >
-              Giao tới: {currentAddress}
+              {t("common.deliverTo", { currentAddress })}
             </Text>
             <ChevronDown color={iconColor} size={14} />
           </Pressable>
@@ -96,14 +97,17 @@ export function MainHeader({
             icon={<Bell color={iconColor} size={20} />}
             label={
               unreadNotificationsCount > 0
-                ? `Thông báo, ${unreadNotificationsCount} mục chưa đọc`
-                : "Thông báo"
+                ? t("common.notificationsUnread", { unreadNotificationsCount })
+                : t("common.notifications")
             }
             onPress={onNotificationClick}
             size="sm"
           />
           {unreadNotificationsCount > 0 ? (
-            <View pointerEvents="none" className="absolute right-2 top-2 h-2 w-2 rounded-full border border-surface bg-danger" />
+            <View
+              pointerEvents="none"
+              className="absolute right-2 top-2 h-2 w-2 rounded-full border border-surface bg-danger"
+            />
           ) : null}
         </View>
 
@@ -112,8 +116,8 @@ export function MainHeader({
             icon={<ShoppingBag color={iconColor} size={20} />}
             label={
               cartItemsCount > 0
-                ? `Giỏ hàng, ${cartItemsCount} sản phẩm`
-                : "Giỏ hàng"
+                ? t("common.cartItems", { count: cartItemsCount })
+                : t("common.cart")
             }
             onPress={onCartClick}
             size="sm"

@@ -1,6 +1,7 @@
+import { useTranslation } from "react-i18next";
 import { Checkbox, PrimaryBtn } from "@/components/common";
 import { useAuthStore } from "@/features/auth/auth.store";
-import { acceptLegalDocuments } from "@/features/legal/legal.service";
+import { acceptLegalDocuments, getLegalAccount } from "@/features/legal/legal.service";
 import { getCartTotals, selectDeliveryAddress, useCartStore, type CartLine } from "@/features/cart/cart.store";
 import { useBottomSheetScrollableCreator } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
@@ -28,13 +29,14 @@ export function CheckoutBottomSheet({
   onClose,
   onQuantityChange,
 }: CheckoutBottomSheetProps) {
+  const { t } = useTranslation();
   const [viewportHeight, setViewportHeight] = useState(0);
   const [addressBookOpen, setAddressBookOpen] = useState(false);
   const [voucherPickerOpen, setVoucherPickerOpen] = useState(false);
   const renderScrollComponent = useBottomSheetScrollableCreator<ScrollViewProps>();
   const address = useCartStore(selectDeliveryAddress);
   const appliedVouchers = useCartStore((state) => state.appliedVouchers);
-  const phone = useAuthStore((state) => state.session?.phone);
+  const account = useAuthStore((state) => getLegalAccount(state.session));
   const totals = getCartTotals(lines, appliedVouchers);
   const [hasAcceptedCheckoutTerms, setHasAcceptedCheckoutTerms] = useState(false);
 
@@ -45,16 +47,16 @@ export function CheckoutBottomSheet({
     }
 
     if (!hasAcceptedCheckoutTerms) {
-      Toast.show({ type: "info", text1: "Cần xác nhận điều khoản", text2: "Vui lòng đọc và đồng ý điều khoản mua bán trước khi đặt hàng." });
+      Toast.show({ type: "info", text1: t("cart.pleaseAcceptTheTerms"), text2: t("cart.readAndAcceptTheSalesTerms") });
       return;
     }
 
-    if (phone) await acceptLegalDocuments(phone, ["sale", "delivery", "returns"], "checkout");
+    if (account) await acceptLegalDocuments(account, ["sale", "delivery", "returns"], "checkout");
 
     Toast.show({
       type: "error",
-      text1: "Chưa thể đặt hàng",
-      text2: "Ứng dụng chưa kết nối hệ thống đặt hàng.",
+      text1: t("cart.couldNotPlaceTheOrder"),
+      text2: t("cart.theAppIsNotConnectedTo"),
     });
   }
 
@@ -66,7 +68,7 @@ export function CheckoutBottomSheet({
     <>
       <AppSheet
         mode="inline"
-        header={{ title: "Xem lại thanh toán" }}
+        header={{ title: t("cart.reviewCheckout") }}
         enableContentPanningGesture={false}
         onDismiss={onClose}
       >
@@ -110,14 +112,14 @@ export function CheckoutBottomSheet({
                   <View className="rounded-lg border border-card-border bg-surface-container-low/60 p-3">
                     <Checkbox
                       checked={hasAcceptedCheckoutTerms}
-                      description="Tôi đã đọc và đồng ý với điều khoản giao dịch áp dụng cho đơn hàng này."
-                      label="Xác nhận điều khoản đặt hàng"
+                      description={t("cart.iHaveReadAndAcceptThe")}
+                      label={t("cart.acceptTheOrderTerms")}
                       onCheckedChange={setHasAcceptedCheckoutTerms}
                     />
                     <View className="ml-8 mt-1 flex-row flex-wrap gap-x-3">
-                      <Pressable accessibilityRole="link" onPress={() => router.push("/legal/sale")}><Text className="font-vietnam text-body-sm text-primary">Mua bán</Text></Pressable>
-                      <Pressable accessibilityRole="link" onPress={() => router.push("/legal/delivery")}><Text className="font-vietnam text-body-sm text-primary">Giao hàng</Text></Pressable>
-                      <Pressable accessibilityRole="link" onPress={() => router.push("/legal/returns")}><Text className="font-vietnam text-body-sm text-primary">Đổi trả</Text></Pressable>
+                      <Pressable accessibilityRole="link" onPress={() => router.push("/legal/sale")}><Text className="font-vietnam text-body-sm text-primary">{t("cart.sales")}</Text></Pressable>
+                      <Pressable accessibilityRole="link" onPress={() => router.push("/legal/delivery")}><Text className="font-vietnam text-body-sm text-primary">{t("cart.delivery")}</Text></Pressable>
+                      <Pressable accessibilityRole="link" onPress={() => router.push("/legal/returns")}><Text className="font-vietnam text-body-sm text-primary">{t("cart.returns")}</Text></Pressable>
                     </View>
                   </View>
                 </View>
@@ -127,7 +129,7 @@ export function CheckoutBottomSheet({
         </View>
         <SheetFooter guardGesture>
           <PrimaryBtn
-            title="Đặt hàng"
+            title={t("cart.placeOrder")}
             fullWidth
             disabled={lines.length === 0 || !hasAcceptedCheckoutTerms}
             onPress={() => void handlePlaceOrder()}

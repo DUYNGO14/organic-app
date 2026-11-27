@@ -1,5 +1,10 @@
 import { PrimaryBtn } from "@/components/common";
+import {
+  ScreenSkeleton,
+  type ScreenLoadingProps,
+} from "@/components/common/Skeleton/ScreenSkeleton";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { useAppTranslation } from "@/localization/content";
 import { FlashList } from "@shopify/flash-list";
 import { ClipboardList, PackageSearch } from "lucide-react-native";
 import { useMemo, useState } from "react";
@@ -8,26 +13,41 @@ import Toast from "react-native-toast-message";
 import { OrderCard } from "./OrderCard";
 import { OrderDetailSheet } from "./OrderDetailSheet";
 import { OrderReviewSheet, type OrderReview } from "./OrderReviewSheet";
-import { demoOrders, orderFilters, type CustomerOrder, type OrderFilter } from "./orders.data";
+import {
+  demoOrders,
+  orderFilters,
+  type CustomerOrder,
+  type OrderFilter,
+} from "./orders.data";
 
-export default function OrdersScreen() {
+export default function OrdersScreen({
+  isLoading = false,
+}: ScreenLoadingProps = {}) {
+  const { t, localize } = useAppTranslation();
   const colors = useAppColors();
   const [filter, setFilter] = useState<OrderFilter>("all");
   const [detailOrder, setDetailOrder] = useState<CustomerOrder | null>(null);
   const [reviewOrder, setReviewOrder] = useState<CustomerOrder | null>(null);
-  const [reviews, setReviews] = useState<Partial<Record<string, OrderReview>>>({});
+  const [reviews, setReviews] = useState<Partial<Record<string, OrderReview>>>(
+    {},
+  );
 
   const visibleOrders = useMemo(
-    () => demoOrders.filter((order) => {
-      if (filter !== "all" && order.status !== filter) return false;
-      return order.status !== "review" || !reviews[order.id] || filter === "all";
-    }),
+    () =>
+      demoOrders.filter((order) => {
+        if (filter !== "all" && order.status !== filter) return false;
+        return (
+          order.status !== "review" || !reviews[order.id] || filter === "all"
+        );
+      }),
     [filter, reviews],
   );
 
   function countForFilter(nextFilter: OrderFilter) {
     if (nextFilter === "all") return demoOrders.length;
-    return demoOrders.filter((order) => order.status === nextFilter && !reviews[order.id]).length;
+    return demoOrders.filter(
+      (order) => order.status === nextFilter && !reviews[order.id],
+    ).length;
   }
 
   function handleOrderAction(order: CustomerOrder) {
@@ -53,25 +73,38 @@ export default function OrdersScreen() {
     setReviewOrder(null);
     Toast.show({
       type: "success",
-      text1: "Đã gửi đánh giá",
-      text2: `Cảm ơn bạn đã đánh giá ${review.rating} sao.`,
+      text1: t("orders.reviewSubmitted"),
+      text2: t("orders.thanksForYourStarReview", { rating: review.rating }),
     });
   }
+
+  if (isLoading) return <ScreenSkeleton variant="orders" />;
 
   return (
     <View className="flex-1 bg-canvas">
       <View
         className="border-b border-border bg-canvas pb-3 pt-2"
-        accessibilityElementsHidden={reviewOrder !== null || detailOrder !== null}
-        importantForAccessibility={reviewOrder || detailOrder ? "no-hide-descendants" : "auto"}
+        accessibilityElementsHidden={
+          reviewOrder !== null || detailOrder !== null
+        }
+        importantForAccessibility={
+          reviewOrder || detailOrder ? "no-hide-descendants" : "auto"
+        }
       >
         <View className="flex-row items-center gap-3 px-4 pb-3">
           <View className="h-11 w-11 items-center justify-center rounded-full bg-primary-container">
-            <ClipboardList color={colors.primary} size={22} />
+            <ClipboardList color={colors.onPrimaryContainer} size={22} />
           </View>
           <View className="min-w-0 flex-1">
-            <Text accessibilityRole="header" className="font-vietnam text-headline-sm text-ink">Đơn hàng của bạn</Text>
-            <Text className="font-vietnam text-body-sm text-muted">Theo dõi trạng thái và trải nghiệm sau mua</Text>
+            <Text
+              accessibilityRole="header"
+              className="font-vietnam text-headline-sm text-ink"
+            >
+              {t("orders.yourOrders")}
+            </Text>
+            <Text className="font-vietnam text-body-sm text-muted">
+              {t("orders.trackDeliveriesAndReviewYourPurchases")}
+            </Text>
           </View>
         </View>
         <ScrollView
@@ -90,9 +123,19 @@ export default function OrdersScreen() {
                 className={`min-h-12 flex-row items-center gap-2 rounded-full border px-4 ${selected ? "border-primary bg-primary" : "border-border bg-surface active:bg-surface-soft"}`}
                 onPress={() => setFilter(id)}
               >
-                <Text className={`font-vietnam text-label-md ${selected ? "text-on-primary" : "text-ink"}`}>{label}</Text>
-                <View className={`min-w-5 items-center rounded-full px-1.5 py-0.5 ${selected ? "bg-on-primary/20" : "bg-surface-container"}`}>
-                  <Text className={`font-vietnam text-label-sm ${selected ? "text-on-primary" : "text-muted"}`}>{count}</Text>
+                <Text
+                  className={`font-vietnam text-label-md ${selected ? "text-on-primary" : "text-ink"}`}
+                >
+                  {localize(label)}
+                </Text>
+                <View
+                  className={`min-w-5 items-center rounded-full px-1.5 py-0.5 ${selected ? "bg-on-primary/20" : "bg-surface-container"}`}
+                >
+                  <Text
+                    className={`font-vietnam text-label-sm ${selected ? "text-on-primary" : "text-muted"}`}
+                  >
+                    {count}
+                  </Text>
                 </View>
               </Pressable>
             );
@@ -101,7 +144,7 @@ export default function OrdersScreen() {
       </View>
 
       <FlashList
-        className="flex-1 bg-surface-soft"
+        className="flex-1 bg-canvas"
         contentContainerStyle={{ padding: 16 }}
         data={visibleOrders}
         keyExtractor={(order) => order.id}
@@ -118,18 +161,34 @@ export default function OrdersScreen() {
             <View className="h-16 w-16 items-center justify-center rounded-full bg-surface-container">
               <PackageSearch color={colors.primary} size={30} />
             </View>
-            <Text className="text-center font-vietnam text-title-md text-ink">Chưa có đơn hàng ở trạng thái này</Text>
-            <Text className="text-center font-vietnam text-body-sm text-muted">Các đơn mới sẽ xuất hiện tại đây khi trạng thái được cập nhật.</Text>
-            <PrimaryBtn title="Xem tất cả đơn" variant="secondary" onPress={() => setFilter("all")} />
+            <Text className="text-center font-vietnam text-title-md text-ink">
+              {t("orders.noOrdersWithThisStatusYet")}
+            </Text>
+            <Text className="text-center font-vietnam text-body-sm text-muted">
+              {t("orders.newOrdersWillAppearHereWhen")}
+            </Text>
+            <PrimaryBtn
+              title={t("orders.viewAllOrders")}
+              variant="secondary"
+              onPress={() => setFilter("all")}
+            />
           </View>
         }
       />
 
       {reviewOrder ? (
-        <OrderReviewSheet order={reviewOrder} onClose={() => setReviewOrder(null)} onSubmit={submitReview} />
+        <OrderReviewSheet
+          order={reviewOrder}
+          onClose={() => setReviewOrder(null)}
+          onSubmit={submitReview}
+        />
       ) : null}
-      {detailOrder ? <OrderDetailSheet order={detailOrder} onClose={() => setDetailOrder(null)} /> : null}
+      {detailOrder ? (
+        <OrderDetailSheet
+          order={detailOrder}
+          onClose={() => setDetailOrder(null)}
+        />
+      ) : null}
     </View>
   );
 }
-

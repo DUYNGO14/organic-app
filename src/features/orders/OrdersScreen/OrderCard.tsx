@@ -1,5 +1,7 @@
+import { useAppTranslation } from "@/localization/content";
+import { i18n } from "@/localization";
 import { PrimaryBtn } from "@/components/common";
-import { formatPrice } from "@/features/products/ProductDetailScreen/components/format-price";
+import { formatPrice } from "@/utils/format-price";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { Image } from "expo-image";
 import {
@@ -32,11 +34,11 @@ const statusIcons: Record<OrderStatus, LucideIcon> = {
 };
 
 function actionLabel(status: OrderStatus) {
-  if (status === "pending-payment") return "Thanh toán ngay";
-  if (status === "awaiting-receipt") return "Theo dõi đơn";
-  if (status === "review") return "Viết đánh giá";
-  if (status === "return") return "Xem tiến trình";
-  return "Xem chi tiết";
+  if (status === "pending-payment") return i18n.t("orders.payNow");
+  if (status === "awaiting-receipt") return i18n.t("orders.trackOrder");
+  if (status === "review") return i18n.t("orders.writeAReview");
+  if (status === "return") return i18n.t("orders.viewProgress");
+  return i18n.t("orders.viewDetails");
 }
 
 export function OrderCard({
@@ -48,6 +50,7 @@ export function OrderCard({
   review?: OrderReview;
   onAction: (order: CustomerOrder) => void;
 }) {
+  const { t, localize } = useAppTranslation();
   const colors = useAppColors();
   const reviewed = Boolean(review);
   const StatusIcon = statusIcons[order.status];
@@ -65,12 +68,12 @@ export function OrderCard({
       <View className="flex-row flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
         <View className="min-w-0 flex-1 gap-0.5">
           <Text className="font-vietnam text-label-md text-ink">#{order.id}</Text>
-          <Text className="font-vietnam text-label-sm text-muted">Đặt lúc {order.placedAt}</Text>
+          <Text className="font-vietnam text-label-sm text-muted">{t("orders.placedAt", { placedAt: order.placedAt })}</Text>
         </View>
         <View className={`flex-row items-center gap-1.5 rounded-full px-3 py-1.5 ${statusStyles[order.status].split(" ")[0]}`}>
           <StatusIcon color={statusIconColor} size={15} />
           <Text className={`font-vietnam text-label-sm ${reviewed ? "text-muted" : statusStyles[order.status].split(" ")[1]}`}>
-            {reviewed ? "Đã đánh giá" : order.statusLabel}
+            {reviewed ? t("orders.reviewed") : localize(order.statusLabel)}
           </Text>
         </View>
       </View>
@@ -83,9 +86,9 @@ export function OrderCard({
             </View>
             <View className="min-w-0 flex-1 gap-1">
               <Text numberOfLines={2} className="font-vietnam text-body-emphasis text-ink">
-                {product.name}
+                {localize(product.name)}
               </Text>
-              <Text className="font-vietnam text-body-sm text-muted">{product.subtitle}</Text>
+              <Text className="font-vietnam text-body-sm text-muted">{localize(product.subtitle)}</Text>
             </View>
             <View className="items-end gap-1">
               <Text className="font-vietnam text-body-sm text-muted">x{itemQuantity}</Text>
@@ -98,16 +101,16 @@ export function OrderCard({
 
         <View className="flex-row items-start gap-2 rounded-md bg-surface-soft p-3">
           <Clock3 color={statusIconColor} size={17} />
-          <Text className="min-w-0 flex-1 font-vietnam text-body-sm text-muted">{order.statusDetail}</Text>
+          <Text className="min-w-0 flex-1 font-vietnam text-body-sm text-muted">{localize(order.statusDetail)}</Text>
         </View>
 
         {review?.photoUris.length ? (
           <View className="gap-2">
-            <Text className="font-vietnam text-label-md text-ink">Ảnh đánh giá của bạn</Text>
+            <Text className="font-vietnam text-label-md text-ink">{t("orders.yourReviewPhotos")}</Text>
             <View className="flex-row flex-wrap gap-2">
               {review.photoUris.map((uri, index) => (
                 <View key={uri} className="h-16 w-16 overflow-hidden rounded bg-surface-container">
-                  <Image accessibilityLabel={`Ảnh đánh giá ${index + 1}`} contentFit="cover" source={uri} style={StyleSheet.absoluteFill} />
+                  <Image accessibilityLabel={t("orders.reviewPhoto", { value: index + 1 })} contentFit="cover" source={uri} style={StyleSheet.absoluteFill} />
                 </View>
               ))}
             </View>
@@ -117,10 +120,10 @@ export function OrderCard({
         <View className="flex-row flex-wrap items-end justify-between gap-3 border-t border-border pt-3">
           <View className="min-w-0 flex-1 gap-1">
             <Text className="font-vietnam text-body-sm text-muted">
-              {quantity} sản phẩm · {order.paymentMethod}
+              {t("orders.items", { count: quantity, paymentMethod: localize(order.paymentMethod) })}
             </Text>
             <View className="flex-row flex-wrap items-baseline gap-2">
-              <Text className="font-vietnam text-label-md text-muted">Thành tiền</Text>
+              <Text className="font-vietnam text-label-md text-muted">{t("orders.subtotal")}</Text>
               <Text style={{ fontVariant: ["tabular-nums"] }} className="font-vietnam text-title-md text-primary">
                 {formatPrice(order.total)}
               </Text>

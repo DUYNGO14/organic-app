@@ -17,7 +17,7 @@ import { StartupTitle, startupTitle } from "./StartupTitle";
 
 const exitAnimation = FadeOut.duration(240).reduceMotion(ReduceMotion.System);
 const previewHoldMs = 2_000;
-const logo = require("@/assets/images/adigo-logo.png");
+const logo = require("@/assets/images/logo-adiogo/adigo-logo.png");
 
 export function StartupSplash({
   fontsReady,

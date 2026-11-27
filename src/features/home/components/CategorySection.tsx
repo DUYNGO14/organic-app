@@ -1,3 +1,4 @@
+import { useAppTranslation } from "@/localization/content";
 import type { HomeCategory } from "@/features/home/home.data";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { Image } from "expo-image";
@@ -15,14 +16,15 @@ export function CategorySection({
   onSeeAll,
   onCategoryPress,
 }: CategorySectionProps) {
+  const { t, localize } = useAppTranslation();
   const colors = useAppColors();
 
   return (
     <View className="mt-6">
       <HomeSectionHeading
-        actionLabel="Tất cả"
+        actionLabel={t("home.all")}
         onActionPress={onSeeAll}
-        title="Danh mục sản phẩm"
+        title={t("home.productCategories")}
       />
       <ScrollView
         horizontal
@@ -32,7 +34,7 @@ export function CategorySection({
         <View className="flex-row gap-2 px-4">
           {categories.map((category) => (
             <Pressable
-              accessibilityLabel={`${category.title}, ${category.subtitle}`}
+              accessibilityLabel={`${localize(category.title)}, ${localize(category.subtitle)}`}
               accessibilityRole="button"
               className="min-h-12 flex-row items-center gap-2 rounded-full border border-card-border bg-surface py-1 pl-2 pr-3 active:bg-surface-container"
               key={category.id}
@@ -57,7 +59,7 @@ export function CategorySection({
                 className="font-vietnam text-label-md text-ink"
                 numberOfLines={1}
               >
-                {category.title}
+                {localize(category.title)}
               </Text>
             </Pressable>
           ))}

@@ -1,3 +1,5 @@
+import { dealProducts, recommendedProducts } from "@/features/home/home.data";
+import type { CatalogProduct, Product, ProductCategoryId } from "@/types/product";
 import type { LucideIcon } from "lucide-react-native";
 import {
   Apple,
@@ -8,36 +10,6 @@ import {
   Sprout,
   Wheat,
 } from "lucide-react-native";
-import {
-  dealProducts,
-  recommendedProducts,
-  type HomeProduct,
-} from "@/features/home/home.data";
-
-export type ProductCategoryId =
-  | "greens"
-  | "fruit"
-  | "roots"
-  | "eggs"
-  | "mushrooms"
-  | "grains"
-  | "herbs";
-
-export type SeasonFilterId =
-  | "in-season"
-  | "cold-region"
-  | "early-harvest";
-
-export type CatalogProduct = HomeProduct & {
-  categoryIds: ProductCategoryId[];
-  certification?: string;
-  topLabel?: string;
-  bottomLabel?: string;
-  discountPercent?: number;
-  seasonTags: SeasonFilterId[];
-  /** Higher values represent more recently harvested demo items. */
-  harvestOrder: number;
-};
 
 export type ProductCategory = {
   id: ProductCategoryId;
@@ -60,7 +32,7 @@ const homeProductById = new Map(
   [...dealProducts, ...recommendedProducts].map((product) => [product.id, product]),
 );
 
-function getHomeProduct(id: string): HomeProduct {
+function getHomeProduct(id: string): Product {
   const product = homeProductById.get(id);
   if (!product) throw new Error(`Missing home demo product: ${id}`);
   return product;
@@ -80,8 +52,8 @@ const greenImages = {
 } as const;
 
 function withMetadata(
-  product: HomeProduct,
-  metadata: Omit<CatalogProduct, keyof HomeProduct>,
+  product: Product,
+  metadata: Omit<CatalogProduct, keyof Product>,
 ): CatalogProduct {
   return { ...product, ...metadata };
 }
@@ -89,44 +61,37 @@ function withMetadata(
 const baseProducts: CatalogProduct[] = [
   withMetadata(getHomeProduct("kale"), {
     categoryIds: ["greens"],
-    certification: "VietGAP",
     bottomLabel: "05:00 sáng",
     seasonTags: ["in-season", "early-harvest"],
     harvestOrder: 7,
   }),
   withMetadata(getHomeProduct("strawberries"), {
     categoryIds: ["fruit"],
-    certification: "GlobalGAP",
     seasonTags: ["in-season", "cold-region"],
     harvestOrder: 4,
   }),
   withMetadata(getHomeProduct("tomatoes"), {
     categoryIds: ["roots"],
-    certification: "VietGAP",
     seasonTags: ["in-season", "early-harvest"],
     harvestOrder: 6,
   }),
   withMetadata(getHomeProduct("avocado"), {
     categoryIds: ["fruit"],
-    certification: "VietGAP",
     seasonTags: ["in-season"],
     harvestOrder: 3,
   }),
   withMetadata(getHomeProduct("eggs"), {
     categoryIds: ["eggs"],
-    certification: "Organic",
     seasonTags: [],
     harvestOrder: 2,
   }),
   withMetadata(getHomeProduct("mushrooms"), {
     categoryIds: ["mushrooms"],
-    certification: "Organic",
     seasonTags: ["cold-region"],
     harvestOrder: 5,
   }),
   withMetadata(getHomeProduct("rice"), {
     categoryIds: ["grains"],
-    certification: "USDA Organic",
     seasonTags: [],
     harvestOrder: 1,
   }),
@@ -142,7 +107,6 @@ const featuredGreenProducts: CatalogProduct[] = [
     oldPrice: 28_000,
     image: greenImages.lettuce,
     badge: "Vào mùa ngọt",
-    discountPercent: 15,
     bottomLabel: "Vào mùa ngọt",
     categoryIds: ["greens"],
     seasonTags: ["in-season", "cold-region"],

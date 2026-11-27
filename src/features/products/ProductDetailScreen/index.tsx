@@ -1,3 +1,5 @@
+import { useAppTranslation } from "@/localization/content";
+import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { StackHeader } from "@/components/layout";
 import {
@@ -8,6 +10,7 @@ import {
 import { CheckoutBottomSheet } from "@/features/cart/CartScreen/CheckoutBottomSheet";
 import { catalogProducts } from "@/features/products/catalog.data";
 import { getProductDetailSpec } from "@/features/products/product-detail.data";
+import { productKeys } from "@/features/products/products.queries";
 import {
   ProductCommitmentsCard,
   ProductGallery,
@@ -19,8 +22,10 @@ import {
   ProductReviewsCard,
   ProductTraceabilityCard,
 } from "@/features/products/ProductDetailScreen/components";
-import { formatPrice } from "@/features/products/ProductDetailScreen/components/format-price";
+import { formatPrice } from "@/utils/format-price";
 import { useAppColors } from "@/hooks/use-app-colors";
+import type { CatalogProduct } from "@/types/product";
+import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Share2, ShoppingBag } from "lucide-react-native";
 import { useMemo, useState } from "react";
@@ -28,11 +33,15 @@ import { ScrollView, Share, Text, View } from "react-native";
 
 const products = catalogProducts;
 
-export default function ProductDetailScreen() {
+export default function ProductDetailScreen({ isLoading = false }: ScreenLoadingProps = {}) {
+  const { t, localize } = useAppTranslation();
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const colors = useAppColors();
+  const queryClient = useQueryClient();
   const cartItemsCount = useCartStore(selectCartQuantity);
-  const product = products.find((item) => item.id === productId);
+  const product =
+    queryClient.getQueryData<CatalogProduct>(productKeys.detail(productId)) ??
+    products.find((item) => item.id === productId);
   const spec = useMemo(
     () => (product ? getProductDetailSpec(product) : null),
     [product],
@@ -42,15 +51,29 @@ export default function ProductDetailScreen() {
   const [quantity, setQuantity] = useState(1);
   const [buyNowOpen, setBuyNowOpen] = useState(false);
 
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-canvas">
+        <StackHeader
+          title={t("products.productDetails")}
+          onBack={() => {
+            if (router.canGoBack()) router.back();
+            else router.replace("/(tabs)/categories");
+          }}
+        />
+        <ScreenSkeleton variant="product" />
+      </View>
+    );
+  }
+
   if (!product || !spec) {
     return (
       <View className="flex-1 items-center justify-center bg-canvas px-6">
         <Text className="font-vietnam text-headline-sm text-ink">
-          Không tìm thấy sản phẩm
-        </Text>
+          {t("products.productNotFound")}</Text>
         <PrimaryBtn
           className="mt-4"
-          title="Quay lại"
+          title={t("common.back")}
           onPress={() => router.back()}
         />
       </View>
@@ -79,16 +102,16 @@ export default function ProductDetailScreen() {
         importantForAccessibility={buyNowOpen ? "no-hide-descendants" : "auto"}
       >
         <StackHeader
-          title="Chi tiết sản phẩm"
+          title={t("products.productDetails")}
           rightAction={
             <View className="flex-row items-center gap-0.5">
               <IconButton
                 icon={<Share2 color={colors.ink} size={20} />}
-                label="Chia sẻ sản phẩm"
+                label={t("products.shareProduct")}
                 size="sm"
                 onPress={() =>
                   void Share.share({
-                    message: `${product.name} – ${formatPrice(selectedPackage.price)}`,
+                    message: `${localize(product.name)} – ${formatPrice(selectedPackage.price)}`,
                   })
                 }
               />
@@ -97,8 +120,8 @@ export default function ProductDetailScreen() {
                   icon={<ShoppingBag color={colors.ink} size={20} />}
                   label={
                     cartItemsCount
-                      ? `Giỏ hàng, ${cartItemsCount} sản phẩm`
-                      : "Giỏ hàng"
+                      ? t("common.cartItems", { count: cartItemsCount })
+                      : t("common.cart")
                   }
                   size="sm"
                   onPress={() => router.push("/cart")}
@@ -121,10 +144,10 @@ export default function ProductDetailScreen() {
         <ScrollView
           className="flex-1"
           contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingTop: 12,
+            paddingHorizontal: 8,
+            paddingTop: 6,
             paddingBottom: 24,
-            gap: 14,
+            gap: 12,
           }}
           showsVerticalScrollIndicator={false}
         >
@@ -151,7 +174,7 @@ export default function ProductDetailScreen() {
             colors={colors}
           />
           <ProductCommitmentsCard colors={colors} />
-          <ProductTraceabilityCard spec={spec} colors={colors} />
+          <ProductTraceabilityCard colors={colors} onScan={() => router.push("/scan-qr")} />
 
           <ProductNutritionCard spec={spec} colors={colors} />
           <ProductOriginCard spec={spec} colors={colors} />

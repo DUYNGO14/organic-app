@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { PrimaryBtn } from "@/components/common";
 import { StackHeader } from "@/components/layout";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -23,6 +24,7 @@ export function ReviewPhotoCamera({
   onClose: () => void;
   onAttach: (uri: string) => void;
 }) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const camera = useRef<CameraView>(null);
   const capturing = useRef(false);
@@ -52,7 +54,7 @@ export function ReviewPhotoCamera({
       if (permission?.canAskAgain === false) await Linking.openSettings();
       else await requestPermission();
     } catch {
-      setMessage("Không thể cấp quyền camera. Vui lòng thử lại.");
+      setMessage(t("orders.couldNotGrantCameraAccessPlease"));
     } finally {
       setRequesting(false);
     }
@@ -71,7 +73,7 @@ export function ReviewPhotoCamera({
       setPhotoUri(photo.uri);
       setReady(false);
     } catch {
-      if (camera.current === activeCamera) setMessage("Chụp ảnh thất bại. Vui lòng thử lại.");
+      if (camera.current === activeCamera) setMessage(t("orders.couldNotTakeThePhotoPlease"));
     } finally {
       capturing.current = false;
       setTakingPhoto(false);
@@ -81,23 +83,23 @@ export function ReviewPhotoCamera({
   return (
     <Modal visible animationType="slide" hardwareAccelerated onRequestClose={onClose}>
       <SafeAreaView className="flex-1 bg-canvas">
-        <StackHeader title={photoUri ? "Xem ảnh đã chụp" : "Chụp ảnh sản phẩm"} onBack={onClose} />
+        <StackHeader title={photoUri ? t("orders.previewPhoto") : t("orders.takeAProductPhoto")} onBack={onClose} />
         {!permission ? (
           <View className="flex-1 items-center justify-center">
-            <ActivityIndicator accessibilityLabel="Đang kiểm tra quyền camera" color={colors.primary} />
+            <ActivityIndicator accessibilityLabel={t("orders.checkingCameraPermissions")} color={colors.primary} />
           </View>
         ) : !permission.granted || cameraError ? (
           <View className="flex-1 justify-center gap-4 px-6">
             <Camera color={colors.primary} size={32} />
             <Text className="font-vietnam text-title-md text-ink">
-              {cameraError ? "Không thể mở camera" : "Cần quyền truy cập camera"}
+              {cameraError ? t("orders.couldNotOpenTheCamera") : t("orders.cameraAccessNeeded")}
             </Text>
             {cameraError ? (
-              <PrimaryBtn title="Thử lại" onPress={() => setCameraError(false)} />
+              <PrimaryBtn title={t("cart.tryAgain")} onPress={() => setCameraError(false)} />
             ) : (
               <PrimaryBtn
                 loading={requesting}
-                title={permission.canAskAgain ? "Cho phép dùng camera" : "Mở cài đặt ứng dụng"}
+                title={permission.canAskAgain ? t("orders.allowCameraAccess") : t("cart.openAppSettings")}
                 onPress={() => void enableCamera()}
               />
             )}
@@ -107,7 +109,7 @@ export function ReviewPhotoCamera({
           <View className="flex-1 gap-4 p-4">
             <View className="flex-1 overflow-hidden rounded-lg bg-surface-container">
               {photoUri ? (
-                <Image accessibilityLabel="Ảnh sản phẩm vừa chụp" contentFit="contain" source={photoUri} style={StyleSheet.absoluteFill} />
+                <Image accessibilityLabel={t("orders.capturedProductPhoto")} contentFit="contain" source={photoUri} style={StyleSheet.absoluteFill} />
               ) : appState !== "background" ? (
                 <CameraView
                   ref={camera}
@@ -125,11 +127,11 @@ export function ReviewPhotoCamera({
             {message ? <Text accessibilityRole="alert" className="font-vietnam text-body-sm text-danger">{message}</Text> : null}
             {photoUri ? (
               <View className="flex-row gap-2">
-                <PrimaryBtn className="flex-1" variant="secondary" title="Chụp lại" onPress={() => setPhotoUri(null)} />
-                <PrimaryBtn className="flex-1" title="Dùng ảnh" onPress={() => onAttach(photoUri)} />
+                <PrimaryBtn className="flex-1" variant="secondary" title={t("orders.retake")} onPress={() => setPhotoUri(null)} />
+                <PrimaryBtn className="flex-1" title={t("orders.usePhoto")} onPress={() => onAttach(photoUri)} />
               </View>
             ) : (
-              <PrimaryBtn fullWidth disabled={!ready} loading={takingPhoto} title="Chụp ảnh" onPress={() => void takePhoto()} />
+              <PrimaryBtn fullWidth disabled={!ready} loading={takingPhoto} title={t("orders.takeAPhoto")} onPress={() => void takePhoto()} />
             )}
           </View>
         )}

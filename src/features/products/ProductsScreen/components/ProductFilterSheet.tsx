@@ -1,16 +1,15 @@
+import { useAppTranslation } from "@/localization/content";
+import { useTranslation } from "react-i18next";
 import { AppSheet, SheetFooter, type AppSheetHandle } from "@/components/common/BottomSheet";
 import { Checkbox, PrimaryBtn } from "@/components/common";
-import {
-  productCategories,
-  type ProductCategoryId,
-  type SeasonFilterId,
-} from "@/features/products/catalog.data";
+import { productCategories } from "@/features/products/catalog.data";
+import type { PriceBandId } from "@/features/products/products.types";
 import { cn } from "@/lib/cn";
+import type { ProductCategoryId, SeasonFilterId } from "@/types/product";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useCallback, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 
-export type PriceBandId = "under-25" | "25-50" | "50-100" | "over-100";
 type SeasonFilterValue = SeasonFilterId | "all";
 
 export type ProductFilters = {
@@ -28,17 +27,17 @@ export const emptyProductFilters: ProductFilters = {
 };
 
 const seasonOptions: { id: SeasonFilterValue; label: string }[] = [
-  { id: "all", label: "Tất cả vụ mùa" },
-  { id: "in-season", label: "Đang vào mùa rộ" },
-  { id: "cold-region", label: "Rau xứ lạnh" },
-  { id: "early-harvest", label: "Hái sớm hôm nay" },
+  { id: "all", label: "products.allSeasons" },
+  { id: "in-season", label: "products.peakSeason" },
+  { id: "cold-region", label: "products.coolClimateGreens" },
+  { id: "early-harvest", label: "products.pickedEarlyToday" },
 ];
 
 const priceBands: { id: PriceBandId; label: string }[] = [
-  { id: "under-25", label: "Dưới 25.000đ" },
-  { id: "25-50", label: "25.000đ – 50.000đ" },
-  { id: "50-100", label: "50.000đ – 100.000đ" },
-  { id: "over-100", label: "Trên 100.000đ" },
+  { id: "under-25", label: "products.under25000" },
+  { id: "25-50", label: "products.2500050000" },
+  { id: "50-100", label: "products.50000100000" },
+  { id: "over-100", label: "products.over100000" },
 ];
 
 const snapPoints = ["88%"];
@@ -60,6 +59,7 @@ function FilterOptions<T extends string>({
   value: T | null;
   onSelect: (id: T) => void;
 }) {
+  const { t } = useTranslation();
   return (
     <View className="gap-2" accessibilityRole="radiogroup">
       <Text accessibilityRole="header" className="font-vietnam text-label-lg text-ink">
@@ -81,7 +81,7 @@ function FilterOptions<T extends string>({
             <View className={cn("h-5 w-5 items-center justify-center rounded-full border", checked ? "border-primary" : "border-border-strong")}>
               {checked ? <View className="h-2.5 w-2.5 rounded-full bg-primary" /> : null}
             </View>
-            <Text className="flex-1 font-vietnam text-body-md text-ink">{label}</Text>
+            <Text className="flex-1 font-vietnam text-body-md text-ink">{t(label)}</Text>
           </Pressable>
         );
       })}
@@ -102,6 +102,7 @@ export function ProductFilterSheet({
   onClose,
   onApply,
 }: ProductFilterSheetProps) {
+  const { t, localize } = useAppTranslation();
   const ref = useRef<AppSheetHandle>(null);
   const [draft, setDraft] = useState(filters);
   const dismiss = useCallback(() => ref.current?.dismiss(), []);
@@ -109,8 +110,8 @@ export function ProductFilterSheet({
   return (
     <AppSheet
       header={{
-        title: "Bộ lọc sản phẩm",
-        actionLabel: "Đóng bộ lọc",
+        title: t("products.productFilters"),
+        actionLabel: t("products.closeFilters"),
       }}
       ref={ref}
       fullWindowOnIOS
@@ -125,13 +126,12 @@ export function ProductFilterSheet({
         <View className="gap-5">
           <View>
             <Text accessibilityRole="header" className="mb-2 font-vietnam text-label-lg text-ink">
-              Danh mục
-            </Text>
+              {t("common.categories")}</Text>
             {productCategories.map(({ id, label }) => (
               <Checkbox
                 key={id}
                 checked={draft.categoryIds.includes(id)}
-                label={label}
+                label={localize(label)}
                 onCheckedChange={() =>
                   setDraft((current) => ({
                     ...current,
@@ -143,7 +143,7 @@ export function ProductFilterSheet({
           </View>
 
           <FilterOptions
-            title="Mùa vụ"
+            title={t("products.season")}
             options={seasonOptions}
             value={draft.season}
             onSelect={(season) => setDraft((current) => ({ ...current, season }))}
@@ -152,8 +152,7 @@ export function ProductFilterSheet({
           {certifications.length > 0 ? (
             <View>
               <Text accessibilityRole="header" className="mb-2 font-vietnam text-label-lg text-ink">
-                Chứng nhận
-              </Text>
+                {t("products.certifications")}</Text>
               {certifications.map((certification) => (
                 <Checkbox
                   key={certification}
@@ -171,7 +170,7 @@ export function ProductFilterSheet({
           ) : null}
 
           <FilterOptions
-            title="Khoảng giá"
+            title={t("products.priceRange")}
             options={priceBands}
             value={draft.priceBand}
             onSelect={(priceBand) =>
@@ -185,10 +184,10 @@ export function ProductFilterSheet({
       </BottomSheetScrollView>
 
       <SheetFooter className="flex-row flex-wrap items-center">
-        <PrimaryBtn title="Xóa lọc" variant="ghost" onPress={() => setDraft(emptyProductFilters)} />
+        <PrimaryBtn title={t("products.clearFilters")} variant="ghost" onPress={() => setDraft(emptyProductFilters)} />
         <PrimaryBtn
           className="min-w-40 flex-1"
-          title="Áp dụng bộ lọc"
+          title={t("products.applyFilters")}
           onPress={() => {
             onApply(draft);
             dismiss();

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/common/Button";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useBottomSheetBackHandler } from "@/hooks/use-bottom-sheet-back-handler";
@@ -248,6 +249,7 @@ export function SheetHeader({
   onBack,
   onDismiss,
 }: SheetHeaderProps) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   return (
     <View className={cn("min-h-12 flex-row items-center gap-2 border-b border-border px-4 pb-2", className)}>
@@ -260,7 +262,7 @@ export function SheetHeader({
         <View>
           <IconButton
             icon={onBack ? <ChevronLeft color={colors.ink} size={22} /> : <X color={colors.ink} size={21} />}
-            label={actionLabel ?? (onBack ? "Quay lại" : "Đóng")}
+            label={actionLabel ?? (onBack ? t("common.back") : t("common.close"))}
             size="lg"
             onPress={() => {
               if (onBack) {

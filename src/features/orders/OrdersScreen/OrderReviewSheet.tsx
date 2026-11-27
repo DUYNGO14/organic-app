@@ -1,3 +1,4 @@
+import { useAppTranslation } from "@/localization/content";
 import { AppSheet, SheetFooter, type AppSheetHandle } from "@/components/common/BottomSheet";
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { SheetTextInput } from "@/components/common/Input/SheetTextInput";
@@ -26,11 +27,11 @@ export type OrderReview = {
 const snapPoints = ["82%"];
 const maxReviewPhotos = 3;
 const ratingLabels = [
-  "Rất tệ",
-  "Chưa tốt",
-  "Bình thường",
-  "Hài lòng",
-  "Rất hài lòng",
+  "orders.veryPoor",
+  "orders.poor",
+  "orders.fair",
+  "orders.satisfied",
+  "orders.verySatisfied",
 ];
 
 export function OrderReviewSheet({
@@ -42,6 +43,7 @@ export function OrderReviewSheet({
   onClose: () => void;
   onSubmit: (review: OrderReview) => void;
 }) {
+  const { t, localize } = useAppTranslation();
   const sheet = useRef<AppSheetHandle>(null);
   const pendingReview = useRef<OrderReview | null>(null);
   const [rating, setRating] = useState(0);
@@ -62,8 +64,8 @@ export function OrderReviewSheet({
   return (
     <AppSheet
       header={{
-        title: "Đánh giá đơn hàng",
-        actionLabel: "Đóng đánh giá",
+        title: t("orders.reviewYourOrder"),
+        actionLabel: t("orders.closeReview"),
         subtitle: `#${order.id}`,
       }}
       ref={sheet}
@@ -89,25 +91,24 @@ export function OrderReviewSheet({
                 numberOfLines={2}
                 className="font-vietnam text-body-emphasis text-ink"
               >
-                {firstItem.product.name}
+                {localize(firstItem.product.name)}
               </Text>
               <Text className="font-vietnam text-body-sm text-muted">
                 {order.items.length > 1
-                  ? `và ${order.items.length - 1} sản phẩm khác`
-                  : firstItem.product.subtitle}
+                  ? t("orders.andMoreItems", { count: order.items.length - 1 })
+                  : localize(firstItem.product.subtitle)}
               </Text>
             </View>
           </View>
 
           <View className="items-center gap-3">
             <Text className="font-vietnam text-body-emphasis text-ink">
-              Bạn hài lòng với đơn hàng này?
-            </Text>
+              {t("orders.howSatisfiedAreYouWithThis")}</Text>
             <View className="w-full flex-row" accessibilityRole="radiogroup">
               {[1, 2, 3, 4, 5].map((value) => (
                 <Pressable
                   key={value}
-                  accessibilityLabel={`${value} sao, ${ratingLabels[value - 1]}`}
+                  accessibilityLabel={t("orders.starRating", { count: value, rating: t(ratingLabels[value - 1]) })}
                   accessibilityRole="radio"
                   accessibilityState={{ checked: rating === value }}
                   className="min-h-12 flex-1 items-center justify-center rounded active:bg-surface-container"
@@ -125,28 +126,27 @@ export function OrderReviewSheet({
               accessibilityLiveRegion="polite"
               className={`font-vietnam text-label-md ${rating ? "text-primary" : "text-muted"}`}
             >
-              {rating ? ratingLabels[rating - 1] : "Chạm để chọn số sao"}
+              {rating ? t(ratingLabels[rating - 1]) : t("orders.tapToSelectARating")}
             </Text>
           </View>
 
           <View className="gap-2">
             <View className="flex-row items-center justify-between gap-2">
               <Text className="font-vietnam text-label-md text-ink">
-                Nhận xét của bạn
-              </Text>
+                {t("orders.yourReview")}</Text>
               <Text className="font-vietnam text-label-sm text-muted">
                 {comment.length}/500
               </Text>
             </View>
             <SheetTextInput
-              accessibilityLabel="Nhận xét đơn hàng"
+              accessibilityLabel={t("orders.orderReview")}
               className="min-h-28 rounded-lg border border-border-strong bg-surface-container-low px-4 py-3 font-vietnam text-body-md text-ink"
               maxLength={500}
               multiline
 
               onChangeText={setComment}
 
-              placeholder="Chia sẻ về độ tươi, cách đóng gói và giao hàng..."
+              placeholder={t("orders.tellUsAboutFreshnessPackagingAnd")}
               placeholderTextColor={colors.muted}
               textAlignVertical="top"
               value={comment}
@@ -156,8 +156,7 @@ export function OrderReviewSheet({
           <View className="gap-2">
             <View className="flex-row items-center justify-between gap-2">
               <Text className="font-vietnam text-label-md text-ink">
-                Ảnh sản phẩm
-              </Text>
+                {t("orders.productPhotos")}</Text>
               <Text className="font-vietnam text-label-sm tabular-nums text-muted">
                 {photoUris.length}/{maxReviewPhotos}
               </Text>
@@ -169,7 +168,7 @@ export function OrderReviewSheet({
                   className="h-20 w-20 overflow-hidden rounded-lg bg-surface-container"
                 >
                   <Image
-                    accessibilityLabel={`Ảnh sản phẩm ${index + 1}`}
+                    accessibilityLabel={t("orders.productPhoto", { value: index + 1 })}
                     contentFit="cover"
                     source={uri}
                     style={StyleSheet.absoluteFill}
@@ -177,7 +176,7 @@ export function OrderReviewSheet({
                   <IconButton
                     className="absolute right-1 top-1"
                     icon={<X size={16} color={colors.ink} />}
-                    label={`Xoá ảnh ${index + 1}`}
+                    label={t("orders.removePhoto", { value: index + 1 })}
                     size="sm"
                     variant="outlined"
                     onPress={() =>
@@ -190,7 +189,7 @@ export function OrderReviewSheet({
               ))}
               {photoUris.length < maxReviewPhotos ? (
                 <Pressable
-                  accessibilityLabel="Chụp ảnh"
+                  accessibilityLabel={t("orders.takeAPhoto")}
                   accessibilityRole="button"
                   className="h-20 w-20 items-center justify-center gap-1 rounded-lg border border-dashed border-border-strong bg-surface-soft active:bg-surface-container"
                   onPress={() => {
@@ -200,8 +199,7 @@ export function OrderReviewSheet({
                 >
                   <Camera size={21} color={colors.primary} />
                   <Text className="font-vietnam text-label-sm text-primary">
-                    Chụp ảnh
-                  </Text>
+                    {t("orders.takeAPhoto")}</Text>
                 </Pressable>
               ) : null}
             </View>
@@ -213,7 +211,7 @@ export function OrderReviewSheet({
         <PrimaryBtn
           disabled={rating === 0}
           fullWidth
-          title="Gửi đánh giá"
+          title={t("orders.submitReview")}
           onPress={() => {
             pendingReview.current = {
               orderId: order.id,

@@ -1,17 +1,25 @@
 {
   "expo": {
     "name": "ADIGO",
-    "slug": "ADIGO",
+    "slug": "organic-corporate-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/adigo-app-icon.png",
+    "icon": "./assets/images/logo-adiogo/ADIGO-light-1024.png",
     "scheme": "organiccorporateapp",
     "userInterfaceStyle": "automatic",
-    "ios": {},
+    "ios": {
+      "icon": {
+        "light": "./assets/images/logo-adiogo/ADIGO-light-1024.png",
+        "dark": "./assets/images/logo-adiogo/ADIGO-dark-1024.png",
+        "tinted": "./assets/images/logo-adiogo/ADIGO-monochrome-1024.png"
+      }
+    },
     "android": {
+      "icon": "./assets/images/logo-adiogo/ADIGO-fresh-1024.png",
       "adaptiveIcon": {
-        "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/images/adigo-app-icon-foreground.png"
+        "backgroundColor": "#E1FDE8",
+        "foregroundImage": "./assets/images/logo-adiogo/ADIGO-android-foreground-1024.png",
+        "monochromeImage": "./assets/images/logo-adiogo/ADIGO-android-monochrome-1024.png"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
@@ -28,7 +36,7 @@
     "web": {
       "bundler": "metro",
       "output": "server",
-      "favicon": "./assets/images/adigo-app-icon.png"
+      "favicon": "./assets/images/logo-adiogo/ADIGO-light-1024.png"
     },
     "plugins": [
       "expo-router",
@@ -36,12 +44,12 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#FFFFFF",
-          "image": "./assets/images/adigo-logo.png",
+          "image": "./assets/images/logo-adiogo/adigo-logo.png",
           "imageWidth": 160,
           "resizeMode": "contain",
           "dark": {
             "backgroundColor": "#121614",
-            "image": "./assets/images/adigo-logo.png"
+            "image": "./assets/images/logo-adiogo/adigo-logo.png"
           }
         }
       ],
@@ -66,6 +74,13 @@
           "microphonePermission": false,
           "recordAudioAndroid": false,
           "barcodeScannerEnabled": true
+        }
+      ],
+      [
+        "expo-localization",
+        {
+          "supportedLocales": ["vi", "en"],
+          "supportsRTL": false
         }
       ]
     ],

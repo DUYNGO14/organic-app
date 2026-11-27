@@ -11,7 +11,10 @@
       "@/providers/*": ["./src/providers/*"],
       "@/screens/*": ["./src/screens/*"],
       "@/store/*": ["./src/store/*"],
-      "@/utils/*": ["./src/utils/*"]
+      "@/utils/*": ["./src/utils/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/config/*": ["./src/config/*"],
+      "@/types/*": ["./src/types/*"]
     }
   },
   "include": [

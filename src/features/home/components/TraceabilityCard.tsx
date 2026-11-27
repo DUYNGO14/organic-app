@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { farmStoryImage } from "@/features/home/home.data";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -11,6 +12,7 @@ type TraceabilityCardProps = {
 };
 
 export function TraceabilityCard({ onJournalPress, onScanPress }: TraceabilityCardProps) {
+  const { t } = useTranslation();
   const colors = useAppColors();
 
   return (
@@ -21,11 +23,10 @@ export function TraceabilityCard({ onJournalPress, onScanPress }: TraceabilityCa
             <ShieldCheck color={colors.primary} size={23} />
           </View>
           <Text className="flex-1 font-vietnam text-label-lg text-ink">
-            Minh bạch nguồn gốc 100%
-          </Text>
+            {t("home.fullyTraceableProduce")}</Text>
         </View>
         <PrimaryBtn
-          title="Nhật ký số"
+          title={t("home.digitalJournal")}
           variant="ghost"
           className="min-h-0 px-1 py-1"
           labelClassName="text-label-md text-secondary"
@@ -35,7 +36,7 @@ export function TraceabilityCard({ onJournalPress, onScanPress }: TraceabilityCa
 
       <View className="h-[220px] overflow-hidden rounded-2xl bg-primary">
         <Image
-          accessibilityLabel="Nông trại hữu cơ tại cao nguyên"
+          accessibilityLabel={t("home.organicHighlandFarm")}
           cachePolicy="disk"
           contentFit="cover"
           source={farmStoryImage}
@@ -45,17 +46,14 @@ export function TraceabilityCard({ onJournalPress, onScanPress }: TraceabilityCa
         <View className="absolute inset-0 bg-[#00391b]/45" />
         <View className="flex-1 justify-end p-4">
           <Text className="font-vietnam text-label-sm uppercase tracking-wide text-white/80">
-            Hợp tác xã nông sản sạch
-          </Text>
+            {t("home.produceCooperative")}</Text>
           <Text className="mt-1 font-vietnam text-headline-sm text-white">
-            Nông Trại Cao Nguyên Xanh (Lâm Đồng)
-          </Text>
+            {t("home.caoNguyenXanhFarmLamDong")}</Text>
           <Text className="mt-1 font-vietnam text-body-md text-white/85">
-            Tiêu chuẩn canh tác VietGAP 2024
-          </Text>
+            {t("home.vietgap2024FarmingStandard")}</Text>
         </View>
         <IconButton
-          label="Quét mã truy xuất nông trại"
+          label={t("home.scanAFarmTraceabilityCode")}
           size="lg"
           className="absolute bottom-3 right-3 rounded-xl bg-white"
           onPress={onScanPress}
@@ -67,11 +65,10 @@ export function TraceabilityCard({ onJournalPress, onScanPress }: TraceabilityCa
         <View className="min-w-0 flex-1 flex-row items-start gap-2">
           <View className="mt-2 h-2.5 w-2.5 rounded-full bg-secondary" />
           <Text className="flex-1 font-vietnam text-body-sm text-muted">
-            Lô thu hoạch gần nhất: Hôm nay, 04:30 AM
-          </Text>
+            {t("home.latestHarvestTodayAt0430")}</Text>
         </View>
         <PrimaryBtn
-          title="Xem nhật ký"
+          title={t("home.viewJournal")}
           variant="ghost"
           className="min-h-0 flex-row px-1 py-1"
           labelClassName="text-label-md"

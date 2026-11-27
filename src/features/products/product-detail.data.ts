@@ -1,11 +1,4 @@
-import type { HomeProduct } from "@/features/home/home.data";
-
-export type PackageOption = {
-  label: string;
-  price: number;
-  oldPrice?: number;
-  note: string;
-};
+import type { PackageOption, Product } from "@/types/product";
 
 export type NutritionItem = {
   value: string;
@@ -138,7 +131,7 @@ const specs: Record<string, Omit<ProductDetailSpec, "gallery"> & { gallery?: str
   },
 };
 
-export function getProductDetailSpec(product: HomeProduct): ProductDetailSpec {
+export function getProductDetailSpec(product: Product): ProductDetailSpec {
   const spec = specs[product.id];
   const defaultPackage: PackageOption = {
     label: product.subtitle.match(/[\d.]+\s?(?:g|kg|quả)/i)?.[0] ?? "1 phần",

@@ -1,3 +1,5 @@
+import { useAppTranslation } from "@/localization/content";
+import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { catalogProducts } from "@/features/products/catalog.data";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -35,13 +37,14 @@ import { FarmStorySheet } from "./FarmStorySheet";
 type Section = "journal" | "regions";
 
 const shortcuts = [
-  { label: "Nhật ký mùa vụ", Icon: BookOpen, section: "journal" },
-  { label: "Hợp tác xã", Icon: UsersRound, section: "regions" },
-  { label: "Chuỗi lạnh", Icon: Snowflake, detail: coldChain },
+  { label: "farm.harvestJournal", Icon: BookOpen, section: "journal" },
+  { label: "farm.cooperative", Icon: UsersRound, section: "regions" },
+  { label: "farm.coldChain", Icon: Snowflake, detail: coldChain },
   { label: "Tham quan", Icon: Compass, detail: greenhouse },
 ] as const;
 
-export default function FarmScreen() {
+export default function FarmScreen({ isLoading = false }: ScreenLoadingProps = {}) {
+  const { t, localize } = useAppTranslation();
   const colors = useAppColors();
   const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
   const sectionOffsets = useRef<Record<Section, number>>({
@@ -77,8 +80,10 @@ export default function FarmScreen() {
   function openMap(query: string) {
     void Linking.openURL(
       `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`,
-    ).catch(() => Alert.alert("Không thể mở bản đồ", "Vui lòng thử lại."));
+    ).catch(() => Alert.alert(t("farm.couldNotOpenMaps"), t("farm.pleaseTryAgain")));
   }
+
+  if (isLoading) return <ScreenSkeleton variant="farm" />;
 
   return (
     <View className="flex-1 bg-canvas">
@@ -128,7 +133,7 @@ export default function FarmScreen() {
                       selected ? "text-on-primary" : "text-ink",
                     )}
                   >
-                    {label}
+                    {t(label)}
                   </Text>
                 </Pressable>
               );
@@ -153,12 +158,9 @@ export default function FarmScreen() {
             <TreePine color={colors.ink} size={26} />
             <View className="min-w-0 flex-1 gap-2">
               <Text className="font-vietnam text-body-md italic text-on-secondary-container">
-                “Trồng rau sạch không chỉ là nghề, mà là cách chúng tôi gìn giữ
-                đất mẹ và sức khỏe cho thế hệ mai sau.”
-              </Text>
+                {t("farm.growingCleanProduceIsHowWe")}</Text>
               <Text className="font-vietnam text-label-md text-on-secondary-container">
-                Đại diện Liên Minh Xanh Việt Nam
-              </Text>
+                {t("farm.representativeOfLienMinhXanhViet")}</Text>
             </View>
           </View>
         </View>
@@ -176,10 +178,10 @@ export default function FarmScreen() {
                 accessibilityRole="header"
                 className="min-w-0 flex-1 font-vietnam text-title-md text-ink"
               >
-                {detail.title}
+                {localize(detail.title)}
               </Text>
               <IconButton
-                label="Đóng"
+                label={t("common.close")}
                 size="lg"
                 icon={<X color={colors.ink} size={22} />}
                 onPress={() => setDetail(null)}
@@ -199,13 +201,13 @@ export default function FarmScreen() {
                 </View>
               ) : null}
               <Text className="font-vietnam text-body-lg text-ink">
-                {detail.description}
+                {localize(detail.description)}
               </Text>
               {mapQuery ? (
                 <PrimaryBtn
                   fullWidth
                   variant="secondary"
-                  title="Mở bản đồ vùng trồng"
+                  title={t("farm.openGrowingRegionMap")}
                   onPress={() => openMap(mapQuery)}
                 />
               ) : null}
@@ -214,7 +216,7 @@ export default function FarmScreen() {
                   key={product.id}
                   fullWidth
                   variant="secondary"
-                  title={product.name}
+                  title={localize(product.name)}
                   onPress={() => openProduct(product.id)}
                 />
               ))}

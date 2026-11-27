@@ -1,16 +1,17 @@
+import { useTranslation } from "react-i18next";
 import { AppSheet, type AppSheetHandle } from "@/components/common/BottomSheet";
+import type { ProductSortId } from "@/features/products/products.types";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { Check } from "lucide-react-native";
 import { useMemo, useRef } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export type ProductSortId = "harvest" | "price-asc" | "price-desc";
 
 const sortOptions: { id: ProductSortId; label: string }[] = [
-  { id: "harvest", label: "Mới hái nhất" },
-  { id: "price-asc", label: "Giá thấp đến cao" },
-  { id: "price-desc", label: "Giá cao đến thấp" },
+  { id: "harvest", label: "products.mostRecentlyHarvested" },
+  { id: "price-asc", label: "products.priceLowToHigh" },
+  { id: "price-desc", label: "products.priceHighToLow" },
 ];
 
 type ProductSortSheetProps = {
@@ -26,6 +27,7 @@ export function ProductSortSheet({
   onClose,
   onSelect,
 }: ProductSortSheetProps) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const insets = useSafeAreaInsets();
   const sheet = useRef<AppSheetHandle>(null);
@@ -36,7 +38,7 @@ export function ProductSortSheet({
   return (
     <AppSheet
       ref={sheet}
-      backdropLabel="Đóng sắp xếp"
+      backdropLabel={t("products.closeSortOptions")}
       backdropStyle={backdropStyle}
       backdropOpacity={0.4}
       fullWindowOnIOS
@@ -49,8 +51,7 @@ export function ProductSortSheet({
         style={{ paddingBottom: Math.max(insets.bottom, 16) }}
       >
         <Text className="mb-3 font-vietnam text-headline-sm text-ink">
-          Sắp xếp theo
-        </Text>
+          {t("products.sortBy")}</Text>
         {sortOptions.map((option) => {
           const active = selected === option.id;
           return (
@@ -67,7 +68,7 @@ export function ProductSortSheet({
               <Text
                 className={`font-vietnam text-body-md ${active ? "text-primary" : "text-ink"}`}
               >
-                {option.label}
+                {t(option.label)}
               </Text>
               {active ? <Check color={colors.primary} size={19} /> : null}
             </Pressable>

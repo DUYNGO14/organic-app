@@ -1,3 +1,5 @@
+import { useAppTranslation } from "@/localization/content";
+import { useTranslation } from "react-i18next";
 import { BadgeCheck, Thermometer } from "lucide-react-native";
 import { Text, View } from "react-native";
 
@@ -8,14 +10,15 @@ export type CertBadgeProps = {
 };
 
 export function CertBadge({ label, className = "", showIcon = true }: CertBadgeProps) {
+  const { t, localize } = useAppTranslation();
   return (
     <View
-      accessibilityLabel={`Chứng nhận ${label}`}
+      accessibilityLabel={t("common.certified", { label: localize(label) })}
       className={`min-h-7 flex-row items-center gap-1.5 self-start rounded-full border border-primary/15 bg-secondary-container px-2.5 py-1 dark:border-primary/30 dark:bg-primary/25 ${className}`}
     >
       {showIcon ? <BadgeCheck color="#006b35" size={14} /> : null}
       <Text className="font-vietnam text-label-sm text-on-secondary-container">
-        {label}
+        {localize(label)}
       </Text>
     </View>
   );
@@ -46,12 +49,15 @@ const statusTextStyles: Record<StatusTone, string> = {
 };
 
 export function StatusChip({ label, tone = "neutral", className = "" }: StatusChipProps) {
+  const { t, localize } = useAppTranslation();
   return (
     <View
-      accessibilityLabel={`Trạng thái: ${label}`}
+      accessibilityLabel={t("common.status", { label: localize(label) })}
       className={`min-h-7 items-center justify-center self-start rounded-full px-2.5 py-1 ${statusStyles[tone]} ${className}`}
     >
-      <Text className={`font-vietnam text-label-sm ${statusTextStyles[tone]}`}>{label}</Text>
+      <Text className={`font-vietnam text-label-sm ${statusTextStyles[tone]}`}>
+        {localize(label)}
+      </Text>
     </View>
   );
 }
@@ -81,9 +87,10 @@ export function TempBadge({
   tone = "fresh",
   className = "",
 }: TempBadgeProps) {
+  const { t } = useTranslation();
   return (
     <View
-      accessibilityLabel={`Nhiệt độ ${temperature}${unit}`}
+      accessibilityLabel={t("common.temperature", { temperature, unit })}
       className={`min-h-7 flex-row items-center gap-1 self-start rounded-full px-2.5 py-1 ${tempBackgroundStyles[tone]} ${className}`}
     >
       <Thermometer color={tone === "warm" ? "#8a4300" : "#006b35"} size={14} />

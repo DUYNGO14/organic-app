@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { IconButton } from "@/components/common";
 import { router } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
@@ -18,6 +19,7 @@ export function StackHeader({
   onBack,
   rightAction,
 }: StackHeaderProps) {
+  const { t } = useTranslation();
   const { colorScheme } = useColorScheme();
   const iconColor = colorScheme === "dark" ? "#e0e3df" : "#3f4940";
 
@@ -27,7 +29,7 @@ export function StackHeader({
         {showBack ? (
           <IconButton
             icon={<ArrowLeft color={iconColor} size={20} />}
-            label="Quay lại"
+            label={t("common.back")}
             onPress={onBack ?? (() => router.back())}
             size="sm"
             variant="outlined"

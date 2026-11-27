@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Search, X } from "lucide-react-native";
 import { useAppColors } from "@/hooks/use-app-colors";
 import type { ComponentType, ReactNode } from "react";
@@ -86,7 +87,7 @@ export function Input({
         accessibilityLabel={label}
         className={twMerge(
           "min-h-12 rounded border bg-surface px-4 py-3",
-          error ? "border-danger" : "border-border-strong",
+          error ? "border-danger" : "border-border-strong focus:border-primary",
           inputClassName,
         )}
         {...props}
@@ -105,6 +106,7 @@ export type PhoneInputProps = SwappableInputProps & {
 };
 
 export function PhoneInput({ countryCode = "+84", variant = "default", ...props }: PhoneInputProps) {
+  const { t } = useTranslation();
   const {
     label,
     required,
@@ -141,7 +143,7 @@ export function PhoneInput({ countryCode = "+84", variant = "default", ...props 
         </Text>
         <InputControl
           inputComponent={inputComponent}
-          accessibilityLabel={accessibilityLabel ?? label ?? "Số điện thoại"}
+          accessibilityLabel={accessibilityLabel ?? label ?? t("common.phoneNumber")}
           autoComplete="tel"
           keyboardType="phone-pad"
           placeholder="912 345 678"
@@ -163,13 +165,15 @@ export function PhoneInput({ countryCode = "+84", variant = "default", ...props 
 }
 
 export type PasswordInputProps = BaseInputProps & {
+  leadingIcon?: ReactNode;
   showPasswordLabel?: string;
   hidePasswordLabel?: string;
 };
 
 export function PasswordInput({
-  showPasswordLabel = "Hiện mật khẩu",
-  hidePasswordLabel = "Ẩn mật khẩu",
+  leadingIcon,
+  showPasswordLabel,
+  hidePasswordLabel,
   label,
   required,
   error,
@@ -177,28 +181,44 @@ export function PasswordInput({
   containerClassName,
   inputClassName = "",
   accessibilityLabel,
+  onBlur,
+  onFocus,
   ...inputProps
 }: PasswordInputProps) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const [visible, setVisible] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   return (
     <FieldFrame label={label} required={required} error={error} helperText={helperText} className={containerClassName}>
-      <View className={`h-12 flex-row items-center rounded-lg border bg-surface focus-within:border-primary ${error ? "border-danger" : "border-border-strong"}`}>
+      <View className={twMerge(
+        "min-h-12 flex-row items-center rounded border border-border-strong bg-surface",
+        focused && "border-primary",
+        error && "border-danger",
+      )}>
+        {leadingIcon ? <View className="pl-4" aria-hidden>{leadingIcon}</View> : null}
         <InputControl
-          accessibilityLabel={accessibilityLabel ?? label ?? "Mật khẩu"}
+          accessibilityLabel={accessibilityLabel ?? label ?? t("common.password")}
           autoCapitalize="none"
           autoComplete="current-password"
-          placeholder="Nhập mật khẩu"
+          placeholder={t("common.enterYourPassword")}
           {...inputProps}
-          className={`h-full min-w-0 flex-1 px-4 ${inputClassName}`}
+          className={twMerge("min-h-12 min-w-0 flex-1 px-4 py-3", leadingIcon && "pl-3", inputClassName)}
+          onBlur={(event) => {
+            setFocused(false);
+            onBlur?.(event);
+          }}
+          onFocus={(event) => {
+            setFocused(true);
+            onFocus?.(event);
+          }}
           secureTextEntry={!visible}
         />
         <Pressable
-          accessibilityLabel={visible ? hidePasswordLabel : showPasswordLabel}
+          accessibilityLabel={visible ? hidePasswordLabel ?? t("common.hidePassword") : showPasswordLabel ?? t("common.showPassword")}
           accessibilityRole="button"
-          className="h-11 w-11 items-center justify-center"
-          hitSlop={8}
+          className="min-h-12 min-w-12 items-center justify-center"
           onPress={() => setVisible((current) => !current)}
         >
           {visible ? <EyeOff color={colors.muted} size={20} /> : <Eye color={colors.muted} size={20} />}
@@ -231,6 +251,7 @@ export function SearchInput({
   inputClassName = "",
   ...inputProps
 }: SearchInputProps) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   return (
     <FieldFrame label={label} required={required} error={error} helperText={helperText} className={containerClassName}>
@@ -243,10 +264,10 @@ export function SearchInput({
         {leadingIcon ?? <Search color={colors.muted} size={19} />}
         <InputControl
           inputComponent={inputComponent}
-          accessibilityLabel={accessibilityLabel ?? label ?? "Tìm kiếm"}
+          accessibilityLabel={accessibilityLabel ?? label ?? t("common.search")}
           autoCapitalize="none"
           clearButtonMode="never"
-          placeholder="Tìm sản phẩm..."
+          placeholder={t("common.searchProducts")}
           returnKeyType="search"
           {...inputProps}
           className={`h-full min-w-0 flex-1 px-3 ${inputClassName}`}
@@ -254,7 +275,7 @@ export function SearchInput({
         />
         {Boolean(value) && onClear ? (
           <Pressable
-            accessibilityLabel="Xóa nội dung tìm kiếm"
+            accessibilityLabel={t("common.clearSearch")}
             accessibilityRole="button"
             className="h-9 w-9 items-center justify-center"
             hitSlop={8}
@@ -286,7 +307,7 @@ export function OTPInput({
   value,
   onChangeText,
   length = 6,
-  label = "Mã xác thực",
+  label: suppliedLabel,
   required,
   error,
   autoFocus = false,
@@ -294,6 +315,8 @@ export function OTPInput({
   variant = "default",
   className = "",
 }: OTPInputProps) {
+  const { t } = useTranslation();
+  const label = suppliedLabel ?? t("common.verificationCode");
   const digits = value.replace(/\D/g, "").slice(0, length);
   const inset = variant === "inset";
 
@@ -335,7 +358,7 @@ export function OTPInput({
           keyboardType="number-pad"
           maxLength={length}
           onChangeText={(text) => onChangeText(text.replace(/\D/g, "").slice(0, length))}
-          selectTextOnFocus
+          selection={{ start: digits.length, end: digits.length }}
           selectionColor="transparent"
           style={{ position: "absolute", inset: 0, opacity: 0 }}
           underlineColorAndroid="transparent"
