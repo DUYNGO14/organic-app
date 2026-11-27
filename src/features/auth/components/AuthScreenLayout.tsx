@@ -1,14 +1,10 @@
-import {
-  IconButton,
-  PrimaryBtn,
-  type PrimaryBtnProps,
-} from "@/components/common";
+import { PrimaryBtn, type PrimaryBtnProps } from "@/components/common";
 import { useAppColors } from "@/hooks/use-app-colors";
 import Constants from "expo-constants";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import { ArrowLeft, Leaf } from "lucide-react-native";
+import { Leaf } from "lucide-react-native";
 import type { ReactNode } from "react";
 import {
   KeyboardAvoidingView,
@@ -24,14 +20,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 type AuthScreenLayoutProps = {
   title: string;
   subtitle: ReactNode;
-  onBack?: () => void;
   children: ReactNode;
 };
 
 export function AuthScreenLayout({
   title,
   subtitle,
-  onBack,
   children,
 }: AuthScreenLayoutProps) {
   const colors = useAppColors();
@@ -83,16 +77,6 @@ export function AuthScreenLayout({
           >
             <View className="w-full max-w-md grow justify-center gap-6 self-center px-4 py-6">
               <View className="items-center gap-3">
-                {onBack ? (
-                  <IconButton
-                    className="absolute left-0 top-0 z-10 border border-card-border bg-surface/80"
-                    icon={<ArrowLeft color={colors.ink} size={21} />}
-                    label="Quay lại nhập số điện thoại"
-                    onPress={onBack}
-                    size="lg"
-                  />
-                ) : null}
-
                 <View className="h-28 w-28 items-center justify-center rounded-full border border-on-photo/40 bg-surface/75">
                   <View className="h-[88px] w-[88px] items-center justify-center rounded-full border border-card-border bg-on-photo">
                     <Image
@@ -150,7 +134,10 @@ export function AuthScreenLayout({
                   Phiên bản {appVersion}
                 </Text>
               ) : null}
-              <Pressable accessibilityRole="link" onPress={() => router.push("/legal/privacy")}>
+              <Pressable
+                accessibilityRole="link"
+                onPress={() => router.push("/legal/privacy")}
+              >
                 <Text className="text-center font-vietnam text-body-sm text-muted">
                   © 2026 ADIGO. Bảo mật và quyền riêng tư
                 </Text>

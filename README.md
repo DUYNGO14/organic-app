@@ -51,6 +51,31 @@ EXPO_PUBLIC_API_URL=https://api.example.com
 
 Nếu không khai báo, ứng dụng dùng DummyJSON làm API mẫu. Không đặt token, khoá riêng tư hoặc bí mật trong biến `EXPO_PUBLIC_*` vì chúng được đóng gói vào ứng dụng.
 
+### API xác thực
+
+Khi chạy bản phát triển với `npx expo start` và chưa đặt `EXPO_PUBLIC_AUTH_API_URL`, app dùng tài khoản thử nghiệm:
+
+- Email `demo@adigo.test`, mật khẩu `AdigoDemo123!`. Có thể bấm **Điền tài khoản mẫu** trên màn đăng nhập.
+- Dùng OTP `123456` để xác thực đăng ký hoặc đặt lại mật khẩu. Chế độ này mô phỏng việc gửi mã ngay trong app.
+- Đăng xuất ở tab **Tài khoản**. Phiên đăng nhập, tài khoản mới và mật khẩu đã đổi chỉ tồn tại trong lần chạy hiện tại. Tải lại app để khôi phục mật khẩu mẫu.
+
+Đặt `EXPO_PUBLIC_AUTH_API_URL` thành địa chỉ HTTPS của backend xác thực. Các API nhận JSON và trả về `{ success, code, message, data }`.
+
+| API | Dữ liệu gửi | `data` khi thành công |
+| --- | --- | --- |
+| `POST /auth/register` | `{ name, email, password }` | `{ challengeId, expiresInSeconds, resendAfterSeconds }`. Backend gửi OTP và giữ đăng ký ở trạng thái chờ xác thực. |
+| `POST /auth/login` | `{ email, password }` | `{ accessToken, refreshToken?, userData: { email, name?, phone? } }` |
+| `POST /auth/forgot-password` | `{ email }` | `{ challengeId, expiresInSeconds, resendAfterSeconds }` cho yêu cầu hợp lệ, kể cả khi email chưa đăng ký. Backend gửi OTP cho tài khoản có mật khẩu. |
+| `POST /auth/resend-otp` | `{ challengeId, purpose }` | `{ challengeId, expiresInSeconds, resendAfterSeconds }` cho mã mới. |
+| `POST /auth/verify-otp` | `{ challengeId, purpose, code }` | Với `register`, kích hoạt tài khoản và trả `null`. Với `reset-password`, trả `{ resetToken }`. |
+| `POST /auth/reset-password` | `{ resetToken, password }` | `null` sau khi lưu mật khẩu mới. |
+| `POST /auth/oauth/{provider}/start` | `{ redirectUri }` | `{ authorizationUrl, exchangeToken }` |
+| `POST /auth/oauth/{provider}/exchange` | `{ code, exchangeToken, redirectUri }` | Phiên đăng nhập cùng cấu trúc với `/auth/login`. |
+
+`purpose` là `register` hoặc `reset-password`. Backend tạo OTP 6 chữ số, ràng buộc mã với email, lượt xác thực và mục đích, giới hạn số lần thử và số lần gửi lại. Mã cũ hết hiệu lực khi gửi mã mới. Backend chỉ cho đăng nhập bằng mật khẩu sau khi email đăng ký đã được xác thực. `resetToken` dùng một lần, có thời hạn ngắn và chỉ cho phép đổi mật khẩu của tài khoản đã xác thực.
+
+`provider` là `google` hoặc `facebook`. Backend cấu hình thông tin OAuth của nhà cung cấp, xác thực `state` và chỉ cho phép URI quay lại đã đăng ký. Trên bản dựng iOS và Android, backend chuyển hướng về `organiccorporateapp://login?code=...` sau khi xác thực. Mã trong URI là mã dùng một lần do backend phát hành, hết hạn nhanh và gắn với `exchangeToken` của đúng lượt đăng nhập. Backend giữ bí mật OAuth và trả token phiên qua API đổi mã.
+
 ## Nối dữ liệu API với skeleton
 
 Dùng `QueryClient` hiện có và giữ dữ liệu máy chủ trong TanStack Query. Khi nối API, truyền `isLoading={query.isLoading && query.data === undefined}` cho màn hình, ví dụ `<ProductsScreen initialSearch="" isLoading={isLoading} />`. Đồng thời thay nguồn dữ liệu mẫu bằng dữ liệu query đã chuyển đổi sang kiểu mà màn hình dùng.
@@ -114,7 +139,7 @@ const updateProduct = useMutation({
 ```text
 src/
 ├── app/                 # Routes Expo Router
-│   ├── (auth)/          # Đăng nhập và OTP
+│   ├── (auth)/          # Đăng nhập và đăng ký
 │   ├── (onboarding)/    # Onboarding
 │   ├── (product)/       # Chi tiết sản phẩm
 │   ├── (tabs)/          # Trang chủ, danh mục, nông trại, đơn hàng, hồ sơ
@@ -182,4 +207,4 @@ npx tsc --noEmit
 npx expo-doctor
 ```
 
-Kiểm tra thêm trên Android và iOS: đăng nhập OTP, cấp/từ chối quyền camera-vị trí, dark mode, điều hướng tab, checkout và bottom sheet.
+Kiểm tra thêm trên Android và iOS: OTP email khi đăng ký và quên mật khẩu, cấp/từ chối quyền camera-vị trí, dark mode, điều hướng tab, checkout và bottom sheet.

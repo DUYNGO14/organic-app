@@ -7,24 +7,24 @@ import { useCallback, useEffect, useState } from "react";
 import { ScrollView, Text, View, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LEGAL_CONTACT_PLACEHOLDER, LEGAL_DRAFT_NOTICE, legalDocuments } from "./legal.data";
-import { getLegalAcceptances, getPrivacyRequests } from "./legal.service";
+import { getLegalAcceptances, getLegalAccount, getPrivacyRequests } from "./legal.service";
 import type { LegalAcceptance, PrivacyRequest } from "./legal.types";
 import { PrivacyRequestSheet } from "./PrivacyRequestSheet";
 
 export function LegalCenterScreen() {
   const colors = useAppColors();
-  const phone = useAuthStore((state) => state.session?.phone);
+  const account = useAuthStore((state) => getLegalAccount(state.session));
   const [acceptances, setAcceptances] = useState<LegalAcceptance[]>([]);
   const [requests, setRequests] = useState<PrivacyRequest[]>([]);
   const [requestOpen, setRequestOpen] = useState(false);
 
   const refresh = useCallback(() => {
-    if (!phone) return;
-    void Promise.all([getLegalAcceptances(phone), getPrivacyRequests(phone)]).then(([nextAcceptances, nextRequests]) => {
+    if (!account) return;
+    void Promise.all([getLegalAcceptances(account), getPrivacyRequests(account)]).then(([nextAcceptances, nextRequests]) => {
       setAcceptances(nextAcceptances);
       setRequests(nextRequests);
     });
-  }, [phone]);
+  }, [account]);
 
   useEffect(() => { refresh(); }, [refresh]);
 

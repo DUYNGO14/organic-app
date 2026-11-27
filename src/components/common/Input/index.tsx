@@ -86,7 +86,7 @@ export function Input({
         accessibilityLabel={label}
         className={twMerge(
           "min-h-12 rounded border bg-surface px-4 py-3",
-          error ? "border-danger" : "border-border-strong",
+          error ? "border-danger" : "border-border-strong focus:border-primary",
           inputClassName,
         )}
         {...props}
@@ -163,11 +163,13 @@ export function PhoneInput({ countryCode = "+84", variant = "default", ...props 
 }
 
 export type PasswordInputProps = BaseInputProps & {
+  leadingIcon?: ReactNode;
   showPasswordLabel?: string;
   hidePasswordLabel?: string;
 };
 
 export function PasswordInput({
+  leadingIcon,
   showPasswordLabel = "Hiện mật khẩu",
   hidePasswordLabel = "Ẩn mật khẩu",
   label,
@@ -177,28 +179,43 @@ export function PasswordInput({
   containerClassName,
   inputClassName = "",
   accessibilityLabel,
+  onBlur,
+  onFocus,
   ...inputProps
 }: PasswordInputProps) {
   const colors = useAppColors();
   const [visible, setVisible] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   return (
     <FieldFrame label={label} required={required} error={error} helperText={helperText} className={containerClassName}>
-      <View className={`h-12 flex-row items-center rounded-lg border bg-surface focus-within:border-primary ${error ? "border-danger" : "border-border-strong"}`}>
+      <View className={twMerge(
+        "min-h-12 flex-row items-center rounded border border-border-strong bg-surface",
+        focused && "border-primary",
+        error && "border-danger",
+      )}>
+        {leadingIcon ? <View className="pl-4" aria-hidden>{leadingIcon}</View> : null}
         <InputControl
           accessibilityLabel={accessibilityLabel ?? label ?? "Mật khẩu"}
           autoCapitalize="none"
           autoComplete="current-password"
           placeholder="Nhập mật khẩu"
           {...inputProps}
-          className={`h-full min-w-0 flex-1 px-4 ${inputClassName}`}
+          className={twMerge("min-h-12 min-w-0 flex-1 px-4 py-3", leadingIcon && "pl-3", inputClassName)}
+          onBlur={(event) => {
+            setFocused(false);
+            onBlur?.(event);
+          }}
+          onFocus={(event) => {
+            setFocused(true);
+            onFocus?.(event);
+          }}
           secureTextEntry={!visible}
         />
         <Pressable
           accessibilityLabel={visible ? hidePasswordLabel : showPasswordLabel}
           accessibilityRole="button"
-          className="h-11 w-11 items-center justify-center"
-          hitSlop={8}
+          className="min-h-12 min-w-12 items-center justify-center"
           onPress={() => setVisible((current) => !current)}
         >
           {visible ? <EyeOff color={colors.muted} size={20} /> : <Eye color={colors.muted} size={20} />}
@@ -335,7 +352,7 @@ export function OTPInput({
           keyboardType="number-pad"
           maxLength={length}
           onChangeText={(text) => onChangeText(text.replace(/\D/g, "").slice(0, length))}
-          selectTextOnFocus
+          selection={{ start: digits.length, end: digits.length }}
           selectionColor="transparent"
           style={{ position: "absolute", inset: 0, opacity: 0 }}
           underlineColorAndroid="transparent"

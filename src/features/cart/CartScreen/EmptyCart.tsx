@@ -1,13 +1,19 @@
 import { IconButton, PrimaryBtn, StatusChip } from "@/components/common";
 import { addToCart } from "@/features/cart/add-to-cart";
 import { catalogProducts } from "@/features/products/catalog.data";
+import { useAppColors } from "@/hooks/use-app-colors";
 import type { CatalogProduct } from "@/types/product";
 import { formatPrice } from "@/utils/format-price";
-import { useAppColors } from "@/hooks/use-app-colors";
 import { FlashList } from "@shopify/flash-list";
 import { Image } from "expo-image";
 import { router } from "expo-router";
-import { ArrowRight, Leaf, Plus, ShoppingBasket, Snowflake } from "lucide-react-native";
+import {
+  ArrowRight,
+  Leaf,
+  ShoppingBasket,
+  ShoppingCartPlus,
+  Snowflake,
+} from "lucide-react-native";
 import { Pressable, Text, View } from "react-native";
 
 const suggestedProducts = catalogProducts.filter(({ id }) =>
@@ -50,20 +56,26 @@ function EmptyCartHeader() {
           <Snowflake color={colors.primary} size={23} />
         </View>
         <View className="min-w-0 flex-1 gap-1">
-          <Text className="font-vietnam text-body-emphasis text-ink">Vận chuyển lạnh 6–8°C</Text>
+          <Text className="font-vietnam text-body-emphasis text-ink">
+            Vận chuyển lạnh 6–8°C
+          </Text>
           <Text className="font-vietnam text-body-sm text-muted">
             Giữ nông sản tươi từ nông trại đến tay bạn.
           </Text>
         </View>
       </View>
       <View className="flex-row items-center justify-between gap-2">
-        <Text className="flex-1 font-vietnam text-title-md text-ink">Nông sản gợi ý</Text>
+        <Text className="flex-1 font-vietnam text-title-md text-ink">
+          Nông sản gợi ý
+        </Text>
         <Pressable
           accessibilityRole="button"
           className="min-h-12 flex-row items-center gap-1"
           onPress={openCatalog}
         >
-          <Text className="font-vietnam text-label-md text-primary">Xem tất cả</Text>
+          <Text className="font-vietnam text-label-md text-primary">
+            Xem tất cả
+          </Text>
           <ArrowRight color={colors.primary} size={16} />
         </Pressable>
       </View>
@@ -80,26 +92,42 @@ function SuggestedProduct({ product }: { product: CatalogProduct }) {
         accessibilityRole="button"
         accessibilityLabel={`Xem ${product.name}`}
         className="min-w-0 flex-1 flex-row items-center gap-3 p-1 active:opacity-80"
-        onPress={() => router.push({
-          pathname: "/(product)/product/[productId]",
-          params: { productId: product.id },
-        })}
+        onPress={() =>
+          router.push({
+            pathname: "/(product)/product/[productId]",
+            params: { productId: product.id },
+          })
+        }
       >
         <View className="h-20 w-20 overflow-hidden rounded bg-surface-container">
-          <Image source={product.image} recyclingKey={product.id} contentFit="cover" style={{ width: "100%", height: "100%" }} />
+          <Image
+            source={product.image}
+            recyclingKey={product.id}
+            contentFit="cover"
+            style={{ width: "100%", height: "100%" }}
+          />
         </View>
         <View className="min-w-0 flex-1 gap-1">
-          <StatusChip label={product.certification ?? product.badge} tone="success" />
-          <Text className="font-vietnam text-body-emphasis text-ink">{product.name}</Text>
-          <Text className="font-vietnam text-body-sm text-muted">{product.subtitle}</Text>
-          <Text className="font-vietnam text-label-lg tabular-nums text-primary">{formatPrice(product.price)}</Text>
+          <StatusChip
+            label={product.certification ?? product.badge}
+            tone="success"
+          />
+          <Text className="font-vietnam text-body-emphasis text-ink">
+            {product.name}
+          </Text>
+          <Text className="font-vietnam text-body-sm text-muted">
+            {product.subtitle}
+          </Text>
+          <Text className="font-vietnam text-label-lg tabular-nums text-primary">
+            {formatPrice(product.price)}
+          </Text>
         </View>
       </Pressable>
       <IconButton
         label={`Thêm ${product.name} vào giỏ`}
         size="lg"
         variant="filled"
-        icon={<Plus color={colors.onPrimary} size={21} />}
+        icon={<ShoppingCartPlus color={colors.onPrimary} size={21} />}
         onPress={() => addToCart(product)}
       />
     </View>

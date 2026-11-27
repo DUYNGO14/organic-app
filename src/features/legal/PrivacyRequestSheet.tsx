@@ -8,7 +8,7 @@ import { useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import Toast from "react-native-toast-message";
 import { AppSheet, SheetFooter, type AppSheetHandle } from "@/components/common/BottomSheet";
-import { createPrivacyRequest } from "./legal.service";
+import { createPrivacyRequest, getLegalAccount } from "./legal.service";
 import type { PrivacyRequestKind } from "./legal.types";
 
 const requestKinds: readonly { id: PrivacyRequestKind; label: string }[] = [
@@ -21,19 +21,19 @@ const requestKinds: readonly { id: PrivacyRequestKind; label: string }[] = [
 export function PrivacyRequestSheet({ onClose }: { onClose: () => void }) {
   const sheet = useRef<AppSheetHandle>(null);
   const colors = useAppColors();
-  const phone = useAuthStore((state) => state.session?.phone);
+  const account = useAuthStore((state) => getLegalAccount(state.session));
   const [kind, setKind] = useState<PrivacyRequestKind>("access");
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   async function submit() {
-    if (!phone) {
+    if (!account) {
       Toast.show({ type: "error", text1: "Cần đăng nhập", text2: "Vui lòng đăng nhập để gửi yêu cầu dữ liệu." });
       return;
     }
     setSubmitting(true);
     try {
-      await createPrivacyRequest(phone, kind, note);
+      await createPrivacyRequest(account, kind, note);
       Toast.show({ type: "success", text1: "Đã ghi nhận yêu cầu", text2: "Yêu cầu đang chờ đội ngũ pháp lý xử lý." });
       sheet.current?.dismiss();
     } catch {

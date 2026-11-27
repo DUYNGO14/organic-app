@@ -1,6 +1,6 @@
 import { Checkbox, PrimaryBtn } from "@/components/common";
 import { useAuthStore } from "@/features/auth/auth.store";
-import { acceptLegalDocuments } from "@/features/legal/legal.service";
+import { acceptLegalDocuments, getLegalAccount } from "@/features/legal/legal.service";
 import { getCartTotals, selectDeliveryAddress, useCartStore, type CartLine } from "@/features/cart/cart.store";
 import { useBottomSheetScrollableCreator } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
@@ -34,7 +34,7 @@ export function CheckoutBottomSheet({
   const renderScrollComponent = useBottomSheetScrollableCreator<ScrollViewProps>();
   const address = useCartStore(selectDeliveryAddress);
   const appliedVouchers = useCartStore((state) => state.appliedVouchers);
-  const phone = useAuthStore((state) => state.session?.phone);
+  const account = useAuthStore((state) => getLegalAccount(state.session));
   const totals = getCartTotals(lines, appliedVouchers);
   const [hasAcceptedCheckoutTerms, setHasAcceptedCheckoutTerms] = useState(false);
 
@@ -49,7 +49,7 @@ export function CheckoutBottomSheet({
       return;
     }
 
-    if (phone) await acceptLegalDocuments(phone, ["sale", "delivery", "returns"], "checkout");
+    if (account) await acceptLegalDocuments(account, ["sale", "delivery", "returns"], "checkout");
 
     Toast.show({
       type: "error",

@@ -19,10 +19,10 @@ import {
   MapPinPlus,
   Plus,
 } from "lucide-react-native";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Alert, Pressable, Text, View } from "react-native";
 import { NativeViewGestureHandler } from "react-native-gesture-handler";
-import { AppSheet, SheetFooter } from "@/components/common/BottomSheet";
+import { AppSheet, SheetFooter, type AppSheetHandle } from "@/components/common/BottomSheet";
 import { DeliveryAddressForm } from "./DeliveryAddressForm";
 
 type AddressEntryProps = {
@@ -141,6 +141,7 @@ function AddressEntry({
 }
 
 export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
+  const sheetRef = useRef<AppSheetHandle>(null);
   const colors = useAppColors();
   const addresses = useCartStore((state) => state.addresses);
   const activeAddress = useCartStore(selectDeliveryAddress);
@@ -176,6 +177,7 @@ export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <AppSheet
+      ref={sheetRef}
       mode="inline"
       header={{
         title: editor
@@ -263,7 +265,7 @@ export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
               onPress={() => {
                 if (!selectedId) return;
                 selectAddress(selectedId);
-                onClose();
+                sheetRef.current?.dismiss();
               }}
             />
           </SheetFooter>

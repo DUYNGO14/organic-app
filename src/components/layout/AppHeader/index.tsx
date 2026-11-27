@@ -1,11 +1,6 @@
 import { IconButton } from "@/components/common";
 import { useAppColors } from "@/hooks/use-app-colors";
-import {
-  Bell,
-  ChevronDown,
-  MapPin,
-  ShoppingBag
-} from "lucide-react-native";
+import { Bell, ChevronDown, MapPin, ShoppingBag } from "lucide-react-native";
 import { Image, Pressable, Text, View } from "react-native";
 
 export type MainHeaderProps = {
@@ -24,7 +19,10 @@ function CountBadge({ count }: { count: number }) {
   if (count < 1) return null;
 
   return (
-    <View pointerEvents="none" className="absolute -right-0.5 -top-0.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-surface bg-primary px-1">
+    <View
+      pointerEvents="none"
+      className="absolute -right-0.5 -top-0.5 min-h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-surface bg-primary px-1"
+    >
       <Text className="font-vietnam text-label-sm font-bold text-on-primary">
         {count > 99 ? "99+" : count}
       </Text>
@@ -56,7 +54,7 @@ export function MainHeader({
           <Image
             accessibilityLabel="ADIGO"
             className="h-full w-full"
-            source={require("@/assets/images/adigo-logo.png")}
+            source={require("@/assets/images/logo-adiogo/adigo-logo.png")}
           />
         </View>
 
@@ -103,7 +101,10 @@ export function MainHeader({
             size="sm"
           />
           {unreadNotificationsCount > 0 ? (
-            <View pointerEvents="none" className="absolute right-2 top-2 h-2 w-2 rounded-full border border-surface bg-danger" />
+            <View
+              pointerEvents="none"
+              className="absolute right-2 top-2 h-2 w-2 rounded-full border border-surface bg-danger"
+            />
           ) : null}
         </View>
 

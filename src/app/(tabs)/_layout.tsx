@@ -32,9 +32,7 @@ export default function MainLayout() {
           currentAddress={
             address ? formatDeliveryAddress(address) : "Chưa có địa chỉ"
           }
-          onAddressClick={() =>
-            router.push({ pathname: "/cart", params: { address: "edit" } })
-          }
+          onAddressClick={() => router.navigate("/address-book")}
           onCartClick={() => router.push("/cart")}
           unreadNotificationsCount={unreadNotificationsCount}
           onNotificationClick={() => router.push("/notifications")}

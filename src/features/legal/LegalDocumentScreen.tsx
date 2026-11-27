@@ -8,7 +8,7 @@ import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import { LEGAL_DRAFT_NOTICE, getLegalDocument } from "./legal.data";
-import { acceptLegalDocuments, getLegalAcceptances } from "./legal.service";
+import { acceptLegalDocuments, getLegalAcceptances, getLegalAccount } from "./legal.service";
 import type { LegalAcceptance } from "./legal.types";
 
 function formatDate(value: string) {
@@ -19,25 +19,25 @@ export function LegalDocumentScreen() {
   const { document: documentId } = useLocalSearchParams<{ document?: string }>();
   const document = getLegalDocument(documentId);
   const colors = useAppColors();
-  const phone = useAuthStore((state) => state.session?.phone);
+  const account = useAuthStore((state) => getLegalAccount(state.session));
   const [acceptance, setAcceptance] = useState<LegalAcceptance | null>(null);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!phone || !document) return;
-    void getLegalAcceptances(phone).then((items) => {
+    if (!account || !document) return;
+    void getLegalAcceptances(account).then((items) => {
       setAcceptance(items.find((item) => item.documentId === document.id && item.version === document.version) ?? null);
     });
-  }, [document, phone]);
+  }, [document, account]);
 
   async function accept() {
-    if (!phone || !document) {
+    if (!account || !document) {
       Toast.show({ type: "info", text1: "Đăng nhập để ghi nhận", text2: "Bạn vẫn có thể đọc tài liệu này mà không cần đăng nhập." });
       return;
     }
     setSaving(true);
     try {
-      const items = await acceptLegalDocuments(phone, [document.id], "legal-center");
+      const items = await acceptLegalDocuments(account, [document.id], "legal-center");
       setAcceptance(items.find((item) => item.documentId === document.id) ?? null);
       Toast.show({ type: "success", text1: "Đã ghi nhận", text2: `Bạn đã đọc ${document.shortTitle}.` });
     } finally {

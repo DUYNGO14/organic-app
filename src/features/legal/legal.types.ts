@@ -26,7 +26,7 @@ export type LegalDocument = {
   sections: readonly LegalSection[];
 };
 
-export type LegalAcceptanceSource = "login" | "checkout" | "legal-center";
+export type LegalAcceptanceSource = "login" | "register" | "checkout" | "legal-center";
 
 export type LegalAcceptance = {
   documentId: LegalDocumentId;

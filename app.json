@@ -44,12 +44,12 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#FFFFFF",
-          "image": "./assets/images/adigo-logo.png",
+          "image": "./assets/images/logo-adiogo/adigo-logo.png",
           "imageWidth": 160,
           "resizeMode": "contain",
           "dark": {
             "backgroundColor": "#121614",
-            "image": "./assets/images/adigo-logo.png"
+            "image": "./assets/images/logo-adiogo/adigo-logo.png"
           }
         }
       ],

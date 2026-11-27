@@ -1,5 +1,5 @@
-import LoginScreen from "@/features/auth/LoginScreen";
+import { AuthFormScreen } from "@/features/auth/components/AuthFormScreen";
 
 export default function LoginRoute() {
-  return <LoginScreen />;
+  return <AuthFormScreen mode="login" />;
 }

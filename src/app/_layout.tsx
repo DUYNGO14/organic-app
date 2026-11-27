@@ -64,7 +64,6 @@ export default function RootLayout() {
 
     if (!shouldShowStartupSplash) {
       handOffSplash();
-      setStartupComplete(true);
       return;
     }
 
@@ -124,6 +123,15 @@ function AuthNavigator() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(product)" />
         <Stack.Screen name="cart" />
+        <Stack.Screen
+          name="address-book"
+          options={{
+            presentation: "transparentModal",
+            animation: "none",
+            gestureEnabled: false,
+            contentStyle: { backgroundColor: "transparent" },
+          }}
+        />
         <Stack.Screen name="notifications" />
         <Stack.Screen name="scan-qr" />
       </Stack.Protected>

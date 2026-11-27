@@ -2,6 +2,7 @@ import { useCartStore } from "@/features/cart/cart.store";
 import { storage } from "@/lib/storage";
 import type { AuthSession, User } from "@/types/user";
 import { create } from "zustand";
+import { isDemoAuthEnabled } from "./auth.config";
 
 const SESSION_KEY = "organic-auth-session";
 const ONBOARDING_KEY = "organic-onboarding-complete";
@@ -38,7 +39,11 @@ export const useAuthStore = create<AuthState>((set, get) => {
       ...session,
       phone: session.userData?.phone ?? session.phone,
     };
-    await storage.setJSON(SESSION_KEY, nextSession);
+    if (nextSession.accessToken.startsWith("demo-")) {
+      if (!isDemoAuthEnabled) throw new Error("Phiên đăng nhập thử nghiệm đã hết hiệu lực.");
+    } else {
+      await storage.setJSON(SESSION_KEY, nextSession);
+    }
     set({ session: nextSession });
   }
 
@@ -60,12 +65,13 @@ export const useAuthStore = create<AuthState>((set, get) => {
         if (!get().isLoading) return;
         try {
           const [storedSession, hasCompletedOnboarding] = await Promise.all([
-            storage.getJSON<AuthSession>(SESSION_KEY),
+            isDemoAuthEnabled ? null : storage.getJSON<AuthSession>(SESSION_KEY),
             storage.getBoolean(ONBOARDING_KEY),
           ]);
           const session =
             typeof storedSession?.accessToken === "string" &&
-            storedSession.accessToken.trim()
+            storedSession.accessToken.trim() &&
+            !storedSession.accessToken.startsWith("demo-")
               ? storedSession
               : null;
           set({ session, hasCompletedOnboarding });
@@ -85,7 +91,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
     signOut: () =>
       withSessionLock(async () => {
-        await storage.remove(SESSION_KEY);
+        if (!get().session?.accessToken.startsWith("demo-")) {
+          await storage.remove(SESSION_KEY);
+        }
         useCartStore.getState().reset();
         set({ session: null });
       }),
