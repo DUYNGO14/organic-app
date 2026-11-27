@@ -41,6 +41,14 @@ npx expo-doctor
 
 > Nếu terminal báo `No active Node.js version is configured`, hãy kích hoạt hoặc cài một phiên bản Node.js trước khi chạy các lệnh Expo.
 
+## Ngôn ngữ
+
+Ứng dụng hỗ trợ tiếng Việt và tiếng Anh. Khi chưa có lựa chọn đã lưu, ứng dụng dùng ngôn ngữ được hỗ trợ đầu tiên trong danh sách ưu tiên của thiết bị, hoặc tiếng Việt nếu không có ngôn ngữ phù hợp. Có thể đổi ngôn ngữ ở màn hình chào mừng, phần cuối màn hình đăng nhập hoặc tab **Tài khoản**.
+
+Thêm cùng một khóa vào `src/localization/locales/vi.json` và `src/localization/locales/en.json`, rồi đọc bằng `t()` từ `useTranslation()`. Dữ liệu mẫu có bản dịch hiển thị trong `src/localization/locales/content.en.json`. Định dạng giá theo ngôn ngữ đang chọn và vẫn dùng VND.
+
+Nếu đang dùng development build được tạo trước khi thêm `expo-localization`, hãy dựng lại ứng dụng iOS hoặc Android để có mô-đun native mới.
+
 ## Biến môi trường
 
 Tạo file `.env` tại thư mục gốc khi cần kết nối backend:

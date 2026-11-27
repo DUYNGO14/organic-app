@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import type { SocialProvider } from "@/features/auth/auth.service";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { cn } from "@/lib/cn";
@@ -30,6 +31,7 @@ export function SocialLoginButtons({
   pending,
   onSelect,
 }: SocialLoginButtonsProps) {
+  const { t } = useTranslation();
   const { primary } = useAppColors();
 
   return (
@@ -37,8 +39,7 @@ export function SocialLoginButtons({
       <View className="flex-row items-center gap-3">
         <View className="h-px flex-1 bg-border" />
         <Text className="shrink text-center font-vietnam text-body-sm text-muted">
-          Hoặc đăng nhập bằng
-        </Text>
+          {t("auth.orSignInWith")}</Text>
         <View className="h-px flex-1 bg-border" />
       </View>
       <View className="flex-row justify-center gap-4">
@@ -48,7 +49,7 @@ export function SocialLoginButtons({
             <Pressable
               key={id}
               accessibilityRole="button"
-              accessibilityLabel={`Đăng nhập bằng ${label}`}
+              accessibilityLabel={t("auth.signInWith", { label })}
               accessibilityState={{ disabled, busy: loading }}
               className={cn(
                 "items-center justify-center flex-1  rounded-full border border-border bg-surface active:bg-surface-soft",
@@ -66,7 +67,9 @@ export function SocialLoginButtons({
                     style={styles.logo}
                     contentFit="contain"
                   />
-                  <Text className="text-body-md font-vietnam">{label}</Text>
+                  <Text className="text-body-md font-vietnam text-muted">
+                    {label}
+                  </Text>
                 </View>
               )}
             </Pressable>

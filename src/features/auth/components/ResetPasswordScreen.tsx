@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { PasswordInput } from "@/components/common";
 import { createAuthFormResolver } from "@/features/auth/auth-form-resolver";
 import {
@@ -20,6 +21,7 @@ const resolver =
   createAuthFormResolver<ResetPasswordInput>(resetPasswordSchema);
 
 export function ResetPasswordScreen({ resetToken }: { resetToken: string }) {
+  const { t } = useTranslation();
   const { setChallenge } = useEmailVerification();
   const submitting = useRef(false);
   const { control, handleSubmit, formState, setError } =
@@ -37,7 +39,7 @@ export function ResetPasswordScreen({ resetToken }: { resetToken: string }) {
       setError("root.server", {
         message: getApiErrorMessage(
           error,
-          "Không thể đổi mật khẩu. Vui lòng thử lại.",
+          t("auth.couldNotChangeYourPasswordPlease"),
         ),
       });
       return;
@@ -45,7 +47,7 @@ export function ResetPasswordScreen({ resetToken }: { resetToken: string }) {
 
     Toast.show({
       type: "success",
-      text1: "Đã đổi mật khẩu. Bạn có thể đăng nhập lại.",
+      text1: t("auth.passwordChangedYouCanSignIn"),
     });
     router.dismissTo("/(auth)/login");
     setChallenge(null);
@@ -63,8 +65,8 @@ export function ResetPasswordScreen({ resetToken }: { resetToken: string }) {
 
   return (
     <AuthScreenLayout
-      title="Đặt lại mật khẩu"
-      subtitle="Tạo mật khẩu mới đạt mức Mạnh cho tài khoản của bạn."
+      title={t("auth.resetPassword")}
+      subtitle={t("auth.createANewPasswordRatedStrong")}
     >
       <View className="gap-4">
         <Controller
@@ -74,10 +76,10 @@ export function ResetPasswordScreen({ resetToken }: { resetToken: string }) {
           render={({ field, fieldState }) => (
             <AuthPasswordInput
               newPassword
-              label="Mật khẩu mới"
-              placeholder="Nhập mật khẩu mới"
+              label={t("auth.newPassword")}
+              placeholder={t("auth.enterYourNewPassword")}
               editable={!isSubmitting}
-              error={fieldState.error?.message}
+              error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
               onBlur={field.onBlur}
               onChangeText={field.onChange}
               value={field.value}
@@ -89,13 +91,13 @@ export function ResetPasswordScreen({ resetToken }: { resetToken: string }) {
           name="confirmation"
           render={({ field, fieldState }) => (
             <PasswordInput
-              label="Xác nhận mật khẩu mới"
-              placeholder="Nhập lại mật khẩu mới"
+              label={t("auth.confirmNewPassword")}
+              placeholder={t("auth.reEnterYourNewPassword2")}
               required
               autoComplete="new-password"
               autoCorrect={false}
               editable={!isSubmitting}
-              error={fieldState.error?.message}
+              error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
               onBlur={field.onBlur}
               onChangeText={field.onChange}
               onSubmitEditing={() => void submit()}
@@ -110,7 +112,7 @@ export function ResetPasswordScreen({ resetToken }: { resetToken: string }) {
           </Text>
         ) : null}
         <AuthSubmitButton
-          title="Lưu mật khẩu mới"
+          title={t("auth.saveNewPassword")}
           disabled={!isStrongPassword(password)}
           loading={isSubmitting}
           onPress={() => void submit()}
@@ -118,7 +120,7 @@ export function ResetPasswordScreen({ resetToken }: { resetToken: string }) {
       </View>
       <Link href="/(auth)/login" dismissTo asChild>
         <Pressable className="min-h-12 items-center justify-center" disabled={isSubmitting}>
-          <Text className="font-vietnam text-label-lg text-primary">Về trang đăng nhập</Text>
+          <Text className="font-vietnam text-label-lg text-primary">{t("auth.backToSignIn")}</Text>
         </Pressable>
       </Link>
     </AuthScreenLayout>

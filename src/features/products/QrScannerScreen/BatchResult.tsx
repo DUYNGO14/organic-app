@@ -1,13 +1,15 @@
+import { useAppTranslation } from "@/localization/content";
+import { getFormattingLocale } from "@/localization";
 import { PrimaryBtn } from "@/components/common";
 import { SkeletonBlock, SkeletonGroup } from "@/components/common/Skeleton";
 import { useTraceabilityBatch } from "@/features/products/traceability.queries";
 import { Text, View } from "react-native";
 
-const harvestFormatter = new Intl.DateTimeFormat("vi-VN", {
+const harvestFormatOptions: Intl.DateTimeFormatOptions = {
   dateStyle: "medium",
   timeStyle: "short",
   timeZone: "Asia/Ho_Chi_Minh",
-});
+};
 
 export function BatchResult({
   batchCode,
@@ -18,11 +20,12 @@ export function BatchResult({
   active: boolean;
   onOpenProduct: (productId: string) => void;
 }) {
+  const { t, localize } = useAppTranslation();
   const query = useTraceabilityBatch(batchCode);
 
   if (query.isLoading) {
     return (
-      <SkeletonGroup active={active} label="Đang tra cứu nguồn gốc">
+      <SkeletonGroup active={active} label={t("products.lookingUpOriginDetails")}>
         <View className="gap-4 rounded-lg border border-card-border bg-surface p-4">
           <SkeletonBlock className="h-6 w-2/3" />
           <SkeletonBlock className="h-4 w-1/3" />
@@ -37,13 +40,13 @@ export function BatchResult({
     return (
       <View className="gap-3 rounded-lg border border-card-border bg-surface p-4">
         <Text accessibilityRole="alert" className="font-vietnam text-body-emphasis text-ink">
-          {query.isPaused ? "Đang ngoại tuyến" : "Chưa thể tra cứu nguồn gốc"}
+          {query.isPaused ? t("products.youReOffline") : t("products.couldNotLookUpTheOrigin")}
         </Text>
         <Text className="font-vietnam text-body-sm text-muted">
-          Kiểm tra kết nối rồi thử tra cứu lại mã lô {batchCode}.
+          {t("products.checkYourConnectionThenLookUp", { batchCode })}
         </Text>
         <PrimaryBtn
-          title="Thử lại"
+          title={t("cart.tryAgain")}
           loading={query.isFetching}
           variant="secondary"
           onPress={() => void query.refetch()}
@@ -57,30 +60,28 @@ export function BatchResult({
     return (
       <View className="gap-2 rounded-lg border border-card-border bg-surface p-4">
         <Text accessibilityRole="header" accessibilityLiveRegion="polite" className="font-vietnam text-title-md text-ink">
-          Không tìm thấy lô {batchCode}
+          {t("products.batchNotFound", { batchCode })}
         </Text>
         <Text className="font-vietnam text-body-md text-muted">
-          Kiểm tra mã trên bao bì hoặc thử quét mã khác.
-        </Text>
+          {t("products.checkTheCodeOnThePackaging")}</Text>
       </View>
     );
   }
 
   const details = [
-    { label: "Mã lô", value: batch.code },
-    { label: "Nông trại", value: batch.farmName },
-    { label: "Vùng trồng", value: batch.growingRegion },
-    { label: "Thu hoạch", value: harvestFormatter.format(new Date(batch.harvestedAt)) },
+    { label: t("products.batchCode"), value: batch.code },
+    { label: t("common.farms"), value: batch.farmName },
+    { label: t("products.growingRegion2"), value: batch.growingRegion },
+    { label: t("products.harvest"), value: new Intl.DateTimeFormat(getFormattingLocale(), harvestFormatOptions).format(new Date(batch.harvestedAt)) },
   ];
 
   return (
     <>
       <View className="gap-4 rounded-lg border border-card-border bg-surface p-4">
         <Text className="self-start rounded-full bg-warning-container px-3 py-1 font-vietnam text-label-sm text-warning">
-          Dữ liệu mẫu
-        </Text>
+          {t("products.sampleData")}</Text>
         <Text accessibilityRole="header" accessibilityLiveRegion="polite" className="font-vietnam text-headline-sm text-ink">
-          {batch.productName}
+          {localize(batch.productName)}
         </Text>
         {details.map(({ label, value }) => (
           <View key={label} className="gap-1 border-t border-border pt-3">
@@ -89,7 +90,7 @@ export function BatchResult({
           </View>
         ))}
       </View>
-      <PrimaryBtn fullWidth title="Xem sản phẩm" onPress={() => onOpenProduct(batch.productId)} />
+      <PrimaryBtn fullWidth title={t("products.browseProducts")} onPress={() => onOpenProduct(batch.productId)} />
     </>
   );
 }

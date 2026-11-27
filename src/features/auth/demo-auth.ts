@@ -1,3 +1,4 @@
+import { i18n } from "@/localization";
 import type { AuthSession } from "@/types/user";
 import type { EmailOtpPurpose, LoginCredentials, RegisterCredentials } from "./auth.service";
 
@@ -24,7 +25,7 @@ let nextId = 0;
 
 function findAccount(email: string) {
   if (email === demoLoginCredentials.email && !accounts.has(email)) {
-    return { ...demoLoginCredentials, name: "Khách hàng dùng thử" };
+    return { ...demoLoginCredentials, name: i18n.t("auth.demoCustomer") };
   }
   return accounts.get(email);
 }
@@ -47,7 +48,7 @@ function issueChallenge(verification: DemoVerification) {
 
 function requireChallenge({ challengeId, purpose }: DemoOtpRequest) {
   if (activeChallenge?.challengeId !== challengeId || activeChallenge.purpose !== purpose) {
-    throw new Error("Mã OTP này đã hết hiệu lực. Vui lòng yêu cầu mã mới.");
+    throw new Error(i18n.t("auth.thisCodeIsNoLongerValid"));
   }
   return activeChallenge;
 }
@@ -56,7 +57,7 @@ export const demoAuth = {
   login({ email, password }: LoginCredentials): AuthSession {
     const account = findAccount(email.toLowerCase());
     if (!account || account.password !== password) {
-      throw new Error("Email hoặc mật khẩu chưa chính xác.");
+      throw new Error(i18n.t("auth.theEmailOrPasswordIsIncorrect"));
     }
     return {
       accessToken: `demo-access-${++nextId}`,
@@ -66,7 +67,7 @@ export const demoAuth = {
 
   register(account: RegisterCredentials) {
     const email = account.email.toLowerCase();
-    if (findAccount(email)) throw new Error("Email đã được đăng ký.");
+    if (findAccount(email)) throw new Error(i18n.t("auth.thisEmailIsAlreadyRegistered"));
     return issueChallenge({ purpose: "register", account: { ...account, email } });
   },
 
@@ -78,7 +79,7 @@ export const demoAuth = {
   resendEmailOtp(request: DemoOtpRequest) {
     const challenge = requireChallenge(request);
     if (Date.now() < challenge.resendAt) {
-      throw new Error("Vui lòng đợi trước khi yêu cầu lại mã OTP.");
+      throw new Error(i18n.t("auth.waitBeforeRequestingAnotherCode"));
     }
     return issueChallenge(challenge);
   },
@@ -86,9 +87,9 @@ export const demoAuth = {
   verifyEmailOtp(request: DemoOtpRequest & { code: string }) {
     const challenge = requireChallenge(request);
     if (Date.now() >= challenge.expiresAt) {
-      throw new Error("Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.");
+      throw new Error(i18n.t("auth.theCodeHasExpiredRequestA"));
     }
-    if (request.code !== DEMO_OTP) throw new Error("Mã OTP chưa chính xác.");
+    if (request.code !== DEMO_OTP) throw new Error(i18n.t("auth.theCodeIsIncorrect"));
 
     if (challenge.purpose === "register") {
       accounts.set(challenge.account.email, challenge.account);
@@ -97,7 +98,7 @@ export const demoAuth = {
     }
 
     if (!findAccount(challenge.email)) {
-      throw new Error("Chưa có tài khoản thử nghiệm cho email này.");
+      throw new Error(i18n.t("auth.noDemoAccountExistsForThis"));
     }
     const token = `demo-reset-${++nextId}`;
     resetGrant = { token, email: challenge.email, expiresAt: Date.now() + 300_000 };
@@ -107,10 +108,10 @@ export const demoAuth = {
 
   resetPassword(token: string, password: string) {
     if (resetGrant?.token !== token || Date.now() >= resetGrant.expiresAt) {
-      throw new Error("Phiên đặt lại mật khẩu đã hết hiệu lực. Vui lòng yêu cầu mã OTP mới.");
+      throw new Error(i18n.t("auth.thePasswordResetSessionHasExpired"));
     }
     const account = findAccount(resetGrant.email);
-    if (!account) throw new Error("Chưa có tài khoản thử nghiệm cho email này.");
+    if (!account) throw new Error(i18n.t("auth.noDemoAccountExistsForThis"));
     accounts.set(account.email, { ...account, password });
     resetGrant = null;
   },

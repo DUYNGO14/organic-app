@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { cn } from "@/lib/cn";
 import { Check, Minus } from "lucide-react-native";
@@ -22,13 +23,14 @@ export function Checkbox({
   className = "",
   ...props
 }: CheckboxProps) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const markColor = colors.isDark ? colors.onPrimary : colors.surface;
   const selected = checked || indeterminate;
 
   return (
     <Pressable
-      accessibilityLabel={label ?? "Ô chọn"}
+      accessibilityLabel={label ?? t("common.checkbox")}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: indeterminate ? "mixed" : checked, disabled }}
       className={cn("min-h-12 flex-row items-center gap-3", disabled && "opacity-50", className)}

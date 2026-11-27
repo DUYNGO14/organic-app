@@ -1,3 +1,4 @@
+import { i18n } from "@/localization";
 import { getAccessToken } from "@/features/auth/auth.store";
 import type { ApiError, ApiResponse } from "@/types/api";
 import { create, isAxiosError } from "axios";
@@ -28,7 +29,7 @@ type ApiErrorBody = Partial<ApiError> & { error?: string };
 export function unwrapApiResponse<T>(response: ApiResponse<T> | ApiError): T {
   if (response?.success !== true || !("data" in response)) {
     throw new Error(
-      getResponseErrorMessage(response) ?? "Phản hồi từ máy chủ không hợp lệ.",
+      getResponseErrorMessage(response) ?? i18n.t("common.invalidServerResponse"),
     );
   }
   return response.data;
@@ -47,14 +48,14 @@ function getResponseErrorMessage(body?: ApiErrorBody | ApiResponse) {
 
 export function getApiErrorMessage(
   error: unknown,
-  fallback = "Đã có lỗi xảy ra. Vui lòng thử lại.",
+  fallback = i18n.t("common.genericRequestError"),
 ): string {
   if (isAxiosError<ApiErrorBody>(error)) {
     if (error.code === "ECONNABORTED") {
-      return "Máy chủ phản hồi quá lâu. Vui lòng thử lại.";
+      return i18n.t("common.requestTimeout");
     }
     if (!error.response) {
-      return "Không thể kết nối máy chủ. Vui lòng kiểm tra mạng.";
+      return i18n.t("common.networkError");
     }
     return getResponseErrorMessage(error.response.data) ?? fallback;
   }

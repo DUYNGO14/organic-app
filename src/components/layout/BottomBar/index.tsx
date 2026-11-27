@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useAppColors } from "@/hooks/use-app-colors";
 import type { BottomTabBarProps as RouterTabBarProps } from "expo-router/js-tabs";
 import type { LucideIcon } from "lucide-react-native";
@@ -27,21 +28,21 @@ const tabDefinitions: {
   label: string;
   Icon: LucideIcon;
 }[] = [
-  { key: "home", label: "Trang chủ", Icon: Home },
+  { key: "home", label: "common.home", Icon: Home },
   {
     key: "categories",
-    label: "Danh mục",
+    label: "common.categories",
     Icon: LayoutGrid,
   },
-  { key: "farm", label: "Nông trại", Icon: Sprout },
+  { key: "farm", label: "common.farms", Icon: Sprout },
   {
     key: "orders",
-    label: "Đơn hàng",
+    label: "common.orders",
     Icon: ClipboardList,
   },
   {
     key: "profile",
-    label: "Tài khoản",
+    label: "common.account",
     Icon: UserRound,
   },
 ];
@@ -77,6 +78,7 @@ export function BottomTabBar({
   navigateToTab,
   orderBadge = false,
 }: BottomTabBarProps) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const activeKey = state.routes[state.index]?.name;
   const activeIndex = Math.max(
@@ -128,7 +130,7 @@ export function BottomTabBar({
           return (
             <Pressable
               key={route.key}
-              accessibilityLabel={label}
+              accessibilityLabel={t(label)}
               accessibilityRole="tab"
               accessibilityState={{ selected: active }}
               className="min-h-[56px] flex-1 items-center gap-1 px-0.5 pb-2 pt-3 active:opacity-70"
@@ -156,7 +158,7 @@ export function BottomTabBar({
               <Text
                 className={`text-center font-vietnam text-label-sm ${active ? "text-primary" : "text-muted"}`}
               >
-                {label}
+                {t(label)}
               </Text>
             </Pressable>
           );

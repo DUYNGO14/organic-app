@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Search, X } from "lucide-react-native";
 import { useAppColors } from "@/hooks/use-app-colors";
 import type { ComponentType, ReactNode } from "react";
@@ -105,6 +106,7 @@ export type PhoneInputProps = SwappableInputProps & {
 };
 
 export function PhoneInput({ countryCode = "+84", variant = "default", ...props }: PhoneInputProps) {
+  const { t } = useTranslation();
   const {
     label,
     required,
@@ -141,7 +143,7 @@ export function PhoneInput({ countryCode = "+84", variant = "default", ...props 
         </Text>
         <InputControl
           inputComponent={inputComponent}
-          accessibilityLabel={accessibilityLabel ?? label ?? "Số điện thoại"}
+          accessibilityLabel={accessibilityLabel ?? label ?? t("common.phoneNumber")}
           autoComplete="tel"
           keyboardType="phone-pad"
           placeholder="912 345 678"
@@ -170,8 +172,8 @@ export type PasswordInputProps = BaseInputProps & {
 
 export function PasswordInput({
   leadingIcon,
-  showPasswordLabel = "Hiện mật khẩu",
-  hidePasswordLabel = "Ẩn mật khẩu",
+  showPasswordLabel,
+  hidePasswordLabel,
   label,
   required,
   error,
@@ -183,6 +185,7 @@ export function PasswordInput({
   onFocus,
   ...inputProps
 }: PasswordInputProps) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const [visible, setVisible] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -196,10 +199,10 @@ export function PasswordInput({
       )}>
         {leadingIcon ? <View className="pl-4" aria-hidden>{leadingIcon}</View> : null}
         <InputControl
-          accessibilityLabel={accessibilityLabel ?? label ?? "Mật khẩu"}
+          accessibilityLabel={accessibilityLabel ?? label ?? t("common.password")}
           autoCapitalize="none"
           autoComplete="current-password"
-          placeholder="Nhập mật khẩu"
+          placeholder={t("common.enterYourPassword")}
           {...inputProps}
           className={twMerge("min-h-12 min-w-0 flex-1 px-4 py-3", leadingIcon && "pl-3", inputClassName)}
           onBlur={(event) => {
@@ -213,7 +216,7 @@ export function PasswordInput({
           secureTextEntry={!visible}
         />
         <Pressable
-          accessibilityLabel={visible ? hidePasswordLabel : showPasswordLabel}
+          accessibilityLabel={visible ? hidePasswordLabel ?? t("common.hidePassword") : showPasswordLabel ?? t("common.showPassword")}
           accessibilityRole="button"
           className="min-h-12 min-w-12 items-center justify-center"
           onPress={() => setVisible((current) => !current)}
@@ -248,6 +251,7 @@ export function SearchInput({
   inputClassName = "",
   ...inputProps
 }: SearchInputProps) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   return (
     <FieldFrame label={label} required={required} error={error} helperText={helperText} className={containerClassName}>
@@ -260,10 +264,10 @@ export function SearchInput({
         {leadingIcon ?? <Search color={colors.muted} size={19} />}
         <InputControl
           inputComponent={inputComponent}
-          accessibilityLabel={accessibilityLabel ?? label ?? "Tìm kiếm"}
+          accessibilityLabel={accessibilityLabel ?? label ?? t("common.search")}
           autoCapitalize="none"
           clearButtonMode="never"
-          placeholder="Tìm sản phẩm..."
+          placeholder={t("common.searchProducts")}
           returnKeyType="search"
           {...inputProps}
           className={`h-full min-w-0 flex-1 px-3 ${inputClassName}`}
@@ -271,7 +275,7 @@ export function SearchInput({
         />
         {Boolean(value) && onClear ? (
           <Pressable
-            accessibilityLabel="Xóa nội dung tìm kiếm"
+            accessibilityLabel={t("common.clearSearch")}
             accessibilityRole="button"
             className="h-9 w-9 items-center justify-center"
             hitSlop={8}
@@ -303,7 +307,7 @@ export function OTPInput({
   value,
   onChangeText,
   length = 6,
-  label = "Mã xác thực",
+  label: suppliedLabel,
   required,
   error,
   autoFocus = false,
@@ -311,6 +315,8 @@ export function OTPInput({
   variant = "default",
   className = "",
 }: OTPInputProps) {
+  const { t } = useTranslation();
+  const label = suppliedLabel ?? t("common.verificationCode");
   const digits = value.replace(/\D/g, "").slice(0, length);
   const inset = variant === "inset";
 

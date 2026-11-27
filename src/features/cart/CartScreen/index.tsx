@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
 import { Checkbox, PrimaryBtn } from "@/components/common";
 import { StackHeader } from "@/components/layout";
@@ -31,6 +32,7 @@ function LineSeparator() {
 }
 
 export default function CartScreen({ isLoading = false }: ScreenLoadingProps = {}) {
+  const { t } = useTranslation();
   const { address: addressAction } = useLocalSearchParams<{
     address?: string;
   }>();
@@ -60,7 +62,7 @@ export default function CartScreen({ isLoading = false }: ScreenLoadingProps = {
         }
       >
         <StackHeader
-          title="Giỏ hàng của bạn"
+          title={t("cart.yourCart")}
           onBack={() => {
             if (router.canGoBack()) router.back();
             else router.replace("/(tabs)/home");
@@ -97,7 +99,7 @@ export default function CartScreen({ isLoading = false }: ScreenLoadingProps = {
                       <View className="min-h-12 flex-1 flex-row items-center gap-2">
                         <ShoppingBag color={colors.primary} size={22} />
                         <Text className="flex-1 font-vietnam text-body-emphasis text-ink">
-                          {lines.length} sản phẩm trong giỏ
+                          {t("cart.itemsInYourCart", { count: lines.length })}
                         </Text>
                       </View>
                       <Pressable
@@ -109,8 +111,7 @@ export default function CartScreen({ isLoading = false }: ScreenLoadingProps = {
                       >
                         <Trash2 color={colors.danger} size={16} />
                         <Text className="font-vietnam text-label-md text-danger">
-                          Xóa đã chọn
-                        </Text>
+                          {t("cart.removeSelected")}</Text>
                       </Pressable>
                     </View>
                     <DeliveryAddressCard
@@ -120,7 +121,7 @@ export default function CartScreen({ isLoading = false }: ScreenLoadingProps = {
                     <Checkbox
                       checked={allSelected}
                       indeterminate={hasSelection && !allSelected}
-                      label={`Chọn tất cả (${lines.length} sản phẩm)`}
+                      label={t("cart.selectAllItems", { count: lines.length })}
                       onCheckedChange={setAllSelected}
                     />
                   </View>
@@ -138,8 +139,7 @@ export default function CartScreen({ isLoading = false }: ScreenLoadingProps = {
               <View className="flex-row flex-wrap items-center justify-between gap-2 border-t border-border bg-surface px-4 py-3">
                 <View className="min-w-32 flex-1 gap-1">
                   <Text className="font-vietnam text-label-md text-muted">
-                    Tổng thanh toán
-                  </Text>
+                    {t("cart.orderTotal")}</Text>
                   <Text
                     accessibilityLiveRegion="polite"
                     className="font-vietnam text-title-md tabular-nums text-primary"
@@ -148,12 +148,12 @@ export default function CartScreen({ isLoading = false }: ScreenLoadingProps = {
                   </Text>
                   {totals.discount > 0 ? (
                     <Text className="font-vietnam text-label-sm tabular-nums text-primary">
-                      Tiết kiệm {formatPrice(totals.discount)}
+                      {t("cart.save", { value: formatPrice(totals.discount) })}
                     </Text>
                   ) : null}
                 </View>
                 <PrimaryBtn
-                  title={`Thanh Toán (${selectedCount})`}
+                  title={t("cart.checkout", { selectedCount })}
                   // trailingIcon={
                   //   <LockKeyhole color={colors.onPrimary} size={17} />
                   // }

@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import { getFormattingLocale } from "@/localization";
 import { ProductCard } from "@/components/product/ProductCard";
 import { getProductCardBadges } from "@/components/product/product-card-badges";
 import type { Product } from "@/types/product";
@@ -14,20 +16,21 @@ type RecommendedProductCardProps = {
 };
 
 function Rating({ rating, reviewCount = 0 }: Pick<Product, "rating" | "reviewCount">) {
+  const { t } = useTranslation();
   const { secondary } = useAppColors();
 
   if (reviewCount <= 0 || rating === undefined || !Number.isFinite(rating)) {
-    return <Text className="font-vietnam text-label-md text-muted">Mới</Text>;
+    return <Text className="font-vietnam text-label-md text-muted">{t("home.new")}</Text>;
   }
 
   return (
     <View className="flex-row items-center gap-1">
       <Star color={secondary} fill={secondary} size={14} />
       <Text className="font-vietnam text-label-md text-secondary">
-        {rating.toFixed(1)}
+        {rating.toLocaleString(getFormattingLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
       </Text>
       <Text className="shrink font-vietnam text-label-md text-muted" numberOfLines={1}>
-        ({reviewCount.toLocaleString("vi-VN")})
+        ({reviewCount.toLocaleString(getFormattingLocale())})
       </Text>
     </View>
   );
@@ -64,13 +67,14 @@ export function RecommendationSection({
   onSeeMore,
   onAddProduct,
 }: RecommendationSectionProps) {
+  const { t } = useTranslation();
   return (
     <View className="mt-8">
       <HomeSectionHeading
-        actionLabel="Xem thêm ›"
+        actionLabel={t("home.seeMore")}
         onActionPress={onSeeMore}
-        subtitle="Dựa trên thói quen dinh dưỡng gia đình"
-        title="Gợi ý món lành cho bạn"
+        subtitle={t("home.basedOnYourFamilySEating")}
+        title={t("home.healthyPicksForYou")}
       />
       <View className="flex-row flex-wrap justify-between gap-y-3 px-4">
         {products.map((product) => (

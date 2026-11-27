@@ -1,12 +1,13 @@
+/* eslint-disable import/no-unresolved */
 import { env } from "@/config/env";
-import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import {
-    clearTokens,
-    getAccessToken,
-    getRefreshToken,
-    saveAccessToken,
-    saveRefreshToken,
-} from "../utils/token";
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  saveAccessToken,
+  saveRefreshToken,
+} from "@/utils/token";
+import { AxiosError, create, InternalAxiosRequestConfig } from "axios";
 
 type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
@@ -20,14 +21,14 @@ if (!env.EXPO_PUBLIC_API_URL) {
   );
 }
 
-const api = axios.create({
+const api = create({
   baseURL: env.EXPO_PUBLIC_API_URL,
   timeout: 10000,
   headers: { "Content-Type": "application/json" },
 });
 
 // Instance riêng, KHÔNG gắn interceptor, dùng cho gọi refresh
-const authClient = axios.create({
+const authClient = create({
   baseURL: env.EXPO_PUBLIC_API_URL,
   timeout: 10000,
   headers: { "Content-Type": "application/json" },

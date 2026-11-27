@@ -1,3 +1,4 @@
+import { i18n } from "@/localization";
 import { useCartStore } from "@/features/cart/cart.store";
 import { storage } from "@/lib/storage";
 import type { AuthSession, User } from "@/types/user";
@@ -33,14 +34,14 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
   async function persistSession(session: AuthSession) {
     if (!session.accessToken.trim()) {
-      throw new Error("Thiếu access token từ kết quả xác thực.");
+      throw new Error(i18n.t("auth.theAuthenticationResponseIsMissingAn"));
     }
     const nextSession = {
       ...session,
       phone: session.userData?.phone ?? session.phone,
     };
     if (nextSession.accessToken.startsWith("demo-")) {
-      if (!isDemoAuthEnabled) throw new Error("Phiên đăng nhập thử nghiệm đã hết hiệu lực.");
+      if (!isDemoAuthEnabled) throw new Error(i18n.t("auth.theDemoSessionHasExpired"));
     } else {
       await storage.setJSON(SESSION_KEY, nextSession);
     }
@@ -50,7 +51,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
   function updateSession(update: (session: AuthSession) => AuthSession) {
     return withSessionLock(async () => {
       const session = get().session;
-      if (!session) throw new Error("Chưa có phiên đăng nhập.");
+      if (!session) throw new Error(i18n.t("auth.thereIsNoActiveSession"));
       await persistSession(update(session));
     });
   }
@@ -105,7 +106,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       withSessionLock(() => persistSession({ ...get().session, accessToken })),
 
     saveRefreshToken: async (refreshToken) => {
-      if (!refreshToken.trim()) throw new Error("Thiếu refresh token.");
+      if (!refreshToken.trim()) throw new Error(i18n.t("auth.theRefreshTokenIsMissing"));
       await updateSession((session) => ({ ...session, refreshToken }));
     },
 

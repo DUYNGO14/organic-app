@@ -1,3 +1,4 @@
+import { i18n } from "@/localization";
 import { api, unwrapApiResponse } from "@/lib/axios";
 import type { ApiError, SimpleResponse } from "@/types/api";
 import type {
@@ -42,7 +43,7 @@ export async function getCatalogProducts(
     page.page !== params.page ||
     typeof page.hasNext !== "boolean"
   ) {
-    throw new Error("Dữ liệu phân trang sản phẩm không hợp lệ.");
+    throw new Error(i18n.t("products.invalidProductPaginationData"));
   }
   return page;
 }

@@ -4,18 +4,18 @@ import { isStrongPassword } from "./password-strength";
 const emailSchema = z
   .string()
   .trim()
-  .min(1, "Vui lòng nhập email.")
-  .pipe(z.email("Vui lòng nhập email hợp lệ."));
-const passwordSchema = z.string().min(1, "Vui lòng nhập mật khẩu.");
+  .min(1, "auth.enterYourEmailAddress")
+  .pipe(z.email("auth.enterAValidEmailAddress"));
+const passwordSchema = z.string().min(1, "auth.enterYourPassword");
 const newPasswordSchema = passwordSchema.refine(
   isStrongPassword,
-  "Mật khẩu phải đạt mức Mạnh.",
+  "auth.yourPasswordMustBeRatedStrong",
 );
 
 export const loginSchema = z.object({ email: emailSchema, password: passwordSchema });
 
 export const registerSchema = loginSchema.extend({
-  name: z.string().trim().min(1, "Vui lòng nhập họ và tên."),
+  name: z.string().trim().min(1, "auth.enterYourFullName"),
   password: newPasswordSchema,
 });
 
@@ -24,14 +24,14 @@ export const forgotPasswordSchema = loginSchema.pick({ email: true });
 export const resetPasswordSchema = z
   .object({
     password: newPasswordSchema,
-    confirmation: z.string().min(1, "Vui lòng nhập lại mật khẩu mới."),
+    confirmation: z.string().min(1, "auth.reEnterYourNewPassword"),
   })
   .refine(({ password, confirmation }) => password === confirmation, {
     path: ["confirmation"],
-    error: "Hai mật khẩu chưa khớp.",
+    error: "auth.thePasswordsDonTMatch",
   });
 
-export const otpCodeSchema = z.string().regex(/^\d{6}$/, "Mã OTP phải gồm 6 chữ số.");
+export const otpCodeSchema = z.string().regex(/^\d{6}$/, "auth.theVerificationCodeMustContain6");
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;

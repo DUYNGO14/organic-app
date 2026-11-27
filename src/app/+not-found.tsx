@@ -1,3 +1,5 @@
+import { i18n } from "@/localization";
+import { useTranslation } from "react-i18next";
 import { PrimaryBtn } from "@/components/common";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -33,6 +35,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const supportNumber = "1800 6886";
 
 function ErrorIllustration() {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const lift = useSharedValue(0);
   const floating = useAnimatedStyle(() => ({ transform: [{ translateY: -lift.value }] }));
@@ -50,7 +53,7 @@ function ErrorIllustration() {
 
   return (
     <View
-      accessibilityLabel="Mã lỗi 404"
+      accessibilityLabel={t("common.errorCode404")}
       accessibilityRole="image"
       accessible
       className="h-56 w-full items-center justify-center"
@@ -132,11 +135,12 @@ function ShortcutCard({ title, description, Icon, tone, color, onPress }: Shortc
 
 function callSupport() {
   void Linking.openURL("tel:18006886").catch(() => {
-    Alert.alert("Không thể mở cuộc gọi", `Bạn có thể gọi ADIGO theo số ${supportNumber}.`);
+    Alert.alert(i18n.t("common.couldNotPlaceTheCall"), i18n.t("common.callAdigoAt", { supportNumber }));
   });
 }
 
 export default function NotFoundScreen() {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const href = useUnstableGlobalHref();
   const signedIn = useAuthStore((state) => Boolean(state.session));
@@ -153,16 +157,16 @@ export default function NotFoundScreen() {
   const shortcutRows: Shortcut[][] = [
     [
       {
-        title: "Trang chủ",
-        description: "Khám phá vụ mới",
+        title: t("common.home"),
+        description: t("common.exploreTheNewHarvest"),
         Icon: House,
         tone: "bg-primary/10",
         color: colors.primary,
         onPress: goToStart,
       },
       {
-        title: "Danh mục",
-        description: "Xem nông sản",
+        title: t("common.categories"),
+        description: t("common.browseProduce"),
         Icon: Grid2X2,
         tone: "bg-secondary/20",
         color: colors.primary,
@@ -171,8 +175,8 @@ export default function NotFoundScreen() {
     ],
     [
       {
-        title: "Đơn hàng",
-        description: "Theo dõi giao hàng",
+        title: t("common.orders"),
+        description: t("common.trackYourDelivery"),
         Icon: Truck,
         tone: "bg-surface-container-high",
         color: colors.ink,
@@ -180,7 +184,7 @@ export default function NotFoundScreen() {
       },
       {
         title: supportNumber,
-        description: "Tổng đài ADIGO",
+        description: t("common.adigoSupport"),
         Icon: Headset,
         tone: "bg-danger-container",
         color: colors.danger,
@@ -198,21 +202,17 @@ export default function NotFoundScreen() {
             <View className="flex-row items-center gap-2 rounded-full bg-primary/10 px-3 py-2">
               <Leaf color={colors.primary} size={16} />
               <Text className="shrink font-vietnam text-label-md text-primary">
-                Đang trong kỳ luân canh thu hoạch
-              </Text>
+                {t("common.harvestRotationInProgress")}</Text>
             </View>
             <Text accessibilityRole="header" className="text-center font-vietnam text-headline-sm text-ink">
-              Không tìm thấy trang
-            </Text>
+              {t("common.pageNotFound")}</Text>
             <Text className="px-3 text-center font-vietnam text-body-md text-muted">
-              Đường dẫn có thể đã được chuyển đi, đổi tên hoặc gỡ bỏ.
-            </Text>
+              {t("common.theLinkMayHaveBeenMoved")}</Text>
           </View>
 
           <View className="gap-2">
             <Text accessibilityRole="header" className="font-vietnam text-label-lg uppercase text-ink">
-              Lối tắt gợi ý
-            </Text>
+              {t("common.suggestedShortcuts")}</Text>
             <View className="gap-2">
               {shortcutRows.map(([first, second]) => (
                 <View key={first.title} className="flex-row gap-2">
@@ -228,7 +228,7 @@ export default function NotFoundScreen() {
               fullWidth
               leadingIcon={<ArrowLeft color={colors.onPrimary} size={19} />}
               onPress={goToStart}
-              title="Về trang chủ ADIGO"
+              title={t("common.goToAdigoHome")}
             />
             <View className="flex-row flex-wrap justify-center gap-x-1">
               <PrimaryBtn
@@ -236,11 +236,11 @@ export default function NotFoundScreen() {
                 className="px-2"
                 labelClassName="text-label-md"
                 leadingIcon={<Flag color={colors.primary} size={16} />}
-                title="Báo lỗi liên kết"
+                title={t("common.reportABrokenLink")}
                 onPress={() => Alert.alert(
-                  "Báo lỗi liên kết",
-                  "Bạn có thể báo lỗi qua tổng đài ADIGO.",
-                  [{ text: "Hủy", style: "cancel" }, { text: `Gọi ${supportNumber}`, onPress: callSupport }],
+                  t("common.reportABrokenLink"),
+                  t("common.reportTheProblemToAdigoSupport"),
+                  [{ text: t("common.cancel"), style: "cancel" }, { text: t("common.call", { supportNumber }), onPress: callSupport }],
                 )}
               />
               <PrimaryBtn
@@ -248,7 +248,7 @@ export default function NotFoundScreen() {
                 className="px-2"
                 labelClassName="text-label-md"
                 leadingIcon={<RefreshCw color={colors.primary} size={16} />}
-                title="Thử tải lại trang"
+                title={t("common.tryReloadingThePage")}
                 onPress={() => router.replace(href as Href)}
               />
             </View>

@@ -1,3 +1,4 @@
+import { useAppTranslation } from "@/localization/content";
 import { AppSheet, type AppSheetHandle } from "@/components/common/BottomSheet";
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { catalogProducts } from "@/features/products/catalog.data";
@@ -20,6 +21,7 @@ export function FarmStorySheet({
   story: FarmStory;
   onClose: () => void;
 }) {
+  const { t, localize } = useAppTranslation();
   const sheet = useRef<AppSheetHandle>(null);
   const pendingProductId = useRef<string | null>(null);
   const colors = useAppColors();
@@ -64,10 +66,9 @@ export function FarmStorySheet({
     >
       <View className="flex-row items-center gap-2 border-b border-border px-4 pb-2">
         <Text className="min-w-0 flex-1 font-vietnam text-label-lg text-muted">
-          Nhật ký mùa vụ
-        </Text>
+          {t("farm.harvestJournal")}</Text>
         <IconButton
-          label="Đóng bài viết"
+          label={t("farm.closeArticle")}
           size="lg"
           icon={<X color={colors.ink} size={22} />}
           onPress={dismiss}
@@ -82,14 +83,16 @@ export function FarmStorySheet({
           <View className="gap-2">
             {story.label ? (
               <Text className="self-start rounded-full bg-secondary-container px-3 py-1 font-vietnam text-label-md text-on-secondary-container">
-                {story.label}
+                {localize(story.label)}
               </Text>
             ) : null}
             <Text accessibilityRole="header" className="font-vietnam text-headline-lg-mobile text-ink">
-              {story.title}
+              {localize(story.title)}
             </Text>
             <Text className="font-vietnam text-label-md text-muted">
-              Bởi {story.author}{story.location ? ` · ${story.location}` : ""}
+              {story.location
+                ? t("farm.by", { author: localize(story.author), location: story.location })
+                : t("farm.byAuthor", { author: localize(story.author) })}
             </Text>
           </View>
 
@@ -97,31 +100,30 @@ export function FarmStorySheet({
             <Image source={story.image} contentFit="cover" style={StyleSheet.absoluteFill} />
           </View>
 
-          <Text className="font-vietnam text-body-lg text-ink">{story.description}</Text>
+          <Text className="font-vietnam text-body-lg text-ink">{localize(story.description)}</Text>
           {story.sections.map(({ title, text }) => (
-            <View key={title} className="gap-2">
+            <View key={localize(title)} className="gap-2">
               <Text accessibilityRole="header" className="font-vietnam text-headline-sm text-ink">
-                {title}
+                {localize(title)}
               </Text>
-              <Text className="font-vietnam text-body-lg text-ink">{text}</Text>
+              <Text className="font-vietnam text-body-lg text-ink">{localize(text)}</Text>
             </View>
           ))}
 
           {story.tags?.length ? (
-            <Text className="font-vietnam text-label-md text-primary">{story.tags.join("  ")}</Text>
+            <Text className="font-vietnam text-label-md text-primary">{story.tags.map(localize).join("  ")}</Text>
           ) : null}
 
           {relatedProducts.length > 0 ? (
             <View className="gap-2 border-t border-border pt-4">
               <Text accessibilityRole="header" className="font-vietnam text-title-md text-ink">
-                Sản phẩm liên quan
-              </Text>
+                {t("farm.relatedProducts")}</Text>
               {relatedProducts.map((product) => (
                 <PrimaryBtn
                   key={product.id}
                   fullWidth
                   variant="secondary"
-                  title={product.name}
+                  title={localize(product.name)}
                   onPress={() => openProduct(product.id)}
                 />
               ))}

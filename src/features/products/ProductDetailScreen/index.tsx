@@ -1,3 +1,4 @@
+import { useAppTranslation } from "@/localization/content";
 import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { StackHeader } from "@/components/layout";
@@ -33,6 +34,7 @@ import { ScrollView, Share, Text, View } from "react-native";
 const products = catalogProducts;
 
 export default function ProductDetailScreen({ isLoading = false }: ScreenLoadingProps = {}) {
+  const { t, localize } = useAppTranslation();
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const colors = useAppColors();
   const queryClient = useQueryClient();
@@ -53,7 +55,7 @@ export default function ProductDetailScreen({ isLoading = false }: ScreenLoading
     return (
       <View className="flex-1 bg-canvas">
         <StackHeader
-          title="Chi tiết sản phẩm"
+          title={t("products.productDetails")}
           onBack={() => {
             if (router.canGoBack()) router.back();
             else router.replace("/(tabs)/categories");
@@ -68,11 +70,10 @@ export default function ProductDetailScreen({ isLoading = false }: ScreenLoading
     return (
       <View className="flex-1 items-center justify-center bg-canvas px-6">
         <Text className="font-vietnam text-headline-sm text-ink">
-          Không tìm thấy sản phẩm
-        </Text>
+          {t("products.productNotFound")}</Text>
         <PrimaryBtn
           className="mt-4"
-          title="Quay lại"
+          title={t("common.back")}
           onPress={() => router.back()}
         />
       </View>
@@ -101,16 +102,16 @@ export default function ProductDetailScreen({ isLoading = false }: ScreenLoading
         importantForAccessibility={buyNowOpen ? "no-hide-descendants" : "auto"}
       >
         <StackHeader
-          title="Chi tiết sản phẩm"
+          title={t("products.productDetails")}
           rightAction={
             <View className="flex-row items-center gap-0.5">
               <IconButton
                 icon={<Share2 color={colors.ink} size={20} />}
-                label="Chia sẻ sản phẩm"
+                label={t("products.shareProduct")}
                 size="sm"
                 onPress={() =>
                   void Share.share({
-                    message: `${product.name} – ${formatPrice(selectedPackage.price)}`,
+                    message: `${localize(product.name)} – ${formatPrice(selectedPackage.price)}`,
                   })
                 }
               />
@@ -119,8 +120,8 @@ export default function ProductDetailScreen({ isLoading = false }: ScreenLoading
                   icon={<ShoppingBag color={colors.ink} size={20} />}
                   label={
                     cartItemsCount
-                      ? `Giỏ hàng, ${cartItemsCount} sản phẩm`
-                      : "Giỏ hàng"
+                      ? t("common.cartItems", { count: cartItemsCount })
+                      : t("common.cart")
                   }
                   size="sm"
                   onPress={() => router.push("/cart")}

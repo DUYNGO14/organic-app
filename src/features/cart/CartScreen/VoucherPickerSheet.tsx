@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { AppSheet, type AppSheetHandle, SheetFooter } from "@/components/common/BottomSheet";
 import { PrimaryBtn } from "@/components/common";
 import { CART_VOUCHERS, useCartStore, type AppliedVouchers, type VoucherType } from "@/features/cart/cart.store";
@@ -12,28 +13,16 @@ import { Pressable, Text, View, type ScrollViewProps } from "react-native";
 
 const snapPoints = ["82%"];
 const groups: { type: VoucherType; title: string }[] = [
-  { type: "shipping", title: "Mã phí vận chuyển" },
-  { type: "product", title: "Mã sản phẩm" },
+  { type: "shipping", title: "cart.shippingVoucher" },
+  { type: "product", title: "cart.productVoucher" },
 ];
 
 type VoucherRow =
   | { kind: "heading"; key: string; title: string }
   | { kind: "voucher"; key: string; type: VoucherType; code: string; description: string };
 
-const rows = groups.flatMap<VoucherRow>(({ type, title }) => [
-  { kind: "heading", key: type, title },
-  ...CART_VOUCHERS[type].map((voucher) => ({
-    kind: "voucher" as const,
-    key: `${type}-${voucher.code}`,
-    type,
-    code: voucher.code,
-    description: "percent" in voucher
-      ? `Giảm ${voucher.percent}%, tối đa ${formatPrice(voucher.maxDiscount)}`
-      : `Giảm phí vận chuyển tối đa ${formatPrice(voucher.maxDiscount)}`,
-  })),
-]);
-
 export function VoucherPickerSheet({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const sheetRef = useRef<AppSheetHandle>(null);
   const colors = useAppColors();
   const [draft, setDraft] = useState<AppliedVouchers>(() => useCartStore.getState().appliedVouchers);
@@ -42,12 +31,25 @@ export function VoucherPickerSheet({ onClose }: { onClose: () => void }) {
   const renderScrollComponent = useBottomSheetScrollableCreator<ScrollViewProps>();
   const dismiss = useCallback(() => sheetRef.current?.dismiss(), []);
 
+  const rows = groups.flatMap<VoucherRow>(({ type, title }) => [
+    { kind: "heading", key: type, title },
+    ...CART_VOUCHERS[type].map((voucher) => ({
+      kind: "voucher" as const,
+      key: `${type}-${voucher.code}`,
+      type,
+      code: voucher.code,
+      description: "percent" in voucher
+        ? t("cart.saveUpTo", { percent: voucher.percent, value2: formatPrice(voucher.maxDiscount) })
+        : t("cart.saveUpToOnShipping", { value: formatPrice(voucher.maxDiscount) }),
+    })),
+  ]);
+
   return (
     <AppSheet
       header={{
-        title: "Chọn voucher",
-        actionLabel: "Đóng bộ chọn voucher",
-        subtitle: "Chọn tối đa một mã mỗi loại. Chạm lại để bỏ chọn.",
+        title: t("cart.chooseAVoucher"),
+        actionLabel: t("cart.closeVoucherPicker"),
+        subtitle: t("cart.chooseUpToOneVoucherOf"),
       }}
       ref={sheetRef}
       fullWindowOnIOS
@@ -72,7 +74,7 @@ export function VoucherPickerSheet({ onClose }: { onClose: () => void }) {
               if (item.kind === "heading") {
                 return (
                   <Text accessibilityRole="header" className="pb-2 pt-1 font-vietnam text-body-emphasis text-ink">
-                    {item.title}
+                    {t(item.title)}
                   </Text>
                 );
               }
@@ -114,7 +116,7 @@ export function VoucherPickerSheet({ onClose }: { onClose: () => void }) {
       </View>
       <SheetFooter guardGesture>
         <PrimaryBtn
-          title="Áp dụng"
+          title={t("cart.apply")}
           fullWidth
           onPress={() => {
             setAppliedVouchers(draft);

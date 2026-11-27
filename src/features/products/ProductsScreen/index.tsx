@@ -1,3 +1,5 @@
+import { useAppTranslation } from "@/localization/content";
+import { useTranslation } from "react-i18next";
 import { IconButton, PrimaryBtn } from "@/components/common";
 import {
   ScreenSkeleton,
@@ -47,6 +49,7 @@ function CatalogStatus({
   loading?: boolean;
   onRetry?: () => void;
 }) {
+  const { t } = useTranslation();
   const { primary } = useAppColors();
 
   return (
@@ -56,7 +59,7 @@ function CatalogStatus({
       {onRetry ? (
         <PrimaryBtn
           className="self-center"
-          title="Thử lại"
+          title={t("cart.tryAgain")}
           variant="secondary"
           onPress={onRetry}
         />
@@ -89,14 +92,15 @@ function SelectedCategoryLabel({
 }: {
   selectedIds: readonly ProductCategoryId[];
 }) {
-  if (selectedIds.length === 0) return "Tất cả sản phẩm";
+  const { t, localize } = useAppTranslation();
+  if (selectedIds.length === 0) return t("products.allProducts");
   const selected = productCategories.filter(({ id }) =>
     selectedIds.includes(id),
   );
-  if (selected.length === 1) return selected[0].label;
+  if (selected.length === 1) return localize(selected[0].label);
   if (selected.length === 2)
-    return selected.map(({ label }) => label).join(" & ");
-  return `${selected.length} danh mục đã chọn`;
+    return selected.map(({ label }) => localize(label)).join(" & ");
+  return t("products.categoriesSelected", { length: selected.length });
 }
 
 export default function ProductsScreen({
@@ -107,6 +111,7 @@ export default function ProductsScreen({
   initialSearch: string;
   initialCategoryId?: ProductCategoryId;
 }) {
+  const { t, localize } = useAppTranslation();
   const colors = useAppColors();
   const queryClient = useQueryClient();
   const listRef = useRef<FlashListRef<CatalogProduct>>(null);
@@ -186,7 +191,7 @@ export default function ProductsScreen({
         filters.season === "all" || product.seasonTags.includes(filters.season);
       const queryMatches =
         !query ||
-        `${product.name} ${product.subtitle} ${product.origin} ${product.certification ?? ""}`
+        `${product.name} ${product.subtitle} ${product.origin} ${product.certification ?? ""} ${localize(product.name)} ${localize(product.subtitle)}`
           .toLocaleLowerCase("vi-VN")
           .includes(query);
       const certificationMatches =
@@ -208,7 +213,7 @@ export default function ProductsScreen({
       if (sort === "price-desc") return b.price - a.price;
       return b.harvestOrder - a.harvestOrder;
     });
-  }, [catalogData, filters, search, sort]);
+  }, [catalogData, filters, localize, search, sort]);
 
   function scrollToTop() {
     listRef.current?.scrollToOffset({ offset: 0, animated: false });
@@ -255,14 +260,11 @@ export default function ProductsScreen({
           <View className="flex-row items-center justify-between gap-3">
             <View className="min-w-0 flex-1">
               <Text className="font-vietnam text-label-sm uppercase text-primary-fixed">
-                ☼ Vụ đông xuân
-              </Text>
+                {t("products.winterSpringHarvest")}</Text>
               <Text className="mt-1 font-vietnam text-headline-sm text-on-primary">
-                Rau giòn ngọt tự nhiên
-              </Text>
+                {t("products.naturallyCrispAndSweet")}</Text>
               <Text className="mt-1 font-vietnam text-body-sm text-on-primary">
-                Không hóa chất kích thích · Thu hoạch sáng sớm
-              </Text>
+                {t("products.noGrowthStimulantsPickedEarlyIn")}</Text>
             </View>
             <View className="h-12 w-12 items-center justify-center rounded-full bg-on-primary/15">
               <Sprout color={colors.onPrimary} size={26} />
@@ -279,7 +281,7 @@ export default function ProductsScreen({
               <SelectedCategoryLabel selectedIds={filters.categoryIds} />
             </Text>
             <Text className="mt-0.5 font-vietnam text-body-sm text-muted">
-              {activeProductCount} sản phẩm
+              {t("products.products", { count: activeProductCount })}
             </Text>
           </View>
           <View className="flex-row items-center gap-2">
@@ -294,15 +296,15 @@ export default function ProductsScreen({
               <ArrowDownUp color={colors.muted} size={17} />
               <Text className="font-vietnam text-label-md text-ink">
                 {sort === "harvest"
-                  ? "Mới hái nhất"
+                  ? t("products.mostRecentlyHarvested")
                   : sort === "price-asc"
-                    ? "Giá thấp"
-                    : "Giá cao"}
+                    ? t("products.lowPrice")
+                    : t("products.highPrice")}
               </Text>
               <ChevronDown color={colors.muted} size={16} />
             </Pressable>
             <IconButton
-              label="Mở bộ lọc sản phẩm"
+              label={t("products.openProductFilters")}
               size="lg"
               variant="outlined"
               className="rounded-xl border-border bg-surface-container-lowest"
@@ -323,6 +325,7 @@ export default function ProductsScreen({
       colors.primary,
       filters.categoryIds,
       sort,
+      t,
     ],
   );
 
@@ -355,21 +358,19 @@ export default function ProductsScreen({
           isCatalogApiConfigured && (isPending || isSearchPending) ? (
             <CatalogStatus
               loading={!isPaused}
-              message={isPaused ? "Đang chờ kết nối mạng…" : "Đang tải sản phẩm…"}
+              message={isPaused ? t("products.waitingForANetworkConnection") : t("products.loadingProducts")}
             />
           ) : isCatalogApiConfigured && isError ? (
             <CatalogStatus
-              message="Không thể tải sản phẩm."
+              message={t("products.couldNotLoadProducts")}
               onRetry={() => void refetch({ cancelRefetch: false })}
             />
           ) : (
             <View className="items-center px-6 py-12">
               <Text className="font-vietnam text-title-md text-ink">
-                Không tìm thấy sản phẩm
-              </Text>
+                {t("products.productNotFound")}</Text>
               <Text className="mt-1 text-center font-vietnam text-body-sm text-muted">
-                Thử đổi danh mục hoặc xóa bớt bộ lọc đang chọn.
-              </Text>
+                {t("products.changeCategoriesOrClearSomeFilters")}</Text>
               <Pressable
                 accessibilityRole="button"
                 className="mt-3 min-h-11 justify-center px-3"
@@ -379,19 +380,18 @@ export default function ProductsScreen({
                 }}
               >
                 <Text className="font-vietnam text-label-md text-primary">
-                  Xóa tìm kiếm và bộ lọc
-                </Text>
+                  {t("products.clearSearchAndFilters")}</Text>
               </Pressable>
             </View>
           )
         }
         ListFooterComponent={
           isCatalogApiConfigured && isFetchingNextPage ? (
-            <CatalogStatus message="Đang tải thêm sản phẩm…" loading />
+            <CatalogStatus message={t("products.loadingMoreProducts")} loading />
           ) : isCatalogApiConfigured && isPaused && hasNextPage ? (
-            <CatalogStatus message="Đang chờ kết nối mạng…" />
+            <CatalogStatus message={t("products.waitingForANetworkConnection")} />
           ) : isCatalogApiConfigured && isFetchNextPageError ? (
-            <CatalogStatus message="Không thể tải thêm sản phẩm." onRetry={loadNextPage} />
+            <CatalogStatus message={t("products.couldNotLoadMoreProducts")} onRetry={loadNextPage} />
           ) : !isCatalogApiConfigured || (catalogData && !hasNextPage) ? (
             <QualityPromise />
           ) : null

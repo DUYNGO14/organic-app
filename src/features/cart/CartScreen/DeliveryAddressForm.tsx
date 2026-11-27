@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   Checkbox,
   FieldFrame,
@@ -11,7 +12,6 @@ import type { DeliveryAddress } from "@/features/cart/cart.store";
 import { resolveLocationAddress } from "@/features/cart/location-address";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { cn } from "@/lib/cn";
-import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import * as Location from "expo-location";
 import {
   Building2,
@@ -30,6 +30,7 @@ import {
   Linking,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   View,
   type TextInputProps,
@@ -37,10 +38,10 @@ import {
 import { NativeViewGestureHandler } from "react-native-gesture-handler";
 import { z } from "zod";
 import { SheetFooter } from "@/components/common/BottomSheet";
-import { AddressDivisionPicker, divisionLabels } from "./AddressDivisionPicker";
+import { AddressDivisionPicker, divisionLabelKeys } from "./AddressDivisionPicker";
 
 const addressSchema = z.object({
-  name: z.string().trim().min(2, "Vui lòng nhập tên người nhận."),
+  name: z.string().trim().min(2, "cart.enterTheRecipientSName"),
   phone: z
     .string()
     .transform((value) =>
@@ -51,32 +52,32 @@ const addressSchema = z.object({
         .string()
         .regex(
           /^[35789]\d{8}$/,
-          "Vui lòng nhập số điện thoại Việt Nam hợp lệ.",
+          "cart.enterAValidVietnamesePhoneNumber",
         ),
     ),
-  province: z.string().trim().min(2, "Vui lòng nhập tỉnh hoặc thành phố."),
+  province: z.string().trim().min(2, "cart.enterTheProvinceOrCity"),
   district: z.string().trim(),
   divisionMode: z.enum(["current", "legacy"]),
-  ward: z.string().trim().min(2, "Vui lòng nhập phường hoặc xã."),
-  address: z.string().trim().min(5, "Vui lòng nhập địa chỉ nhận hàng đầy đủ."),
+  ward: z.string().trim().min(2, "cart.enterTheWardOrCommune"),
+  address: z.string().trim().min(5, "cart.enterYourCompleteDeliveryAddress"),
   label: z.enum(["home", "office"]),
-  note: z.string().trim().max(240, "Ghi chú tối đa 240 ký tự."),
+  note: z.string().trim().max(240, "cart.keepTheNoteTo240Characters"),
   makeDefault: z.boolean(),
 }).refine((values) => values.divisionMode === "current" || values.district.length > 0, {
   path: ["district"],
-  message: "Vui lòng chọn quận hoặc huyện.",
+  message: "cart.chooseADistrict",
 });
 
 type AddressFormValues = z.input<typeof addressSchema>;
 type AddressTextField = "name" | "address" | "note";
 const addressLabels = [
-  { value: "home", title: "Nhà riêng", Icon: House },
-  { value: "office", title: "Văn phòng", Icon: Building2 },
+  { value: "home", title: "cart.home", Icon: House },
+  { value: "office", title: "cart.office", Icon: Building2 },
 ] as const;
 const quickNotes = [
-  "Giao giờ hành chính",
-  "Gọi trước 15 phút",
-  "Gửi lễ tân / bảo vệ",
+  "cart.deliverDuringBusinessHours",
+  "cart.call15MinutesAhead",
+  "cart.leaveWithReceptionOrSecurity",
 ];
 
 function AddressFormSection({
@@ -109,6 +110,7 @@ export function DeliveryAddressForm({
   isDefault: boolean;
   onSave: (address: DeliveryAddress, makeDefault: boolean) => void;
 }) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const {
     control,
@@ -178,18 +180,18 @@ export function DeliveryAddressForm({
 
   function renderDivision(level: DivisionLevel, value: string) {
     const helperText = level === "district" && divisionMode === "current"
-      ? "Chọn địa chỉ có quận/huyện ở mục Tỉnh / Thành phố."
+      ? t("cart.chooseTheAddressFormatWithA")
       : level !== "province" && !province
-        ? "Chọn tỉnh hoặc thành phố trước."
+        ? t("cart.chooseAProvinceOrCityFirst")
         : level === "ward" && divisionMode === "legacy" && !district
-          ? "Chọn quận hoặc huyện trước."
+          ? t("cart.chooseADistrictFirst")
           : undefined;
-    const label = divisionLabels[level];
+    const label = t(divisionLabelKeys[level]);
     return (
-      <FieldFrame label={label} required={level !== "district" || divisionMode === "legacy"} error={errors[level]?.message} helperText={helperText}>
+      <FieldFrame label={label} required={level !== "district" || divisionMode === "legacy"} error={errors[level]?.message ? t(errors[level].message) : undefined} helperText={helperText}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={value ? `${label}: ${value}` : `Chọn ${label}`}
+          accessibilityLabel={value ? `${label}: ${value}` : t("cart.select2", { productLabel: label })}
           accessibilityState={{ disabled: locating || Boolean(helperText) }}
           disabled={locating || Boolean(helperText)}
           className={cn("min-h-12 flex-row items-center gap-2 rounded border bg-surface-soft px-4 py-2 active:bg-surface-container", errors[level] ? "border-danger" : "border-border")}
@@ -199,7 +201,7 @@ export function DeliveryAddressForm({
           }}
         >
           <Text className={cn("flex-1 font-vietnam text-body-md", value ? "text-ink" : "text-muted")}>
-            {value || `Chọn ${label.toLocaleLowerCase("vi-VN")}`}
+            {value || t("cart.select2", { productLabel: label.toLocaleLowerCase("vi-VN") })}
           </Text>
           <ChevronRight color={colors.muted} size={19} />
         </Pressable>
@@ -223,7 +225,7 @@ export function DeliveryAddressForm({
             inputClassName="bg-surface-soft"
             label={label}
             required={name !== "note"}
-            error={fieldState.error?.message}
+            error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
             onBlur={field.onBlur}
             onChangeText={(value) => {
               if (fieldState.error) clearErrors(name);
@@ -253,21 +255,21 @@ export function DeliveryAddressForm({
       if (!granted) {
         setShowLocationSettings(!canAskAgain);
         setLocationMessage(canAskAgain
-          ? "Cho phép truy cập vị trí để tự điền địa chỉ nhận hàng."
-          : "Bật quyền vị trí cho ứng dụng trong Cài đặt để dùng tính năng này.");
+          ? t("cart.allowLocationAccessToFillIn")
+          : t("cart.enableLocationAccessForThisApp"));
         return;
       }
       const servicesEnabled = await Location.hasServicesEnabledAsync();
       if (signal.aborted) return;
       if (!servicesEnabled) {
-        setLocationMessage("Hãy bật dịch vụ vị trí trên thiết bị rồi thử lại.");
+        setLocationMessage(t("cart.turnOnLocationServicesAndTry"));
         return;
       }
       timeout = setTimeout(() => {
         request.abort();
         locationRequest.current = null;
         setLocating(false);
-        setLocationMessage("Lấy địa chỉ mất quá nhiều thời gian. Bạn có thể thử lại.");
+        setLocationMessage(t("cart.findingYourAddressTookTooLong"));
       }, 35_000);
       signal.addEventListener("abort", () => clearTimeout(timeout), { once: true });
 
@@ -281,7 +283,7 @@ export function DeliveryAddressForm({
       const fields = place && await resolveLocationAddress(place, getValues("divisionMode"), signal);
       if (signal.aborted) return;
       if (!fields || (!fields.province && !fields.address)) {
-        setLocationMessage("Đã lấy vị trí nhưng chưa tìm được địa chỉ nhận hàng. Hãy kiểm tra trên bản đồ hoặc nhập địa chỉ.");
+        setLocationMessage(t("cart.weFoundYourLocationButCouldn"));
         return;
       }
       const addressFields = ["divisionMode", "province", "district", "ward", "address"] as const;
@@ -292,11 +294,11 @@ export function DeliveryAddressForm({
       const hasFullAddress = fields.ward && fields.address.length >= 5
         && (fields.divisionMode === "current" || fields.district);
       setLocationMessage(hasFullAddress
-        ? "Đã điền địa chỉ theo vị trí. Hãy kiểm tra lại số nhà và tên đường trước khi lưu."
-        : "Đã điền phần địa chỉ tìm được. Hãy bổ sung các mục còn thiếu trước khi lưu.");
+        ? t("cart.weFilledInTheAddressFrom")
+        : t("cart.weFilledInPartOfThe"));
     } catch {
       if (!signal.aborted) {
-        setLocationMessage("Không thể lấy địa chỉ từ vị trí. Hãy thử lại hoặc nhập địa chỉ.");
+        setLocationMessage(t("cart.couldNotFindAnAddressFrom"));
       }
     } finally {
       clearTimeout(timeout);
@@ -314,12 +316,12 @@ export function DeliveryAddressForm({
     );
     void Linking.openURL(
       `https://www.google.com/maps/search/?api=1&query=${query}`,
-    ).catch(() => setLocationMessage("Không thể mở bản đồ trên thiết bị này."));
+    ).catch(() => setLocationMessage(t("cart.couldNotOpenMapsOnThis")));
   }
 
   return (
     <>
-      <BottomSheetScrollView
+      <ScrollView
         style={{ flex: 1, minHeight: 0 }}
         keyboardDismissMode="none"
         keyboardShouldPersistTaps="handled"
@@ -327,12 +329,12 @@ export function DeliveryAddressForm({
       >
         <View className="gap-4">
           <AddressFormSection
-            title="Thông tin người nhận"
+            title={t("cart.recipientDetails")}
             icon={<UserRound color={colors.primary} size={20} />}
           >
-            {renderField("name", "Họ và tên", {
+            {renderField("name", t("auth.fullName"), {
               autoComplete: "name",
-              placeholder: "Tên người nhận",
+              placeholder: t("cart.recipientName"),
             })}
             <Controller
               control={control}
@@ -341,8 +343,8 @@ export function DeliveryAddressForm({
                 <PhoneInput
                   required
                   inputComponent={SheetTextInput}
-                  label="Số điện thoại"
-                  error={fieldState.error?.message}
+                  label={t("common.phoneNumber")}
+                  error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
                   onBlur={field.onBlur}
                   onChangeText={(value) => {
                     clearErrors("phone");
@@ -355,7 +357,7 @@ export function DeliveryAddressForm({
           </AddressFormSection>
 
           <AddressFormSection
-            title="Địa chỉ nhận nông sản"
+            title={t("cart.produceDeliveryAddress")}
             icon={<MapPin color={colors.primary} size={20} />}
           >
             {Platform.OS !== "web" ? (
@@ -364,7 +366,7 @@ export function DeliveryAddressForm({
                   <PrimaryBtn
                     variant="secondary"
                     title={
-                      locating ? "Đang lấy vị trí…" : "Dùng vị trí hiện tại"
+                      locating ? t("cart.gettingYourLocation") : t("cart.useCurrentLocation")
                     }
                     disabled={locating}
                     leadingIcon={
@@ -383,16 +385,16 @@ export function DeliveryAddressForm({
                   {showLocationSettings ? (
                     <PrimaryBtn
                       variant="ghost"
-                      title="Mở cài đặt ứng dụng"
+                      title={t("cart.openAppSettings")}
                       onPress={() => void Linking.openSettings().catch(() => {
-                        setLocationMessage("Không thể mở cài đặt ứng dụng trên thiết bị này.");
+                        setLocationMessage(t("cart.couldNotOpenAppSettingsOn"));
                       })}
                     />
                   ) : null}
                   {coordinates ? (
                     <PrimaryBtn
                       variant="ghost"
-                      title="Xem vị trí trên bản đồ"
+                      title={t("cart.viewLocationOnMap")}
                       onPress={openMap}
                     />
                   ) : null}
@@ -402,8 +404,8 @@ export function DeliveryAddressForm({
             {renderDivision("province", province)}
             {renderDivision("district", district)}
             {renderDivision("ward", ward)}
-            {renderField("address", "Tên đường, tòa nhà, số nhà", {
-              placeholder: "Nhập địa chỉ cụ thể",
+            {renderField("address", t("cart.streetBuildingAndHouseNumber"), {
+              placeholder: t("cart.enterTheFullStreetAddress"),
               autoComplete: "street-address",
               editable: !locating,
               multiline: true,
@@ -412,7 +414,7 @@ export function DeliveryAddressForm({
           </AddressFormSection>
 
           <AddressFormSection
-            title="Cài đặt và nhãn địa chỉ"
+            title={t("cart.addressPreferencesAndLabels")}
             icon={<Tag color={colors.primary} size={20} />}
           >
             <Controller
@@ -446,7 +448,7 @@ export function DeliveryAddressForm({
                               checked ? "text-on-primary" : "text-ink",
                             )}
                           >
-                            {title}
+                            {t(title)}
                           </Text>
                         </Pressable>
                       </NativeViewGestureHandler>
@@ -455,13 +457,13 @@ export function DeliveryAddressForm({
                 </View>
               )}
             />
-            {renderField("note", "Ghi chú giao hàng", {
-              placeholder: "Ví dụ: Gửi lễ tân ở tầng trệt",
+            {renderField("note", t("cart.deliveryNotes"), {
+              placeholder: t("cart.forExampleLeaveWithReceptionOn"),
               maxLength: 240,
               multiline: true,
             })}
             <View className="flex-row flex-wrap gap-2">
-              {quickNotes.map((note) => (
+              {quickNotes.map((key) => t(key)).map((note) => (
                 <NativeViewGestureHandler key={note} disallowInterruption>
                   <Pressable
                     accessibilityRole="button"
@@ -496,8 +498,8 @@ export function DeliveryAddressForm({
                       disabled={isDefault}
                       label={
                         isDefault
-                          ? "Địa chỉ mặc định"
-                          : "Đặt làm địa chỉ mặc định"
+                          ? t("cart.defaultAddress")
+                          : t("cart.setAsDefaultAddress")
                       }
                       onCheckedChange={field.onChange}
                     />
@@ -507,19 +509,19 @@ export function DeliveryAddressForm({
             />
           </AddressFormSection>
         </View>
-      </BottomSheetScrollView>
+      </ScrollView>
       <SheetFooter guardGesture>
         {firstError ? (
           <Text
             accessibilityRole="alert"
             className="font-vietnam text-body-sm text-danger"
           >
-            {firstError}
+            {t(firstError)}
           </Text>
         ) : null}
         <PrimaryBtn
           fullWidth
-          title="Hoàn thành & lưu địa chỉ"
+          title={t("cart.saveAddress")}
           disabled={locating}
           leadingIcon={<CheckCircle2 color={colors.onPrimary} size={20} />}
           onPress={() => {

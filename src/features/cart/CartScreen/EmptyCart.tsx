@@ -1,3 +1,5 @@
+import { useAppTranslation } from "@/localization/content";
+import { useTranslation } from "react-i18next";
 import { IconButton, PrimaryBtn, StatusChip } from "@/components/common";
 import { addToCart } from "@/features/cart/add-to-cart";
 import { catalogProducts } from "@/features/products/catalog.data";
@@ -25,6 +27,7 @@ export function openCatalog() {
 }
 
 function EmptyCartHeader() {
+  const { t } = useTranslation();
   const colors = useAppColors();
 
   return (
@@ -38,15 +41,13 @@ function EmptyCartHeader() {
         </View>
         <View className="gap-2">
           <Text className="text-center font-vietnam text-headline-sm text-ink">
-            Giỏ hàng của bạn còn trống
-          </Text>
+            {t("cart.yourCartIsEmpty")}</Text>
           <Text className="text-center font-vietnam text-body-md text-muted">
-            Chọn rau củ, trái cây hữu cơ từ các nông trại cho bữa ăn hôm nay.
-          </Text>
+            {t("cart.chooseOrganicVegetablesAndFruitFrom")}</Text>
         </View>
         <PrimaryBtn
           fullWidth
-          title="Khám phá nông sản"
+          title={t("cart.exploreProduce")}
           trailingIcon={<ArrowRight color={colors.onPrimary} size={18} />}
           onPress={openCatalog}
         />
@@ -57,25 +58,21 @@ function EmptyCartHeader() {
         </View>
         <View className="min-w-0 flex-1 gap-1">
           <Text className="font-vietnam text-body-emphasis text-ink">
-            Vận chuyển lạnh 6–8°C
-          </Text>
+            {t("cart.chilledDeliveryAt68C")}</Text>
           <Text className="font-vietnam text-body-sm text-muted">
-            Giữ nông sản tươi từ nông trại đến tay bạn.
-          </Text>
+            {t("cart.keepsProduceFreshFromFarmTo")}</Text>
         </View>
       </View>
       <View className="flex-row items-center justify-between gap-2">
         <Text className="flex-1 font-vietnam text-title-md text-ink">
-          Nông sản gợi ý
-        </Text>
+          {t("cart.recommendedProduce")}</Text>
         <Pressable
           accessibilityRole="button"
           className="min-h-12 flex-row items-center gap-1"
           onPress={openCatalog}
         >
           <Text className="font-vietnam text-label-md text-primary">
-            Xem tất cả
-          </Text>
+            {t("cart.viewAll")}</Text>
           <ArrowRight color={colors.primary} size={16} />
         </Pressable>
       </View>
@@ -84,13 +81,14 @@ function EmptyCartHeader() {
 }
 
 function SuggestedProduct({ product }: { product: CatalogProduct }) {
+  const { t, localize } = useAppTranslation();
   const colors = useAppColors();
 
   return (
     <View className="mb-3 flex-row items-center rounded-lg border border-card-border bg-surface p-2">
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`Xem ${product.name}`}
+        accessibilityLabel={t("common.viewDetailsFor", { name: localize(product.name) })}
         className="min-w-0 flex-1 flex-row items-center gap-3 p-1 active:opacity-80"
         onPress={() =>
           router.push({
@@ -109,14 +107,14 @@ function SuggestedProduct({ product }: { product: CatalogProduct }) {
         </View>
         <View className="min-w-0 flex-1 gap-1">
           <StatusChip
-            label={product.certification ?? product.badge}
+            label={localize(product.certification ?? product.badge)}
             tone="success"
           />
           <Text className="font-vietnam text-body-emphasis text-ink">
-            {product.name}
+            {localize(product.name)}
           </Text>
           <Text className="font-vietnam text-body-sm text-muted">
-            {product.subtitle}
+            {localize(product.subtitle)}
           </Text>
           <Text className="font-vietnam text-label-lg tabular-nums text-primary">
             {formatPrice(product.price)}
@@ -124,7 +122,7 @@ function SuggestedProduct({ product }: { product: CatalogProduct }) {
         </View>
       </Pressable>
       <IconButton
-        label={`Thêm ${product.name} vào giỏ`}
+        label={t("common.addToCart", { name: localize(product.name) })}
         size="lg"
         variant="filled"
         icon={<ShoppingCartPlus color={colors.onPrimary} size={21} />}

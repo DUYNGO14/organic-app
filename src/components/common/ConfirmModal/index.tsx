@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { CircleHelp, TriangleAlert, type LucideIcon } from "lucide-react-native";
 import { useRef, useState } from "react";
@@ -26,13 +27,14 @@ function OpenConfirmModal({
   title,
   message,
   confirmLabel,
-  cancelLabel = "Hủy",
+  cancelLabel,
   variant = "default",
   icon,
-  errorMessage = "Không thể thực hiện thao tác. Vui lòng thử lại.",
+  errorMessage,
   onClose,
   onConfirm,
 }: Omit<ConfirmModalProps, "visible">) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const inFlight = useRef(false);
   const [confirming, setConfirming] = useState(false);
@@ -91,7 +93,7 @@ function OpenConfirmModal({
                   {message ? <Text className="font-vietnam text-body-md text-muted">{message}</Text> : null}
                   {hasError ? (
                     <Text accessibilityRole="alert" className="font-vietnam text-body-sm text-danger">
-                      {errorMessage}
+                      {errorMessage ?? t("common.couldNotCompleteTheActionPlease")}
                     </Text>
                   ) : null}
                 </View>
@@ -99,7 +101,7 @@ function OpenConfirmModal({
                   <View className="min-w-0 grow basis-28">
                     <PrimaryBtn
                       fullWidth
-                      title={cancelLabel}
+                      title={cancelLabel ?? t("common.cancel")}
                       variant="secondary"
                       disabled={confirming}
                       onPress={requestClose}

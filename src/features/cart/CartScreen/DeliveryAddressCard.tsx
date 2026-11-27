@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { PrimaryBtn } from "@/components/common";
 import { formatDeliveryAddress, type DeliveryAddress } from "@/features/cart/cart.store";
 import { useAppColors } from "@/hooks/use-app-colors";
@@ -11,6 +12,7 @@ export function DeliveryAddressCard({
   address: DeliveryAddress | null;
   onEdit?: () => void;
 }) {
+  const { t } = useTranslation();
   const colors = useAppColors();
 
   if (!address) {
@@ -20,12 +22,11 @@ export function DeliveryAddressCard({
           <MapPinOff color={colors.danger} size={20} />
         </View>
         <View className="min-w-0 flex-1 gap-2">
-          <Text className="font-vietnam text-body-emphasis text-danger">Chưa có địa chỉ nhận hàng</Text>
+          <Text className="font-vietnam text-body-emphasis text-danger">{t("cart.noDeliveryAddressesYet")}</Text>
           <Text className="font-vietnam text-body-sm text-ink">
-            Thêm địa chỉ để chuẩn bị giao nông sản đến bạn.
-          </Text>
+            {t("cart.addAnAddressSoWeCan")}</Text>
           <PrimaryBtn
-            title="Thêm địa chỉ ngay"
+            title={t("cart.addAnAddress")}
             trailingIcon={<ArrowRight color={colors.onPrimary} size={16} />}
             className="mt-1"
             onPress={onEdit}
@@ -40,10 +41,10 @@ export function DeliveryAddressCard({
       <View className="min-h-12 flex-row items-center justify-between gap-2">
         <View className="min-w-0 flex-1 flex-row items-center gap-2">
           <MapPin color={colors.primary} size={18} />
-          <Text className="flex-1 font-vietnam text-body-emphasis text-ink">Địa chỉ nhận hàng</Text>
+          <Text className="flex-1 font-vietnam text-body-emphasis text-ink">{t("cart.deliveryAddress")}</Text>
         </View>
         {onEdit ? (
-          <PrimaryBtn title="Thay đổi" variant="ghost" onPress={onEdit} />
+          <PrimaryBtn title={t("cart.change")} variant="ghost" onPress={onEdit} />
         ) : null}
       </View>
       <Text className="font-vietnam text-body-emphasis text-ink">

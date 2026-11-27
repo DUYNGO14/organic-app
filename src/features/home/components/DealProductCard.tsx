@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+import { useAppTranslation } from "@/localization/content";
 import { ProductCard } from "@/components/product/ProductCard";
 import { getProductCardBadges } from "@/components/product/product-card-badges";
 import type { Product } from "@/types/product";
@@ -14,6 +16,7 @@ type DealProductCardProps = {
 };
 
 function SoldProgress({ percent }: { percent: number }) {
+  const { t } = useTranslation();
   const clampedPercent = Math.min(100, Math.max(0, percent));
 
   return (
@@ -25,7 +28,7 @@ function SoldProgress({ percent }: { percent: number }) {
         />
       </View>
       <Text className="mt-1 text-right font-vietnam text-label-sm text-muted">
-        Đã bán {clampedPercent}%
+        {t("home.sold", { clampedPercent })}
       </Text>
     </View>
   );
@@ -37,6 +40,7 @@ export function DealProductCard({
   onPress,
   onAdd,
 }: DealProductCardProps) {
+  const { localize } = useAppTranslation();
   return (
     <ProductCard
       {...product}
@@ -44,7 +48,7 @@ export function DealProductCard({
       className={className}
       meta={
         <Text className="font-vietnam text-label-md text-secondary" numberOfLines={1}>
-          {product.origin}
+          {localize(product.origin)}
         </Text>
       }
       footer={
@@ -66,6 +70,7 @@ type DealSectionProps = {
 };
 
 function DealCountdown({ endsAt }: { endsAt: number }) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const { remainingSeconds } = useCountdown(endsAt);
   if (remainingSeconds === null) return null;
@@ -81,7 +86,7 @@ function DealCountdown({ endsAt }: { endsAt: number }) {
     <View className="mb-1 flex-row items-center gap-1 rounded-xl bg-surface-container-lowest px-2.5 py-2 shadow-sm">
       <Clock3 color={colors.muted} size={14} />
       <Text
-        accessibilityLabel={`Thời gian còn lại: ${hours} giờ ${minutes} phút ${seconds} giây`}
+        accessibilityLabel={t("home.timeRemainingHrMinSec", { hours, minutes, seconds })}
         className="font-vietnam text-label-sm text-danger"
         style={{ fontVariant: ["tabular-nums"] }}
       >
@@ -97,16 +102,15 @@ export function DealSection({
   onProductPress,
   onAddProduct,
 }: DealSectionProps) {
+  const { t } = useTranslation();
   return (
     <View className="mt-8">
       <View className="mb-3 flex-row items-end justify-between px-4">
         <View className="flex-1">
           <Text className="mb-1 font-vietnam text-label-sm font-bold uppercase tracking-wider text-primary">
-            ⚡ Mở bán sớm
-          </Text>
+            {t("home.earlyAccess")}</Text>
           <Text className="font-vietnam text-headline-sm text-ink">
-            Thu hoạch sáng nay
-          </Text>
+            {t("home.harvestedThisMorning")}</Text>
         </View>
         <DealCountdown endsAt={endsAt} />
       </View>

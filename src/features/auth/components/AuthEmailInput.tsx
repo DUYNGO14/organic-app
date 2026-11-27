@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/common";
 import type { ComponentProps } from "react";
 
@@ -6,6 +7,7 @@ type AuthEmailInputProps = Pick<ComponentProps<typeof Input>,
 >;
 
 export function AuthEmailInput(props: AuthEmailInputProps) {
+  const { t } = useTranslation();
   return (
     <Input
       label="Email"
@@ -14,7 +16,7 @@ export function AuthEmailInput(props: AuthEmailInputProps) {
       autoComplete="email"
       autoCorrect={false}
       keyboardType="email-address"
-      placeholder="Nhập địa chỉ email"
+      placeholder={t("auth.enterYourEmailAddress2")}
       {...props}
     />
   );

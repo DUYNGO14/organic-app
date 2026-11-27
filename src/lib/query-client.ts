@@ -1,3 +1,4 @@
+import { i18n } from "@/localization";
 import {
   focusManager,
   MutationCache,
@@ -60,7 +61,7 @@ export const queryClient = new QueryClient({
   mutationCache: new MutationCache({
     onError: (error, _vars, _ctx, mutation) => {
       if (mutation.meta?.silent) return;
-      Alert.alert("Có lỗi xảy ra");
+      Alert.alert(i18n.t("common.genericErrorTitle"));
     },
   }),
 });

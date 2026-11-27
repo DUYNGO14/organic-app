@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Minus, Plus } from "lucide-react-native";
 import { useAppColors } from "@/hooks/use-app-colors";
 import type { ReactNode } from "react";
@@ -135,20 +136,21 @@ export function StepperBtn({
   max = Number.POSITIVE_INFINITY,
   step = 1,
   disabled = false,
-  label = "Số lượng",
+  label,
   className = "",
 }: StepperBtnProps) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const canDecrement = !disabled && value - step >= min;
   const canIncrement = !disabled && value + step <= max;
 
   return (
     <View
-      accessibilityLabel={label}
+      accessibilityLabel={label ?? t("common.quantity")}
       className={`min-h-12 flex-row items-center rounded-full border border-border bg-surface dark:border-border-strong dark:bg-surface-container-low ${className}`}
     >
       <Pressable
-        accessibilityLabel="Giảm số lượng"
+        accessibilityLabel={t("common.decreaseQuantity")}
         accessibilityRole="button"
         accessibilityState={{ disabled: !canDecrement }}
         className={`h-12 w-12 items-center justify-center rounded-full ${canDecrement ? "active:bg-surface-soft dark:active:bg-surface-container-high" : "opacity-40"}`}
@@ -161,7 +163,7 @@ export function StepperBtn({
         {value}
       </Text>
       <Pressable
-        accessibilityLabel="Tăng số lượng"
+        accessibilityLabel={t("common.increaseQuantity")}
         accessibilityRole="button"
         accessibilityState={{ disabled: !canIncrement }}
         className={`h-12 w-12 items-center justify-center rounded-full ${canIncrement ? "active:bg-surface-soft dark:active:bg-surface-container-high" : "opacity-40"}`}

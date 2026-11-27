@@ -1,22 +1,25 @@
 import { PrimaryBtn } from "@/components/common";
+import { LanguageToggle } from "@/features/account/ProfileScreen/components/LanguageToggle";
 import { useAuthStore } from "@/features/auth/auth.store";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import {
-  ArrowRight,
-  ScanLine,
-  ShieldCheck,
-  Sparkles,
+    ArrowRight,
+    ScanLine,
+    ShieldCheck,
+    Sparkles,
 } from "lucide-react-native";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const logo = require("@/assets/images/logo-adiogo/adigo-logo.png");
 
 export default function WelcomeScreen() {
+  const { t } = useTranslation();
   const completeOnboarding = useAuthStore((state) => state.completeOnboarding);
   const colors = useAppColors();
   const [isStarting, setIsStarting] = useState(false);
@@ -68,7 +71,10 @@ export default function WelcomeScreen() {
       />
 
       <SafeAreaView className="flex-1" edges={["top", "bottom"]}>
-        <View className="flex-1 px-4 pb-4 pt-3">
+        <ScrollView
+          contentContainerClassName="grow px-4 pb-4 pt-3"
+          showsVerticalScrollIndicator={false}
+        >
           <View className="self-center overflow-hidden rounded-full border border-card-border bg-surface/85">
             <LinearGradient
               colors={[`${colors.logoStart}16`, `${colors.logoEnd}12`]}
@@ -79,7 +85,7 @@ export default function WelcomeScreen() {
             <View className="min-h-10 flex-row items-center gap-2 px-4 py-2">
               <Sparkles color={colors.logoEnd} size={16} />
               <Text className="font-vietnam text-label-sm text-ink">
-                NÔNG SẢN MINH BẠCH
+                {t("onboarding.traceableProduce")}
               </Text>
             </View>
           </View>
@@ -130,11 +136,10 @@ export default function WelcomeScreen() {
                   ADIGO
                 </Text>
                 <Text className="mt-3 max-w-[300px] text-center font-vietnam text-body-lg text-ink">
-                  Từ nông trại hữu cơ thuần khiết đến bữa ăn lành mạnh của gia
-                  đình Việt.
+                  {t("onboarding.fromOrganicFarmsToHealthyMeals")}
                 </Text>
                 <Text className="mt-3 text-center font-vietnam text-body-md text-muted">
-                  Mỗi lựa chọn đều có nguồn gốc rõ ràng.
+                  {t("onboarding.knowWhereYourFoodComesFrom")}
                 </Text>
               </View>
 
@@ -145,10 +150,10 @@ export default function WelcomeScreen() {
                   </View>
                   <View className="min-w-0 flex-1">
                     <Text className="font-vietnam text-label-md text-ink">
-                      Truy xuất rõ ràng
+                      {t("onboarding.easyToTrace")}
                     </Text>
                     <Text className="font-vietnam text-body-sm text-muted">
-                      Từng lô nông sản
+                      {t("onboarding.everyBatchOfProduce")}
                     </Text>
                   </View>
                 </View>
@@ -158,10 +163,10 @@ export default function WelcomeScreen() {
                   </View>
                   <View className="min-w-0 flex-1">
                     <Text className="font-vietnam text-label-md text-ink">
-                      Chọn lọc tử tế
+                      {t("onboarding.carefullySelected")}
                     </Text>
                     <Text className="font-vietnam text-body-sm text-muted">
-                      Cho bữa ăn nhà
+                      {t("onboarding.forHomeCooking")}
                     </Text>
                   </View>
                 </View>
@@ -170,20 +175,20 @@ export default function WelcomeScreen() {
           </View>
 
           <View className="gap-3">
+            <LanguageToggle />
             <PrimaryBtn
               fullWidth
               className="min-h-[52px] rounded-xl"
               loading={isStarting}
-              title="Bắt đầu cùng ADIGO"
+              title={t("onboarding.getStartedWithAdigo")}
               trailingIcon={<ArrowRight color={colors.onPrimary} size={20} />}
               onPress={() => void handleStart()}
             />
             <Text className="px-4 text-center font-vietnam text-body-sm text-muted">
-              Bằng cách tiếp tục, bạn đồng ý với Điều khoản sử dụng và Chính
-              sách bảo mật của ADIGO.
+              {t("onboarding.byContinuingYouAgreeToAdigo")}
             </Text>
           </View>
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </View>
   );

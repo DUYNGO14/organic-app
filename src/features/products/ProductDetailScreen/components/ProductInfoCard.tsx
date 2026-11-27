@@ -1,3 +1,4 @@
+import { useAppTranslation } from "@/localization/content";
 import type { PackageOption, Product } from "@/types/product";
 import type { AppColors } from "@/hooks/use-app-colors";
 import { BadgeCheck, Package, Star } from "lucide-react-native";
@@ -20,25 +21,24 @@ export function ProductInfoCard({
   discount,
   colors,
 }: ProductInfoCardProps) {
+  const { t, localize } = useAppTranslation();
   return (
     <DetailCard>
       <View className="mb-3 flex-row flex-wrap items-center gap-2">
         <View className="rounded-lg bg-secondary-container px-2.5 py-1">
           <Text className="font-vietnam text-label-sm text-on-secondary-container">
-            LOẠI 1 SIÊU TƯƠI
-          </Text>
+            {t("products.extraFreshGrade1")}</Text>
         </View>
         <View className="flex-row items-center gap-1">
           <BadgeCheck color={colors.primary} size={16} />
           <Text className="font-vietnam text-label-sm text-primary">
-            Chính ngạch Organic
-          </Text>
+            {t("products.certifiedOrganic")}</Text>
         </View>
       </View>
       <Text className="font-vietnam text-headline-sm text-ink">
         {product.id === "kale"
-          ? "Cải Kale Thủy Canh Đà Lạt (Loại 1 Siêu Tươi)"
-          : product.name}
+          ? t("products.daLatHydroponicKaleExtraFresh")
+          : localize(product.name)}
       </Text>
       <View className="mt-3 flex-row flex-wrap items-center gap-x-2.5 gap-y-1">
         <Text className="font-vietnam text-headline-lg-mobile text-primary">
@@ -66,16 +66,14 @@ export function ProductInfoCard({
             {(product.rating ?? 4.9).toFixed(1)}
           </Text>
           <Text className="font-vietnam text-body-sm text-muted">
-            ({product.reviewCount ?? 156} đánh giá)
-          </Text>
+            ({product.reviewCount ?? 156} {t("products.reviews")}</Text>
         </View>
         <Text className="font-vietnam text-label-md text-muted">
-          Đã bán 1.2k+
-        </Text>
+          {t("products.12kSold")}</Text>
         <View className="flex-row items-center gap-1">
           <Package color={colors.secondary} size={15} />
           <Text className="font-vietnam text-label-sm text-secondary">
-            {selectedPackage.label}
+            {localize(selectedPackage.label)}
           </Text>
         </View>
       </View>

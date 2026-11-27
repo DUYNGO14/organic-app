@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { OTPInput, PrimaryBtn } from "@/components/common";
 import { isDemoAuthEnabled } from "@/features/auth/auth.config";
 import { otpCodeSchema } from "@/features/auth/auth.schema";
@@ -17,6 +18,7 @@ import { ResetPasswordScreen } from "./ResetPasswordScreen";
 type EmailAction = "verify" | "resend";
 
 export function VerifyEmailScreen() {
+  const { t } = useTranslation();
   const { challenge, setChallenge } = useEmailVerification();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string>();
@@ -67,14 +69,14 @@ export function VerifyEmailScreen() {
       ).then(() => true, () => false);
       Toast.show({
         type: "success",
-        text1: "Email đã được xác thực",
+        text1: t("auth.emailVerified"),
         text2: savedTerms
-          ? "Bạn có thể đăng nhập bằng tài khoản vừa tạo."
-          : "Bạn có thể xác nhận lại điều khoản trong Trung tâm pháp lý.",
+          ? t("auth.youCanSignInWithYour")
+          : t("auth.youCanAcknowledgeTheTermsAgain"),
       });
       router.dismissTo("/(auth)/login");
       setChallenge(null);
-    }, "Không thể xác thực mã OTP. Vui lòng thử lại.");
+    }, t("auth.couldNotVerifyTheCodePlease"));
   }
 
   function resend() {
@@ -85,17 +87,17 @@ export function VerifyEmailScreen() {
       setCode("");
       Toast.show({
         type: "info",
-        text1: isDemoAuthEnabled ? "Bạn có thể nhập lại mã thử nghiệm" : "Hãy kiểm tra email để lấy mã mới",
+        text1: isDemoAuthEnabled ? t("auth.youCanEnterTheDemoCode") : t("auth.checkYourEmailForTheNew"),
       });
-    }, "Chưa thể gửi lại mã OTP. Vui lòng thử lại.");
+    }, t("auth.couldNotResendTheCodePlease"));
   }
 
   return (
     <AuthScreenLayout
-      title="Xác thực email"
+      title={t("auth.verifyEmail")}
       subtitle={isDemoAuthEnabled
-        ? "Dùng mã thử nghiệm bên dưới để xem bước tiếp theo."
-        : "Nhập mã OTP gồm 6 chữ số trong email. Hãy kiểm tra cả thư rác."}
+        ? t("auth.useTheDemoCodeBelowTo")
+        : t("auth.enterThe6DigitCodeFrom")}
     >
       <View className="gap-4">
         <View className="rounded-lg border border-card-border bg-surface-soft px-4 py-3">
@@ -103,11 +105,11 @@ export function VerifyEmailScreen() {
         </View>
         {isDemoAuthEnabled ? (
           <Text className="rounded bg-warning-container px-3 py-2 font-vietnam text-body-md text-warning">
-            Mã OTP thử nghiệm {DEMO_OTP}
+            {t("auth.demoCode", { demoOtp: DEMO_OTP })}
           </Text>
         ) : null}
         <OTPInput
-          label="Mã OTP 6 chữ số"
+          label={t("auth.6DigitVerificationCode")}
           variant="inset"
           required
           autoFocus={!isExpired}
@@ -121,17 +123,16 @@ export function VerifyEmailScreen() {
         />
         {isExpired ? (
           <Text accessibilityLiveRegion="polite" className="font-vietnam text-body-sm text-danger">
-            Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.
-          </Text>
+            {t("auth.theCodeHasExpiredRequestA")}</Text>
         ) : null}
         <AuthSubmitButton
-          title="Xác thực email"
+          title={t("auth.verifyEmail")}
           disabled={busy || isExpired || !isCodeValid}
           loading={pending === "verify"}
           onPress={verify}
         />
         <PrimaryBtn
-          title={resendIn ? `Gửi lại mã sau ${resendIn} giây` : "Gửi lại mã OTP"}
+          title={resendIn ? t("auth.resendInSeconds", { count: resendIn }) : t("auth.resendCode")}
           variant="ghost"
           fullWidth
           disabled={busy || !!resendIn}
@@ -141,7 +142,7 @@ export function VerifyEmailScreen() {
       </View>
       <Link href={emailRoute} dismissTo asChild>
         <Pressable className="min-h-12 items-center justify-center" disabled={busy}>
-          <Text className="font-vietnam text-label-md text-primary">Thay đổi email</Text>
+          <Text className="font-vietnam text-label-md text-primary">{t("auth.changeEmail")}</Text>
         </Pressable>
       </Link>
     </AuthScreenLayout>

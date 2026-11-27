@@ -1,3 +1,4 @@
+import { useAppTranslation } from "@/localization/content";
 import {
   Checkbox,
   IconButton,
@@ -18,12 +19,13 @@ type CartItemCardProps = {
 };
 
 export function CartItemCard({ line, variant = "cart", onQuantityChange }: CartItemCardProps) {
+  const { t, localize } = useAppTranslation();
   const { id, pack, product, quantity, selected } = line;
   const colors = useAppColors();
   const setSelected = useCartStore((state) => state.setSelected);
   const setQuantity = useCartStore((state) => state.setQuantity);
   const remove = useCartStore((state) => state.remove);
-  const productLabel = `${product.name}, ${pack.label}`;
+  const productLabel = `${localize(product.name)}, ${localize(pack.label)}`;
   const isCheckout = variant === "checkout";
 
   return (
@@ -31,7 +33,7 @@ export function CartItemCard({ line, variant = "cart", onQuantityChange }: CartI
       <View className="flex-row items-start">
         {!isCheckout ? (
           <Checkbox
-            accessibilityLabel={`Chọn ${productLabel}`}
+            accessibilityLabel={t("cart.select2", { productLabel })}
             checked={selected}
             className="min-w-12 justify-center"
             onCheckedChange={(checked) => setSelected(id, checked)}
@@ -47,16 +49,16 @@ export function CartItemCard({ line, variant = "cart", onQuantityChange }: CartI
         </View>
         <View className="min-w-0 flex-1 gap-1 pb-1 pl-3 pt-2">
           <Text className="font-vietnam text-body-emphasis text-ink">
-            {product.name}
+            {localize(product.name)}
           </Text>
           <Text className="font-vietnam text-body-sm text-muted">
-            {pack.label}
+            {localize(pack.label)}
           </Text>
           <StatusChip label={product.badge} tone="success" />
         </View>
         {!isCheckout ? (
           <IconButton
-            label={`Xóa ${productLabel} khỏi giỏ`}
+            label={t("cart.removeFromCart", { productLabel })}
             size="lg"
             icon={<X color={colors.muted} size={20} />}
             onPress={() => remove(id)}
@@ -76,7 +78,7 @@ export function CartItemCard({ line, variant = "cart", onQuantityChange }: CartI
         </View>
         <StepperBtn
           className="ml-auto"
-          label={`Số lượng ${productLabel}`}
+          label={t("cart.quantityFor", { productLabel })}
           value={quantity}
           min={1}
           onValueChange={onQuantityChange ?? ((value) => setQuantity(id, value))}

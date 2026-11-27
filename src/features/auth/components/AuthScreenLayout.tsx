@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { Leaf } from "lucide-react-native";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -28,6 +29,7 @@ export function AuthScreenLayout({
   subtitle,
   children,
 }: AuthScreenLayoutProps) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const appVersion = Constants.expoConfig?.version;
 
@@ -124,14 +126,13 @@ export function AuthScreenLayout({
               </View>
 
               <Text className="text-center font-vietnam text-body-sm text-muted">
-                Nông sản sạch từ tâm
+                {t("auth.responsiblyGrownProduce")}
               </Text>
             </View>
-
             <View className="gap-1 px-4 pb-4">
               {appVersion ? (
                 <Text className="text-center font-vietnam text-body-sm text-muted">
-                  Phiên bản {appVersion}
+                  {t("auth.version", { appVersion })}
                 </Text>
               ) : null}
               <Pressable
@@ -139,7 +140,7 @@ export function AuthScreenLayout({
                 onPress={() => router.push("/legal/privacy")}
               >
                 <Text className="text-center font-vietnam text-body-sm text-muted">
-                  © 2026 ADIGO. Bảo mật và quyền riêng tư
+                  {t("auth.2026AdigoSecurityAndPrivacy")}
                 </Text>
               </Pressable>
             </View>

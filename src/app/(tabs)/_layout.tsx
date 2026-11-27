@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   BottomTabBar,
   MainHeader,
@@ -20,6 +21,7 @@ function renderBottomTabBar(props: BottomTabBarProps) {
 }
 
 export default function MainLayout() {
+  const { t } = useTranslation();
   const cartItemsCount = useCartStore(selectCartQuantity);
   const address = useCartStore(selectDeliveryAddress);
   const unreadNotificationsCount = useNotificationStore(selectUnreadNotificationCount);
@@ -30,7 +32,7 @@ export default function MainLayout() {
         <MainHeader
           cartItemsCount={cartItemsCount}
           currentAddress={
-            address ? formatDeliveryAddress(address) : "Chưa có địa chỉ"
+            address ? formatDeliveryAddress(address) : t("common.noDeliveryAddress")
           }
           onAddressClick={() => router.navigate("/address-book")}
           onCartClick={() => router.push("/cart")}

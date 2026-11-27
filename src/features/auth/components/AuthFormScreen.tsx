@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Checkbox, Input } from "@/components/common";
 import { createAuthFormResolver } from "@/features/auth/auth-form-resolver";
 import { isDemoAuthEnabled } from "@/features/auth/auth.config";
@@ -28,6 +29,7 @@ const loginResolver = createAuthFormResolver<RegisterInput, AuthCredentials>(log
 const registerResolver = createAuthFormResolver<RegisterInput, AuthCredentials>(registerSchema);
 
 export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
+  const { t } = useTranslation();
   const isRegister = mode === "register";
   const signIn = useAuthStore((state) => state.signIn);
   const { setChallenge } = useEmailVerification();
@@ -83,7 +85,7 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
           });
           router.push("/(auth)/verify-otp");
         },
-        "Không thể đăng ký. Vui lòng thử lại.",
+        t("auth.couldNotSignUpPleaseTry"),
       );
       return;
     }
@@ -94,7 +96,7 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
         await signIn(await login(credentials));
         router.replace("/(tabs)/home");
       },
-      "Không thể đăng nhập. Vui lòng thử lại.",
+      t("auth.couldNotSignInPleaseTry"),
     );
   }
 
@@ -111,17 +113,17 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
         await signIn(session);
         router.replace("/(tabs)/home");
       },
-      "Không thể đăng nhập. Vui lòng thử lại.",
+      t("auth.couldNotSignInPleaseTry"),
     );
   }
 
   return (
     <AuthScreenLayout
-      title={isRegister ? "Tạo tài khoản" : "Đăng nhập"}
+      title={isRegister ? t("auth.createAnAccount") : t("auth.signIn")}
       subtitle={
         isRegister
-          ? "Nhập thông tin để nhận mã xác thực qua email."
-          : "Chào mừng bạn đến với ADIGO."
+          ? t("auth.enterYourInformationToReceiveA")
+          : t("auth.welcomeToAdigo")
       }
     >
       <View className="gap-4">
@@ -136,8 +138,8 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
               setValue("password", demoLoginCredentials.password);
             }}
           >
-            <Text className="font-vietnam text-body-sm text-warning">Bản thử nghiệm</Text>
-            <Text className="font-vietnam text-label-md text-warning">Điền tài khoản mẫu</Text>
+            <Text className="font-vietnam text-body-sm text-warning">{t("auth.demoMode")}</Text>
+            <Text className="font-vietnam text-label-md text-warning">{t("auth.useADemoAccount")}</Text>
           </Pressable>
         ) : null}
         {isRegister ? (
@@ -146,15 +148,15 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
             name="name"
             render={({ field, fieldState }) => (
               <Input
-                label="Họ và tên"
+                label={t("auth.fullName")}
                 required
                 autoCapitalize="words"
                 autoComplete="name"
                 editable={!busy}
-                error={fieldState.error?.message}
+                error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
                 onBlur={field.onBlur}
                 onChangeText={field.onChange}
-                placeholder="Nhập họ và tên"
+                placeholder={t("auth.enterYourFullName2")}
                 value={field.value}
               />
             )}
@@ -166,7 +168,7 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
           render={({ field, fieldState }) => (
             <AuthEmailInput
               editable={!busy}
-              error={fieldState.error?.message}
+              error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
               onBlur={field.onBlur}
               onChangeText={field.onChange}
               value={field.value}
@@ -180,7 +182,7 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
             <AuthPasswordInput
               newPassword={isRegister}
               editable={!busy}
-              error={fieldState.error?.message}
+              error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
               onBlur={field.onBlur}
               onChangeText={field.onChange}
               onSubmitEditing={submit}
@@ -193,24 +195,22 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
           <View>
             <Checkbox
               checked={acceptedTerms}
-              description="Tôi đã đọc và đồng ý với các tài liệu dự thảo bên dưới."
+              description={t("auth.iHaveReadAndAgreeTo")}
               disabled={busy}
-              label="Xác nhận điều khoản"
+              label={t("auth.acceptTheTerms")}
               onCheckedChange={setAcceptedTerms}
             />
             <View className="flex-row flex-wrap gap-x-4 pl-8">
               <Link href="/legal/terms" asChild>
                 <Pressable className="min-h-12 justify-center" disabled={busy}>
                   <Text className="font-vietnam text-body-sm text-primary">
-                    Điều khoản sử dụng
-                  </Text>
+                    {t("auth.termsOfUse")}</Text>
                 </Pressable>
               </Link>
               <Link href="/legal/privacy" asChild>
                 <Pressable className="min-h-12 justify-center" disabled={busy}>
                   <Text className="font-vietnam text-body-sm text-primary">
-                    Chính sách bảo mật
-                  </Text>
+                    {t("auth.privacyPolicy")}</Text>
                 </Pressable>
               </Link>
             </View>
@@ -222,8 +222,7 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
               disabled={busy}
             >
               <Text className="font-vietnam text-label-md text-primary">
-                Quên mật khẩu?
-              </Text>
+                {t("auth.forgotYourPassword")}</Text>
             </Pressable>
           </Link>
         )}
@@ -239,7 +238,7 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
           disabled={busy || (isRegister && (!acceptedTerms || !isStrongPassword(password)))}
           loading={pending === "form"}
           onPress={submit}
-          title={isRegister ? "Đăng ký" : "Đăng nhập"}
+          title={isRegister ? t("auth.signUp") : t("auth.signIn")}
         />
       </View>
       <SocialLoginButtons
@@ -250,7 +249,7 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
 
       <View className="flex-row flex-wrap items-center justify-center gap-x-2">
         <Text className="font-vietnam text-body-md text-muted">
-          {isRegister ? "Bạn đã có tài khoản?" : "Bạn chưa có tài khoản?"}
+          {isRegister ? t("auth.alreadyHaveAnAccount") : t("auth.newToAdigo")}
         </Text>
         <Link
           href={isRegister ? "/(auth)/login" : "/(auth)/register"}
@@ -259,7 +258,7 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
         >
           <Pressable className="min-h-12 justify-center" disabled={busy}>
             <Text className="font-vietnam text-label-lg text-primary">
-              {isRegister ? "Đăng nhập" : "Đăng ký"}
+              {isRegister ? t("auth.signIn") : t("auth.signUp")}
             </Text>
           </Pressable>
         </Link>

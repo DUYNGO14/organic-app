@@ -1,94 +1,68 @@
 import { useAppColors } from "@/hooks/use-app-colors";
-import { cn } from "@/lib/cn";
-import type { LucideIcon } from "lucide-react-native";
 import { Award, BadgeCheck, RefreshCw, Timer } from "lucide-react-native";
-import { useState } from "react";
-import { Text, View, useWindowDimensions } from "react-native";
+import { useTranslation } from "react-i18next";
+import { Text, View } from "react-native";
 
-// Allow room for the longest note at the default text scale.
-const minPromiseColumnWidth = 114;
-const columnGap = 8;
-
-const promises: {
-  id: string;
-  title: string;
-  note?: string;
-  Icon: LucideIcon;
-}[] = [
+const promises = [
   {
     id: "fresh",
-    title: "Hái trong ngày",
-    // note: "Giao tươi ngon",
+    title: "home.pickedToday",
+    note: "Giao tươi ngon",
     Icon: Timer,
   },
   {
     id: "trace",
-    title: "Truy xuất 100%",
-    // note: "Mã QR từng lô",
+    title: "home.fullyTraceable",
+    note: "Mã QR từng lô",
     Icon: BadgeCheck,
   },
   {
     id: "return",
-    title: "Đổi trả tận nơi",
-    // note: "Nếu không hài lòng",
+    title: "home.returnsAtYourDoor",
+    note: "Nếu không hài lòng",
     Icon: RefreshCw,
   },
-];
+] as const;
 
 export function QualityPromise() {
+  const { t } = useTranslation();
   const colors = useAppColors();
-  const { fontScale } = useWindowDimensions();
-  const [contentWidth, setContentWidth] = useState(0);
-  const minGridWidth =
-    minPromiseColumnWidth * Math.max(1, fontScale) * promises.length +
-    columnGap * (promises.length - 1);
-  const isCompact = contentWidth < minGridWidth;
 
   return (
-    <View className="mx-4 mt-8 rounded-xl bg-surface-container-low p-4">
-      <View className="mb-5 flex-row items-center gap-2">
-        <Award color={colors.secondary} size={23} />
-        <Text className="flex-1 font-vietnam text-label-lg text-primary">
-          Cam kết chất lượng ADIGO
+    <View className="mx-4 mt-8 rounded-xl bg-surface-container-low px-3 py-4">
+      <View className="mb-4 flex-row items-center gap-2">
+        <Award color={colors.secondary} size={18} />
+        <Text
+          adjustsFontSizeToFit
+          minimumFontScale={0.65}
+          numberOfLines={1}
+          className="min-w-0 flex-1 font-vietnam text-label-lg text-primary"
+        >
+          {t("home.adigoQualityPromise")}
         </Text>
       </View>
-      <View
-        className={isCompact ? "gap-3" : "flex-row gap-2"}
-        onLayout={({ nativeEvent }) =>
-          setContentWidth(nativeEvent.layout.width)
-        }
-      >
+      <View className="flex-row gap-1">
         {promises.map(({ id, title, note, Icon }) => (
-          <View
-            className={cn(
-              "items-center",
-              isCompact ? "flex-row gap-3" : "flex-1 gap-2",
-            )}
-            key={id}
-          >
-            <View className="h-11 w-11 items-center justify-center rounded-full bg-surface-container-lowest">
-              <Icon color={colors.primary} size={22} />
+          <View key={id} className="min-w-0 flex-1 items-center gap-1">
+            <View className="mb-1 h-8 w-8 items-center justify-center rounded-full bg-surface-container-lowest">
+              <Icon color={colors.primary} size={18} />
             </View>
-            <View className={isCompact ? "flex-1" : "self-stretch"}>
-              <Text
-                className={cn(
-                  "font-vietnam text-label-md text-ink",
-                  !isCompact && "text-center",
-                )}
-              >
-                {title}
-              </Text>
-              {note && (
-                <Text
-                  className={cn(
-                    "mt-1 font-vietnam text-body-sm text-muted",
-                    !isCompact && "text-center",
-                  )}
-                >
-                  {note}
-                </Text>
-              )}
-            </View>
+            <Text
+              adjustsFontSizeToFit
+              minimumFontScale={0.65}
+              numberOfLines={1}
+              className="self-stretch text-center font-vietnam text-label-md text-ink"
+            >
+              {t(title)}
+            </Text>
+            <Text
+              adjustsFontSizeToFit
+              minimumFontScale={0.65}
+              numberOfLines={1}
+              className="self-stretch text-center font-vietnam text-body-sm text-muted"
+            >
+              {note}
+            </Text>
           </View>
         ))}
       </View>

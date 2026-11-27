@@ -1,5 +1,6 @@
 import { StartupSplash } from "@/components/layout/StartupSplash";
 import { useAuthStore } from "@/features/auth/auth.store";
+import { useLanguageBootstrap } from "@/localization/use-language-bootstrap";
 import { AppProviders } from "@/providers/app-providers";
 import { useAppStore } from "@/stores/app-store";
 import { useFonts } from "expo-font";
@@ -16,6 +17,7 @@ const shouldShowStartupSplash = __DEV__;
 
 export default function RootLayout() {
   const pathname = usePathname();
+  const isLanguageReady = useLanguageBootstrap();
   const hydrateAuth = useAuthStore((state) => state.hydrate);
   const isLoading = useAuthStore((state) => state.isLoading);
   const isThemeHydrated = useAppStore((state) => state.isThemeHydrated);
@@ -56,6 +58,7 @@ export default function RootLayout() {
     if (
       startupComplete ||
       !fontsReady ||
+      !isLanguageReady ||
       isLoading ||
       !isThemeHydrated ||
       pathname === "/"
@@ -74,6 +77,7 @@ export default function RootLayout() {
     startupComplete,
     splashComplete,
     fontsReady,
+    isLanguageReady,
     isLoading,
     isThemeHydrated,
     pathname,
@@ -90,7 +94,7 @@ export default function RootLayout() {
   return (
     <View className="flex-1 bg-canvas" collapsable={false}>
       <AppProviders>
-        {fontsReady && !isLoading ? <AuthNavigator /> : null}
+        {fontsReady && isLanguageReady && !isLoading ? <AuthNavigator /> : null}
       </AppProviders>
       {shouldShowStartupSplash && !startupComplete ? (
         <StartupSplash

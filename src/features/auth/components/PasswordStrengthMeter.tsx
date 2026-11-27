@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { assessPassword, MIN_STRONG_PASSWORD_LENGTH } from "@/features/auth/password-strength";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { cn } from "@/lib/cn";
@@ -5,23 +6,23 @@ import { Circle, CircleCheck } from "lucide-react-native";
 import { Text, View } from "react-native";
 
 const strengthLevels = {
-  empty: { label: "Chưa nhập", filled: 0, bar: "bg-border", text: "text-muted", hint: null },
+  empty: { label: "auth.empty", filled: 0, bar: "bg-border", text: "text-muted", hint: null },
   weak: {
-    label: "Yếu",
+    label: "auth.weak",
     filled: 1,
     bar: "bg-danger",
     text: "text-danger",
-    hint: "Dùng mật khẩu dài hơn và tránh các chuỗi dễ đoán.",
+    hint: "auth.useALongerPasswordAndAvoid",
   },
   medium: {
-    label: "Trung bình",
+    label: "auth.medium",
     filled: 2,
     bar: "bg-warning",
     text: "text-warning",
-    hint: "Thử thêm ký tự, chữ số hoặc ký hiệu.",
+    hint: "auth.tryAddingMoreCharactersNumbersOr",
   },
   strong: {
-    label: "Mạnh",
+    label: "auth.strong",
     filled: 3,
     bar: "bg-primary",
     text: "text-primary",
@@ -30,10 +31,10 @@ const strengthLevels = {
 } as const;
 
 const characterGroupLabels = [
-  ["lowercase", "chữ thường"],
-  ["uppercase", "chữ hoa"],
-  ["digit", "chữ số"],
-  ["symbol", "ký tự đặc biệt"],
+  ["lowercase", "auth.lowercaseLetters"],
+  ["uppercase", "auth.uppercaseLetters"],
+  ["digit", "auth.digits"],
+  ["symbol", "auth.symbols"],
 ] as const;
 
 export function PasswordStrengthMeter({
@@ -43,6 +44,7 @@ export function PasswordStrengthMeter({
   password: string;
   variant?: "inline" | "panel";
 }) {
+  const { t } = useTranslation();
   const { primary, muted } = useAppColors();
   const panel = variant === "panel";
   if (!password && !panel) return null;
@@ -54,22 +56,23 @@ export function PasswordStrengthMeter({
     meetsGroups,
     avoidsPredictablePattern,
   } = assessPassword(password);
-  const { label, filled, bar, text, hint } = strengthLevels[level];
+  const { label: labelKey, filled, bar, text, hint } = strengthLevels[level];
+  const label = t(labelKey);
   const segmentCount = panel ? 4 : 3;
   const filledSegments = level === "strong" ? segmentCount : filled;
   const presentGroups = characterGroupLabels
     .filter(([group]) => characterGroups[group])
-    .map(([, label]) => label);
+    .map(([, label]) => t(label));
   const groupDetail = presentGroups.length
-    ? `Đã có ${presentGroups.join(", ")}`
-    : "Chọn trong các nhóm chữ thường, chữ hoa, chữ số và ký tự đặc biệt.";
+    ? t("auth.included", { value: presentGroups.join(", ") })
+    : t("auth.chooseFromLowercaseLettersUppercaseLetters");
 
   function renderRequirement(label: string, met: boolean, detail?: string) {
     const Icon = met ? CircleCheck : Circle;
     return (
       <View
         accessible
-        accessibilityLabel={[label, met ? "đạt" : "chưa đạt", detail].filter(Boolean).join(", ")}
+        accessibilityLabel={[label, met ? t("auth.met") : t("auth.notMet"), detail].filter(Boolean).join(", ")}
         className="flex-row items-start gap-2"
       >
         <View className="pt-1" aria-hidden>
@@ -88,9 +91,9 @@ export function PasswordStrengthMeter({
   return (
     <View className={cn("gap-2", panel && "rounded-lg bg-surface-soft p-3")}>
       <View className="flex-row flex-wrap items-center justify-between gap-x-2">
-        <Text className="font-vietnam text-label-md text-muted">Độ mạnh mật khẩu</Text>
+        <Text className="font-vietnam text-label-md text-muted">{t("auth.passwordStrength")}</Text>
         <Text
-          accessibilityLabel={`Độ mạnh mật khẩu ${label.toLowerCase()}`}
+          accessibilityLabel={t("auth.passwordStrength2", { value: label.toLowerCase() })}
           accessibilityLiveRegion="polite"
           className={`font-vietnam text-label-md ${text}`}
         >
@@ -107,12 +110,12 @@ export function PasswordStrengthMeter({
       </View>
       {panel ? (
         <View className="gap-2">
-          {renderRequirement(`Ít nhất ${MIN_STRONG_PASSWORD_LENGTH} ký tự`, meetsLength)}
-          {renderRequirement(`Ít nhất ${requiredGroups} nhóm ký tự`, meetsGroups, groupDetail)}
-          {renderRequirement("Tránh mẫu mật khẩu dễ đoán", avoidsPredictablePattern)}
+          {renderRequirement(t("auth.atLeastCharacters", { minStrongPasswordLength: MIN_STRONG_PASSWORD_LENGTH }), meetsLength)}
+          {renderRequirement(t("auth.atLeastCharacterGroups", { requiredGroups }), meetsGroups, groupDetail)}
+          {renderRequirement(t("auth.avoidPredictablePasswordPatterns"), avoidsPredictablePattern)}
         </View>
       ) : null}
-      {!panel && hint ? <Text className="font-vietnam text-body-sm text-muted">{hint}</Text> : null}
+      {!panel && hint ? <Text className="font-vietnam text-body-sm text-muted">{t(hint)}</Text> : null}
     </View>
   );
 }

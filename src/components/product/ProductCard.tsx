@@ -1,3 +1,4 @@
+import { useAppTranslation } from "@/localization/content";
 import { IconButton } from "@/components/common";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { cn } from "@/lib/cn";
@@ -23,8 +24,8 @@ type ProductCardProps = {
 };
 
 export function ProductCard({
-  name,
-  subtitle,
+  name: productName,
+  subtitle: productSubtitle,
   price,
   oldPrice,
   image,
@@ -36,6 +37,9 @@ export function ProductCard({
   onPress,
   onAdd,
 }: ProductCardProps) {
+  const { t, localize } = useAppTranslation();
+  const name = localize(productName);
+  const subtitle = productSubtitle ? localize(productSubtitle) : undefined;
   const { onPrimary } = useAppColors();
   const { width, fontScale } = useWindowDimensions();
   const stackCartButton = width < 360 || fontScale > 1.2;
@@ -50,7 +54,7 @@ export function ProductCard({
     >
       <View className="relative">
         <Pressable
-          accessibilityLabel={`Xem chi tiết ${name}`}
+          accessibilityLabel={t("common.viewDetailsFor", { name })}
           accessibilityRole="button"
           className="active:opacity-80"
           disabled={!onPress}
@@ -125,7 +129,7 @@ export function ProductCard({
           pointerEvents="box-none"
         >
           <IconButton
-            label={`Thêm ${name} vào giỏ`}
+            label={t("common.addToCart", { name })}
             size="md"
             variant="filled"
             disabled={!onAdd}

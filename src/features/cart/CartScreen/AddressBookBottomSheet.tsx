@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { PrimaryBtn } from "@/components/common";
 import {
   formatDeliveryAddress,
@@ -20,7 +21,7 @@ import {
   Plus,
 } from "lucide-react-native";
 import { useRef, useState } from "react";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Alert, Platform, Pressable, Text, View } from "react-native";
 import { NativeViewGestureHandler } from "react-native-gesture-handler";
 import { AppSheet, SheetFooter, type AppSheetHandle } from "@/components/common/BottomSheet";
 import { DeliveryAddressForm } from "./DeliveryAddressForm";
@@ -44,6 +45,7 @@ function AddressEntry({
   onSetDefault,
   onDelete,
 }: AddressEntryProps) {
+  const { t } = useTranslation();
   const colors = useAppColors();
   const LabelIcon = address.label === "office" ? Building2 : House;
 
@@ -72,8 +74,7 @@ function AddressEntry({
               {isDefault ? (
                 <View className="rounded-full bg-primary px-2 py-1">
                   <Text className="font-vietnam text-label-sm text-on-primary">
-                    Mặc định
-                  </Text>
+                    {t("cart.default")}</Text>
                 </View>
               ) : null}
             </View>
@@ -90,7 +91,7 @@ function AddressEntry({
             <View className="flex-row items-center gap-1 self-start rounded-full bg-surface-container px-2 py-1">
               <LabelIcon color={colors.primary} size={14} />
               <Text className="font-vietnam text-label-sm text-ink">
-                {address.label === "office" ? "Văn phòng" : "Nhà riêng"}
+                {address.label === "office" ? t("cart.office") : t("cart.home")}
               </Text>
             </View>
           ) : null}
@@ -116,8 +117,7 @@ function AddressEntry({
               onPress={onSetDefault}
             >
               <Text className="font-vietnam text-label-md text-primary">
-                Đặt làm mặc định
-              </Text>
+                {t("cart.setAsDefault")}</Text>
             </Pressable>
           ) : null}
           <Pressable
@@ -125,14 +125,14 @@ function AddressEntry({
             accessibilityRole="button"
             onPress={onEdit}
           >
-            <Text className="font-vietnam text-label-md text-primary">Sửa</Text>
+            <Text className="font-vietnam text-label-md text-primary">{t("cart.edit")}</Text>
           </Pressable>
           <Pressable
             className="min-h-12 min-w-12 items-center justify-center"
             accessibilityRole="button"
             onPress={onDelete}
           >
-            <Text className="font-vietnam text-label-md text-danger">Xóa</Text>
+            <Text className="font-vietnam text-label-md text-danger">{t("cart.delete")}</Text>
           </Pressable>
         </View>
       </NativeViewGestureHandler>
@@ -141,6 +141,7 @@ function AddressEntry({
 }
 
 export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
+  const { t } = useTranslation();
   const sheetRef = useRef<AppSheetHandle>(null);
   const colors = useAppColors();
   const addresses = useCartStore((state) => state.addresses);
@@ -165,10 +166,10 @@ export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
   }
 
   function handleDelete(address: SavedDeliveryAddress) {
-    Alert.alert("Xóa địa chỉ?", formatDeliveryAddress(address), [
-      { text: "Hủy", style: "cancel" },
+    Alert.alert(t("cart.deleteThisAddress"), formatDeliveryAddress(address), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Xóa",
+        text: t("cart.delete"),
         style: "destructive",
         onPress: () => removeAddress(address.id),
       },
@@ -182,10 +183,10 @@ export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
       header={{
         title: editor
           ? editor.address
-            ? "Sửa địa chỉ nhận hàng"
-            : "Thêm địa chỉ nhận hàng mới"
-          : "Sổ địa chỉ giao hàng",
-        subtitle: editor ? undefined : `${addresses.length} địa chỉ đã lưu`,
+            ? t("cart.editDeliveryAddress")
+            : t("cart.addANewDeliveryAddress")
+          : t("cart.deliveryAddressBook"),
+        subtitle: editor ? undefined : t("cart.savedAddresses", { count: addresses.length }),
         icon: (
           <View className="h-10 w-10 items-center justify-center rounded-full bg-primary/10">
             {editor ? (
@@ -197,6 +198,8 @@ export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
         ),
       }}
       enableContentPanningGesture={!editor}
+      // On Android, adjustResize already resizes the sheet's container for the keyboard.
+      keyboardBehavior={Platform.OS === "android" ? "interactive" : undefined}
       onBack={editor ? () => setEditor(null) : undefined}
       onDismiss={onClose}
     >
@@ -238,8 +241,7 @@ export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
             ListEmptyComponent={
               <View className="items-center rounded-lg border border-card-border px-4 py-6">
                 <Text className="font-vietnam text-body-emphasis text-ink">
-                  Chưa có địa chỉ nhận hàng
-                </Text>
+                  {t("cart.noDeliveryAddressesYet")}</Text>
               </View>
             }
             ListFooterComponent={
@@ -248,7 +250,7 @@ export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
                   <PrimaryBtn
                     fullWidth
                     variant="secondary"
-                    title="Thêm địa chỉ nhận hàng mới"
+                    title={t("cart.addANewDeliveryAddress")}
                     leadingIcon={<Plus color={colors.primary} size={19} />}
                     onPress={() => setEditor({ address: null })}
                   />
@@ -259,7 +261,7 @@ export function AddressBookBottomSheet({ onClose }: { onClose: () => void }) {
           <SheetFooter guardGesture>
             <PrimaryBtn
               fullWidth
-              title="Xác nhận địa chỉ giao hàng"
+              title={t("cart.confirmDeliveryAddress")}
               leadingIcon={<CheckCircle2 color={colors.onPrimary} size={20} />}
               disabled={!selectedId}
               onPress={() => {

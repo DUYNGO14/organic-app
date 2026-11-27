@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { createAuthFormResolver } from "@/features/auth/auth-form-resolver";
 import { isDemoAuthEnabled } from "@/features/auth/auth.config";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/features/auth/auth.schema";
@@ -14,6 +15,7 @@ import { AuthScreenLayout, AuthSubmitButton } from "./AuthScreenLayout";
 const resolver = createAuthFormResolver<ForgotPasswordInput>(forgotPasswordSchema);
 
 export function ForgotPasswordScreen() {
+  const { t } = useTranslation();
   const { setChallenge } = useEmailVerification();
   const activeRequest = useRef(false);
   const { control, handleSubmit, formState, setError } =
@@ -30,7 +32,7 @@ export function ForgotPasswordScreen() {
       router.push("/(auth)/verify-otp");
     } catch {
       setError("root.server", {
-        message: "Chưa thể gửi yêu cầu. Vui lòng thử lại.",
+        message: t("auth.couldNotSendTheRequestPlease"),
       });
     }
   }
@@ -47,8 +49,8 @@ export function ForgotPasswordScreen() {
 
   return (
     <AuthScreenLayout
-      title="Quên mật khẩu"
-      subtitle="Nhập email đã đăng ký để nhận mã OTP đặt lại mật khẩu."
+      title={t("auth.forgotPassword")}
+      subtitle={t("auth.enterYourRegisteredEmailToReceive")}
     >
       <View className="gap-4">
         <Controller
@@ -57,7 +59,7 @@ export function ForgotPasswordScreen() {
           render={({ field, fieldState }) => (
             <AuthEmailInput
               editable={!isSubmitting}
-              error={fieldState.error?.message}
+              error={fieldState.error?.message ? t(fieldState.error.message) : undefined}
               onBlur={field.onBlur}
               onChangeText={field.onChange}
               onSubmitEditing={() => void submit()}
@@ -77,7 +79,7 @@ export function ForgotPasswordScreen() {
         <AuthSubmitButton
           loading={isSubmitting}
           onPress={() => void submit()}
-          title="Gửi mã OTP"
+          title={t("auth.sendVerificationCode")}
         />
       </View>
       <Link href="/(auth)/login" dismissTo asChild>
@@ -86,8 +88,7 @@ export function ForgotPasswordScreen() {
           disabled={isSubmitting}
         >
           <Text className="font-vietnam text-label-lg text-primary">
-            Về trang đăng nhập
-          </Text>
+            {t("auth.backToSignIn")}</Text>
         </Pressable>
       </Link>
     </AuthScreenLayout>

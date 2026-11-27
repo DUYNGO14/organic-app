@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useIsFocused } from "expo-router";
 import { View } from "react-native";
 import { SkeletonBlock, SkeletonGroup } from "./index";
@@ -32,7 +33,7 @@ function Rows({ count, icon = false }: { count: number; icon?: boolean }) {
 
 const layouts = {
   home: {
-    label: "Đang tải trang chủ",
+    label: "common.loadingHome",
     content: () => (
       <>
         <SkeletonBlock className="h-12 w-full rounded-full" />
@@ -48,7 +49,7 @@ const layouts = {
     ),
   },
   catalog: {
-    label: "Đang tải danh mục sản phẩm",
+    label: "common.loadingProductCategories",
     content: () => (
       <>
         <SkeletonBlock className="h-12 w-full rounded-full" />
@@ -60,7 +61,7 @@ const layouts = {
     ),
   },
   product: {
-    label: "Đang tải chi tiết sản phẩm",
+    label: "common.loadingProductDetails",
     content: () => (
       <>
         <SkeletonBlock className="aspect-square w-full rounded-lg" />
@@ -71,7 +72,7 @@ const layouts = {
     ),
   },
   cart: {
-    label: "Đang tải giỏ hàng",
+    label: "common.loadingCart",
     content: () => (
       <>
         <SkeletonBlock className="h-20 w-full rounded-lg" />
@@ -80,7 +81,7 @@ const layouts = {
     ),
   },
   orders: {
-    label: "Đang tải đơn hàng",
+    label: "common.loadingOrders",
     content: () => (
       <>
         <SkeletonBlock className="h-6 w-1/2" />
@@ -90,7 +91,7 @@ const layouts = {
     ),
   },
   farm: {
-    label: "Đang tải thông tin nông trại",
+    label: "common.loadingFarmInformation",
     content: () => (
       <>
         <SkeletonBlock className="h-48 w-full rounded-xl" />
@@ -101,7 +102,7 @@ const layouts = {
     ),
   },
   profile: {
-    label: "Đang tải thông tin tài khoản",
+    label: "common.loadingAccountInformation",
     content: () => (
       <>
         <Rows count={1} icon />
@@ -111,7 +112,7 @@ const layouts = {
     ),
   },
   notifications: {
-    label: "Đang tải thông báo",
+    label: "common.loadingNotifications",
     content: () => (
       <>
         <SkeletonBlock className="h-5 w-1/2" />
@@ -123,13 +124,14 @@ const layouts = {
 };
 
 export function ScreenSkeleton({ variant }: { variant: keyof typeof layouts }) {
+  const { t } = useTranslation();
   const focused = useIsFocused();
   const { label, content: Content } = layouts[variant];
   return (
     <SkeletonGroup
       active={focused}
       className="flex-1 overflow-hidden bg-surface-soft px-4 py-4"
-      label={label}
+      label={t(label)}
     >
       <View className="gap-4">
         <Content />

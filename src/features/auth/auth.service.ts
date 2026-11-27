@@ -1,3 +1,4 @@
+import { i18n } from "@/localization";
 import type { ApiResponse } from "@/types/api";
 import type { AuthSession } from "@/types/user";
 import { unwrapApiResponse } from "@/lib/axios";
@@ -46,10 +47,10 @@ export type EmailOtpChallenge = {
 async function postAuth(path: string, body: object) {
   const baseURL = authApiBaseUrl;
   if (!baseURL) {
-    throw new Error("Ứng dụng chưa kết nối máy chủ xác thực.");
+    throw new Error(i18n.t("auth.theAppIsNotConnectedTo"));
   }
   if (!httpsUrlSchema.safeParse(baseURL).success) {
-    throw new Error("Máy chủ xác thực cần sử dụng địa chỉ HTTPS.");
+    throw new Error(i18n.t("auth.theAuthenticationServerMustUseHttps"));
   }
 
   const { data } = await authApi.post<ApiResponse>(path, body, { baseURL });
@@ -59,7 +60,7 @@ async function postAuth(path: string, body: object) {
 function readSession(data: unknown): AuthSession {
   const result = sessionSchema.safeParse(data);
   if (!result.success) {
-    throw new Error("Máy chủ xác thực trả về phiên đăng nhập không hợp lệ.");
+    throw new Error(i18n.t("auth.theAuthenticationServerReturnedAnInvalid"));
   }
   return result.data;
 }
@@ -82,7 +83,7 @@ export async function requestPasswordReset(email: string) {
 function readEmailOtp(data: unknown): EmailOtpChallenge {
   const result = emailOtpSchema.safeParse(data);
   if (!result.success) {
-    throw new Error("Máy chủ chưa trả về thông tin xác thực email hợp lệ.");
+    throw new Error(i18n.t("auth.theServerDidNotReturnValid"));
   }
   const { challengeId, expiresInSeconds, resendAfterSeconds } = result.data;
   const now = Date.now();
@@ -106,7 +107,7 @@ export async function verifyEmailOtp(request: EmailOtpRequest & { code: string }
 
   const result = resetGrantSchema.safeParse(data);
   if (!result.success) {
-    throw new Error("Máy chủ chưa cho phép đặt lại mật khẩu.");
+    throw new Error(i18n.t("auth.theServerHasNotAuthorizedA"));
   }
   return { purpose: request.purpose, resetToken: result.data.resetToken } as const;
 }
@@ -118,10 +119,10 @@ export async function resetPassword(resetToken: string, password: string) {
 
 export async function loginWithProvider(provider: SocialProvider) {
   if (isDemoAuthEnabled) {
-    throw new Error("Đăng nhập bằng Google hoặc Facebook cần kết nối máy chủ xác thực.");
+    throw new Error(i18n.t("auth.googleAndFacebookSignInRequire"));
   }
   if (Platform.OS === "web") {
-    throw new Error("Đăng nhập bằng Google và Facebook hiện có trên ứng dụng di động.");
+    throw new Error(i18n.t("auth.googleAndFacebookSignInAre"));
   }
 
   const redirectUri = createURL("login", { scheme: "organiccorporateapp" });
@@ -129,7 +130,7 @@ export async function loginWithProvider(provider: SocialProvider) {
     await postAuth(`/auth/oauth/${provider}/start`, { redirectUri }),
   );
   if (!start.success) {
-    throw new Error("Không thể bắt đầu đăng nhập. Vui lòng thử lại.");
+    throw new Error(i18n.t("auth.couldNotStartSignInPlease"));
   }
 
   const { authorizationUrl, exchangeToken } = start.data;
@@ -137,11 +138,11 @@ export async function loginWithProvider(provider: SocialProvider) {
   if (result.type !== "success") return null;
 
   if (!result.url.startsWith(`${redirectUri}?`)) {
-    throw new Error("Không thể xác thực phản hồi đăng nhập. Vui lòng thử lại.");
+    throw new Error(i18n.t("auth.couldNotVerifyTheSignIn"));
   }
   const codes = new URL(result.url).searchParams.getAll("code");
   if (codes.length !== 1 || !codes[0]) {
-    throw new Error("Không nhận được mã đăng nhập. Vui lòng thử lại.");
+    throw new Error(i18n.t("auth.noSignInCodeWasReceived"));
   }
 
   return readSession(
