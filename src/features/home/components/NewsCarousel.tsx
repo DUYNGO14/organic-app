@@ -9,7 +9,6 @@ import {
   Pressable,
   Text,
   View,
-  useWindowDimensions,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
@@ -28,14 +27,14 @@ export function NewsCarousel({
 }: NewsCarouselProps) {
   const { t, localize } = useAppTranslation();
   const colors = useAppColors();
-  const { width } = useWindowDimensions();
+  const [width, setWidth] = useState(0);
   const listRef = useRef<FlatList<HomeBanner>>(null);
   const activeIndexRef = useRef(0);
   const isDraggingRef = useRef(false);
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
-    if (banners.length < 2) return;
+    if (!width || banners.length < 2) return;
 
     const timer = setInterval(() => {
       if (isDraggingRef.current) return;
@@ -67,7 +66,7 @@ export function NewsCarousel({
   const renderBanner = useCallback(
     ({ item }: { item: HomeBanner }) => (
       <View style={{ width }} className="px-4">
-        <View className="h-[244px] overflow-hidden rounded-xl bg-primary shadow-md">
+        <View className={`overflow-hidden rounded-xl bg-primary shadow-md ${width >= 620 ? "h-[280px]" : "h-[244px]"}`}>
           <Image
             accessibilityLabel={localize(item.title)}
             cachePolicy="disk"
@@ -137,24 +136,30 @@ export function NewsCarousel({
   if (banners.length === 0) return null;
 
   return (
-    <FlatList
-      ref={listRef}
-      data={banners}
-      horizontal
-      initialNumToRender={1}
-      keyExtractor={(item) => item.id}
-      onMomentumScrollEnd={handleMomentumEnd}
-      onScrollBeginDrag={() => {
-        isDraggingRef.current = true;
-      }}
-      pagingEnabled
-      renderItem={renderBanner}
-      showsHorizontalScrollIndicator={false}
-      getItemLayout={(_, index) => ({
-        length: width,
-        offset: width * index,
-        index,
-      })}
-    />
+    <View onLayout={({ nativeEvent }) => setWidth(nativeEvent.layout.width)}>
+      {width > 0 ? (
+        <FlatList
+          key={width}
+          ref={listRef}
+          data={banners}
+          horizontal
+          initialNumToRender={1}
+          initialScrollIndex={activeIndex > 0 ? Math.min(activeIndex, banners.length - 1) : undefined}
+          keyExtractor={(item) => item.id}
+          onMomentumScrollEnd={handleMomentumEnd}
+          onScrollBeginDrag={() => {
+            isDraggingRef.current = true;
+          }}
+          pagingEnabled
+          renderItem={renderBanner}
+          showsHorizontalScrollIndicator={false}
+          getItemLayout={(_, index) => ({
+            length: width,
+            offset: width * index,
+            index,
+          })}
+        />
+      ) : null}
+    </View>
   );
 }

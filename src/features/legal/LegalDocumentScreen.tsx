@@ -2,6 +2,7 @@ import { useAppTranslation } from "@/localization/content";
 import { getFormattingLocale } from "@/localization";
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { useAuthStore } from "@/features/auth/auth.store";
+import { requestSignIn } from "@/features/auth/member-access";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { router, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, CheckCircle2, FileText, ShieldAlert } from "lucide-react-native";
@@ -28,16 +29,15 @@ export function LegalDocumentScreen() {
 
   useEffect(() => {
     if (!account || !document) return;
+    let active = true;
     void getLegalAcceptances(account).then((items) => {
-      setAcceptance(items.find((item) => item.documentId === document.id && item.version === document.version) ?? null);
+      if (active) setAcceptance(items.find((item) => item.documentId === document.id && item.version === document.version) ?? null);
     });
+    return () => { active = false; };
   }, [document, account]);
 
   async function accept() {
-    if (!account || !document) {
-      Toast.show({ type: "info", text1: t("legal.signInToAcknowledge"), text2: t("legal.youCanStillReadThisDocument") });
-      return;
-    }
+    if (!account || !document) return;
     setSaving(true);
     try {
       const items = await acceptLegalDocuments(account, [document.id], "legal-center");
@@ -88,13 +88,19 @@ export function LegalDocumentScreen() {
             ))}
           </View>
         ))}
-        {acceptance ? (
+        {account && acceptance ? (
           <View className="mt-8 flex-row items-center gap-2 rounded-lg bg-secondary-container/40 p-4">
             <CheckCircle2 color={colors.secondary} size={20} />
             <Text className="min-w-0 flex-1 font-vietnam text-body-sm text-on-secondary-container">{t("legal.youAcknowledgedThisVersionOn", { value: formatDate(acceptance.acceptedAt) })}</Text>
           </View>
         ) : (
-          <PrimaryBtn className="mt-8" fullWidth loading={saving} title={t("legal.iVeReadThisDocument")} onPress={() => void accept()} />
+          <PrimaryBtn
+            className="mt-8"
+            fullWidth
+            loading={saving}
+            title={t(account ? "legal.iVeReadThisDocument" : "legal.signInToAcknowledge")}
+            onPress={() => account ? void accept() : requestSignIn()}
+          />
         )}
       </ScrollView>
     </SafeAreaView>

@@ -10,7 +10,7 @@ import Toast from "react-native-toast-message";
 import { profileSettings } from "../profile.data";
 import { PreferencesSheet } from "./PreferencesSheet";
 
-export function SettingsSection({ onSignOut }: { onSignOut: () => void }) {
+export function SettingsSection({ onSignOut }: { onSignOut?: () => void }) {
   const { t, localize } = useAppTranslation();
   const colors = useAppColors();
   const appVersion = Constants.expoConfig?.version ?? "1.0.0";
@@ -36,7 +36,7 @@ export function SettingsSection({ onSignOut }: { onSignOut: () => void }) {
     <View className="gap-4">
       <View className="overflow-hidden rounded-xl border border-card-border bg-surface px-2">
         <PreferencesSheet />
-        {profileSettings.map(({ id, title, subtitle, Icon }) => (
+        {profileSettings.filter(({ id }) => onSignOut || id === "policy").map(({ id, title, subtitle, Icon }) => (
           <SettingRow
             key={id}
             title={localize(title)}
@@ -69,7 +69,7 @@ export function SettingsSection({ onSignOut }: { onSignOut: () => void }) {
         </Pressable>
       </View>
 
-      <PrimaryBtn
+      {onSignOut ? <PrimaryBtn
         fullWidth
         title={t("account.signOut")}
         variant="secondary"
@@ -77,7 +77,7 @@ export function SettingsSection({ onSignOut }: { onSignOut: () => void }) {
         className="bg-surface-container"
         labelClassName="text-muted"
         onPress={onSignOut}
-      />
+      /> : null}
 
       <Text className="pb-2 text-center font-vietnam text-label-sm text-muted">
         {t("account.adigoVSupportingResponsibleFarming", { appVersion })}

@@ -6,7 +6,8 @@ import type { Product } from "@/types/product";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { useCountdown } from "@/hooks/use-countdown";
 import { Clock3 } from "lucide-react-native";
-import { ScrollView, Text, View } from "react-native";
+import { useState } from "react";
+import { ScrollView, Text, useWindowDimensions, View } from "react-native";
 
 type DealProductCardProps = {
   product: Product;
@@ -103,8 +104,14 @@ export function DealSection({
   onAddProduct,
 }: DealSectionProps) {
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
+  const wideLayout = width >= 640;
+  const [sectionWidth, setSectionWidth] = useState(0);
+  const cardWidth = wideLayout && sectionWidth > 0
+    ? Math.max(180, (sectionWidth - 32 - 24) / 3)
+    : 200;
   return (
-    <View className="mt-8">
+    <View className="mt-8" onLayout={({ nativeEvent }) => setSectionWidth(nativeEvent.layout.width)}>
       <View className="mb-3 flex-row items-end justify-between px-4">
         <View className="flex-1">
           <Text className="mb-1 font-vietnam text-label-sm font-bold uppercase tracking-wider text-primary">
@@ -116,8 +123,9 @@ export function DealSection({
       </View>
       <ScrollView
         contentContainerStyle={{
+          gap: 12,
           paddingLeft: 16,
-          paddingRight: 28,
+          paddingRight: wideLayout ? 16 : 40,
           paddingBottom: 8,
         }}
         horizontal
@@ -125,13 +133,13 @@ export function DealSection({
         showsHorizontalScrollIndicator={false}
       >
         {products.map((product) => (
-          <DealProductCard
-            key={product.id}
-            className="mr-3 w-[200px]"
-            onPress={onProductPress}
-            onAdd={onAddProduct}
-            product={product}
-          />
+          <View key={product.id} style={{ width: cardWidth }}>
+            <DealProductCard
+              onPress={onProductPress}
+              onAdd={onAddProduct}
+              product={product}
+            />
+          </View>
         ))}
       </ScrollView>
     </View>

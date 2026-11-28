@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useAppColors } from "@/hooks/use-app-colors";
+import { cn } from "@/lib/cn";
 import type { BottomTabBarProps as RouterTabBarProps } from "expo-router/js-tabs";
 import type { LucideIcon } from "lucide-react-native";
 import {
@@ -9,7 +10,7 @@ import {
   Sprout,
   UserRound,
 } from "lucide-react-native";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, useWindowDimensions, View } from "react-native";
 import Animated, {
   Easing,
   ReduceMotion,
@@ -80,6 +81,7 @@ export function BottomTabBar({
 }: BottomTabBarProps) {
   const { t } = useTranslation();
   const colors = useAppColors();
+  const { width } = useWindowDimensions();
   const activeKey = state.routes[state.index]?.name;
   const activeIndex = Math.max(
     0,
@@ -100,8 +102,13 @@ export function BottomTabBar({
 
   return (
     <SafeAreaView
-      className="overflow-hidden rounded-t-xl border-x border-t border-border-strong bg-surface"
-      edges={["bottom", "left", "right"]}
+      className={cn(
+        "overflow-hidden border-border-strong bg-surface",
+        width >= 640
+          ? "mb-2 w-full max-w-[600px] self-center rounded-xl border"
+          : "rounded-t-xl border-x border-t",
+      )}
+      edges={["bottom"]}
     >
       <View
         className="flex-row"

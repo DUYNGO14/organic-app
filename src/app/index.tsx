@@ -9,5 +9,5 @@ export default function IndexRoute() {
 
   if (session) return <Redirect href="/(tabs)/home" />;
   if (!hasCompletedOnboarding) return <Redirect href="/(onboarding)/welcome" />;
-  return <Redirect href="/(auth)/login" />;
+  return <Redirect href="/(tabs)/home" />;
 }

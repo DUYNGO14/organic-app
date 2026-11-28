@@ -1,10 +1,11 @@
 import { StartupSplash } from "@/components/layout/StartupSplash";
 import { useAuthStore } from "@/features/auth/auth.store";
+import { resumePendingMemberAction } from "@/features/auth/member-access";
 import { useLanguageBootstrap } from "@/localization/use-language-bootstrap";
 import { AppProviders } from "@/providers/app-providers";
 import { useAppStore } from "@/stores/app-store";
 import { useFonts } from "expo-font";
-import { Stack, usePathname } from "expo-router";
+import { Stack, usePathname, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { StatusBar, View } from "react-native";
@@ -109,35 +110,39 @@ export default function RootLayout() {
 
 function AuthNavigator() {
   const session = useAuthStore((state) => state.session);
+  const segments = useSegments();
   const hasCompletedOnboarding = useAuthStore(
     (state) => state.hasCompletedOnboarding,
   );
 
+  const inAuthFlow = segments[0] === "(auth)";
+  useEffect(() => {
+    if (session && !inAuthFlow) resumePendingMemberAction();
+  }, [session, inAuthFlow]);
+
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <StatusBar barStyle="auto" />
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="(product)" />
       <Stack.Screen name="legal" />
-      <Stack.Protected guard={!session && hasCompletedOnboarding}>
+      <Stack.Screen name="scan-qr" />
+      <Stack.Screen name="cart" />
+      <Stack.Screen
+        name="address-book"
+        options={{
+          presentation: "transparentModal",
+          animation: "none",
+          gestureEnabled: false,
+          contentStyle: { backgroundColor: "transparent" },
+        }}
+      />
+      <Stack.Screen name="notifications" />
+      <Stack.Protected guard={!session}>
         <Stack.Screen name="(auth)" />
       </Stack.Protected>
       <Stack.Protected guard={!session && !hasCompletedOnboarding}>
         <Stack.Screen name="(onboarding)" />
-      </Stack.Protected>
-      <Stack.Protected guard={!!session}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="(product)" />
-        <Stack.Screen name="cart" />
-        <Stack.Screen
-          name="address-book"
-          options={{
-            presentation: "transparentModal",
-            animation: "none",
-            gestureEnabled: false,
-            contentStyle: { backgroundColor: "transparent" },
-          }}
-        />
-        <Stack.Screen name="notifications" />
-        <Stack.Screen name="scan-qr" />
       </Stack.Protected>
       <Stack.Screen name="index" />
       <Stack.Screen name="+not-found" />

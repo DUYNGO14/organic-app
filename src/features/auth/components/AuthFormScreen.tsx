@@ -12,10 +12,11 @@ import {
 import { useAuthStore } from "@/features/auth/auth.store";
 import { demoLoginCredentials } from "@/features/auth/demo-auth";
 import { useEmailVerification } from "@/features/auth/email-verification";
+import { cancelSignIn } from "@/features/auth/member-access";
 import { isStrongPassword } from "@/features/auth/password-strength";
 import { getApiErrorMessage } from "@/lib/axios";
 import { Link, router, useFocusEffect } from "expo-router";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { Pressable, Text, View } from "react-native";
 import { AuthEmailInput } from "./AuthEmailInput";
@@ -36,6 +37,7 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [pending, setPending] = useState<PendingAction | null>(null);
   const activeAction = useRef(false);
+  const mounted = useRef(false);
   const { control, handleSubmit, formState, setError, clearErrors, setValue, reset } =
     useForm<RegisterInput, unknown, AuthCredentials>({
       defaultValues: { name: "", email: "", password: "" },
@@ -43,6 +45,11 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
     });
   const password = useWatch({ control, name: "password", disabled: !isRegister });
   const busy = pending !== null;
+
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -64,10 +71,12 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
     try {
       await operation();
     } catch (error) {
-      setError("root.server", { message: getApiErrorMessage(error, fallback) });
+      if (mounted.current) {
+        setError("root.server", { message: getApiErrorMessage(error, fallback) });
+      }
     } finally {
       activeAction.current = false;
-      setPending(null);
+      if (mounted.current) setPending(null);
     }
   }
 
@@ -78,6 +87,7 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
         "form",
         async () => {
           const challenge = await register(credentials);
+          if (!mounted.current) return;
           setChallenge({
             ...challenge,
             email: credentials.email,
@@ -93,8 +103,8 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
     await run(
       "form",
       async () => {
-        await signIn(await login(credentials));
-        router.replace("/(tabs)/home");
+        const session = await login(credentials);
+        if (mounted.current) await signIn(session);
       },
       t("auth.couldNotSignInPleaseTry"),
     );
@@ -109,9 +119,7 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
       provider,
       async () => {
         const session = await loginWithProvider(provider);
-        if (!session) return;
-        await signIn(session);
-        router.replace("/(tabs)/home");
+        if (session && mounted.current) await signIn(session);
       },
       t("auth.couldNotSignInPleaseTry"),
     );
@@ -120,6 +128,7 @@ export function AuthFormScreen({ mode }: { mode: "login" | "register" }) {
   return (
     <AuthScreenLayout
       title={isRegister ? t("auth.createAnAccount") : t("auth.signIn")}
+      onCancel={!isRegister && !busy ? cancelSignIn : undefined}
       subtitle={
         isRegister
           ? t("auth.enterYourInformationToReceiveA")

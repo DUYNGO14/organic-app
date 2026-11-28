@@ -65,7 +65,7 @@ export default function ProfileScreen({
 
   async function confirmSignOut() {
     await signOut();
-    router.replace("/(auth)/login");
+    router.replace("/(tabs)/home");
   }
 
   function renderSection(item: ProfileSection) {

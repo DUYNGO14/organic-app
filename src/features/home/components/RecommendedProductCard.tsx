@@ -5,7 +5,7 @@ import { getProductCardBadges } from "@/components/product/product-card-badges";
 import type { Product } from "@/types/product";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { Star } from "lucide-react-native";
-import { Text, View } from "react-native";
+import { Text, useWindowDimensions, View } from "react-native";
 import { HomeSectionHeading } from "./HomeSectionHeading";
 
 type RecommendedProductCardProps = {
@@ -68,6 +68,8 @@ export function RecommendationSection({
   onAddProduct,
 }: RecommendationSectionProps) {
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
+  const cardWidth = width >= 1024 ? "w-[23.5%]" : width >= 640 ? "w-[31.5%]" : "w-[48.5%]";
   return (
     <View className="mt-8">
       <HomeSectionHeading
@@ -76,11 +78,11 @@ export function RecommendationSection({
         subtitle={t("home.basedOnYourFamilySEating")}
         title={t("home.healthyPicksForYou")}
       />
-      <View className="flex-row flex-wrap justify-between gap-y-3 px-4">
+      <View className={`flex-row flex-wrap gap-y-3 px-4 ${width >= 640 ? "gap-x-3" : "justify-between"}`}>
         {products.map((product) => (
           <RecommendedProductCard
             key={product.id}
-            className="w-[48.5%]"
+            className={cardWidth}
             onPress={onProductPress}
             onAdd={onAddProduct}
             product={product}

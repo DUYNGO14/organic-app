@@ -24,12 +24,12 @@ export default function WelcomeScreen() {
   const colors = useAppColors();
   const [isStarting, setIsStarting] = useState(false);
 
-  async function handleStart() {
+  async function handleStart(destination: "/(tabs)/home" | "/(auth)/login") {
     if (isStarting) return;
     setIsStarting(true);
     try {
       await completeOnboarding();
-      router.replace("/(auth)/login");
+      router.replace(destination);
     } finally {
       setIsStarting(false);
     }
@@ -180,13 +180,29 @@ export default function WelcomeScreen() {
               fullWidth
               className="min-h-[52px] rounded-xl"
               loading={isStarting}
-              title={t("onboarding.getStartedWithAdigo")}
+              title={t("onboarding.exploreAsGuest")}
               trailingIcon={<ArrowRight color={colors.onPrimary} size={20} />}
-              onPress={() => void handleStart()}
+              onPress={() => void handleStart("/(tabs)/home")}
             />
-            <Text className="px-4 text-center font-vietnam text-body-sm text-muted">
-              {t("onboarding.byContinuingYouAgreeToAdigo")}
-            </Text>
+            <PrimaryBtn
+              fullWidth
+              disabled={isStarting}
+              variant="secondary"
+              title={t("auth.signIn")}
+              onPress={() => void handleStart("/(auth)/login")}
+            />
+            <View className="flex-row flex-wrap items-center justify-center gap-x-4">
+              <PrimaryBtn
+                variant="ghost"
+                title={t("auth.termsOfUse")}
+                onPress={() => router.push("/legal/terms")}
+              />
+              <PrimaryBtn
+                variant="ghost"
+                title={t("auth.privacyPolicy")}
+                onPress={() => router.push("/legal/privacy")}
+              />
+            </View>
           </View>
         </ScrollView>
       </SafeAreaView>

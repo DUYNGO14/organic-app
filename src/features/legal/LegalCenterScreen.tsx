@@ -1,6 +1,7 @@
 import { useAppTranslation } from "@/localization/content";
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { useAuthStore } from "@/features/auth/auth.store";
+import { requestSignIn } from "@/features/auth/member-access";
 import { useAppColors } from "@/hooks/use-app-colors";
 import { router } from "expo-router";
 import { ChevronLeft, ChevronRight, FileLock2, ShieldCheck } from "lucide-react-native";
@@ -23,6 +24,7 @@ export function LegalCenterScreen() {
   const refresh = useCallback(() => {
     if (!account) return;
     void Promise.all([getLegalAcceptances(account), getPrivacyRequests(account)]).then(([nextAcceptances, nextRequests]) => {
+      if (getLegalAccount(useAuthStore.getState().session) !== account) return;
       setAcceptances(nextAcceptances);
       setRequests(nextRequests);
     });
@@ -46,7 +48,7 @@ export function LegalCenterScreen() {
         <Text className="mt-1 font-vietnam text-body-md text-muted">{t("legal.reviewEachDocumentSVersionEffective")}</Text>
         <View className="mt-4 overflow-hidden rounded-xl border border-card-border bg-surface">
           {legalDocuments.map((document, index) => {
-            const accepted = acceptances.find((item) => item.documentId === document.id && item.version === document.version);
+            const accepted = account && acceptances.find((item) => item.documentId === document.id && item.version === document.version);
             return (
               <Pressable key={document.id} className={`min-h-20 flex-row items-center gap-3 px-4 py-3 active:bg-surface-soft ${index ? "border-t border-border" : ""}`} onPress={() => router.push(`/legal/${document.id}`)}>
                 <View className="h-11 w-11 items-center justify-center rounded-md bg-surface-container">
@@ -68,11 +70,11 @@ export function LegalCenterScreen() {
             <Text className="font-vietnam text-title-md text-ink">{t("legal.personalDataRights")}</Text>
           </View>
           <Text className="mt-2 font-vietnam text-body-md text-muted">{t("legal.requestAccessCorrectionOrDeletionOf", { legalContactPlaceholder: localize(LEGAL_CONTACT_PLACEHOLDER) })}</Text>
-          {requests.length ? <Text className="mt-3 font-vietnam text-body-sm text-secondary">{t("legal.youHavePendingRequestsOnThis", { count: requests.length })}</Text> : null}
-          <PrimaryBtn className="mt-4" fullWidth title={t("legal.submitADataRequest")} onPress={() => setRequestOpen(true)} />
+          {account && requests.length ? <Text className="mt-3 font-vietnam text-body-sm text-secondary">{t("legal.youHavePendingRequestsOnThis", { count: requests.length })}</Text> : null}
+          <PrimaryBtn className="mt-4" fullWidth title={t("legal.submitADataRequest")} onPress={() => requestSignIn(() => setRequestOpen(true))} />
         </View>
       </ScrollView>
-      {requestOpen ? <PrivacyRequestSheet onClose={() => { setRequestOpen(false); refresh(); }} /> : null}
+      {account && requestOpen ? <PrivacyRequestSheet onClose={() => { setRequestOpen(false); refresh(); }} /> : null}
     </SafeAreaView>
   );
 }

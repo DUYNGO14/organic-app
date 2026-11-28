@@ -2,6 +2,8 @@ import { useAppTranslation } from "@/localization/content";
 import { ScreenSkeleton, type ScreenLoadingProps } from "@/components/common/Skeleton/ScreenSkeleton";
 import { IconButton, PrimaryBtn } from "@/components/common";
 import { StackHeader } from "@/components/layout";
+import { useAuthStore } from "@/features/auth/auth.store";
+import { requestSignIn } from "@/features/auth/member-access";
 import {
   selectCartQuantity,
   useCartStore,
@@ -38,7 +40,9 @@ export default function ProductDetailScreen({ isLoading = false }: ScreenLoading
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const colors = useAppColors();
   const queryClient = useQueryClient();
+  const session = useAuthStore((state) => state.session);
   const cartItemsCount = useCartStore(selectCartQuantity);
+  const visibleCartCount = session ? cartItemsCount : 0;
   const product =
     queryClient.getQueryData<CatalogProduct>(productKeys.detail(productId)) ??
     products.find((item) => item.id === productId);
@@ -49,17 +53,21 @@ export default function ProductDetailScreen({ isLoading = false }: ScreenLoading
   const [imageIndex, setImageIndex] = useState(0);
   const [packageIndex, setPackageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [buyNowOpen, setBuyNowOpen] = useState(false);
+  const [buyNowLine, setBuyNowLine] = useState<CartLine | null>(null);
+  const activeCheckoutLine = session ? buyNowLine : null;
+  const buyNowOpen = activeCheckoutLine !== null;
+
+  function goBack() {
+    if (router.canGoBack()) router.back();
+    else router.replace("/(tabs)/categories");
+  }
 
   if (isLoading) {
     return (
       <View className="flex-1 bg-canvas">
         <StackHeader
           title={t("products.productDetails")}
-          onBack={() => {
-            if (router.canGoBack()) router.back();
-            else router.replace("/(tabs)/categories");
-          }}
+          onBack={goBack}
         />
         <ScreenSkeleton variant="product" />
       </View>
@@ -74,7 +82,7 @@ export default function ProductDetailScreen({ isLoading = false }: ScreenLoading
         <PrimaryBtn
           className="mt-4"
           title={t("common.back")}
-          onPress={() => router.back()}
+          onPress={goBack}
         />
       </View>
     );
@@ -103,6 +111,7 @@ export default function ProductDetailScreen({ isLoading = false }: ScreenLoading
       >
         <StackHeader
           title={t("products.productDetails")}
+          onBack={goBack}
           rightAction={
             <View className="flex-row items-center gap-0.5">
               <IconButton
@@ -119,20 +128,20 @@ export default function ProductDetailScreen({ isLoading = false }: ScreenLoading
                 <IconButton
                   icon={<ShoppingBag color={colors.ink} size={20} />}
                   label={
-                    cartItemsCount
-                      ? t("common.cartItems", { count: cartItemsCount })
+                    visibleCartCount
+                      ? t("common.cartItems", { count: visibleCartCount })
                       : t("common.cart")
                   }
                   size="sm"
-                  onPress={() => router.push("/cart")}
+                  onPress={() => requestSignIn(() => router.push("/cart"))}
                 />
-                {cartItemsCount > 0 ? (
+                {visibleCartCount > 0 ? (
                   <View
                     pointerEvents="none"
                     className="absolute -right-0.5 -top-0.5 h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1"
                   >
                     <Text className="font-vietnam text-label-sm font-bold text-on-primary">
-                      {cartItemsCount > 99 ? "99+" : cartItemsCount}
+                      {visibleCartCount > 99 ? "99+" : visibleCartCount}
                     </Text>
                   </View>
                 ) : null}
@@ -186,14 +195,17 @@ export default function ProductDetailScreen({ isLoading = false }: ScreenLoading
           selectedPackage={selectedPackage}
           quantity={quantity}
           colors={colors}
-          onBuyNow={() => setBuyNowOpen(true)}
+          onBuyNow={() => requestSignIn(() => setBuyNowLine(checkoutLine))}
         />
       </View>
-      {buyNowOpen ? (
+      {activeCheckoutLine ? (
         <CheckoutBottomSheet
-          lines={[checkoutLine]}
-          onClose={() => setBuyNowOpen(false)}
-          onQuantityChange={(_, nextQuantity) => setQuantity(nextQuantity)}
+          lines={[activeCheckoutLine]}
+          onClose={() => setBuyNowLine(null)}
+          onQuantityChange={(_, nextQuantity) => {
+            setQuantity(nextQuantity);
+            setBuyNowLine((line) => line && { ...line, quantity: nextQuantity });
+          }}
         />
       ) : null}
     </>

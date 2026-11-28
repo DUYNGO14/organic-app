@@ -32,7 +32,7 @@ function CountBadge({ count }: { count: number }) {
 }
 
 export function MainHeader({
-  userName = "Minh An",
+  userName,
   currentAddress: suppliedAddress,
   unreadNotificationsCount = 0,
   cartItemsCount = 0,
@@ -66,7 +66,7 @@ export function MainHeader({
             numberOfLines={1}
             className="font-vietnam text-body-sm text-ink"
           >
-            {t("common.hello", { userName })}
+            {userName ? t("common.hello", { userName }) : "ADIGO"}
           </Text>
           <Pressable
             accessibilityHint={t("common.chooseADeliveryAddress")}

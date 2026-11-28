@@ -38,7 +38,7 @@ import {
   Sprout,
 } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Keyboard, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Keyboard, Pressable, Text, useWindowDimensions, View } from "react-native";
 
 function CatalogStatus({
   message,
@@ -112,6 +112,8 @@ export default function ProductsScreen({
   initialCategoryId?: ProductCategoryId;
 }) {
   const { t, localize } = useAppTranslation();
+  const { width } = useWindowDimensions();
+  const numColumns = width >= 1024 ? 4 : width >= 640 ? 3 : 2;
   const colors = useAppColors();
   const queryClient = useQueryClient();
   const listRef = useRef<FlashListRef<CatalogProduct>>(null);
@@ -397,7 +399,7 @@ export default function ProductsScreen({
           ) : null
         }
         ListHeaderComponent={header}
-        numColumns={2}
+        numColumns={numColumns}
         renderItem={renderProduct}
         ItemSeparatorComponent={ProductRowSeparator}
       />
